@@ -10,6 +10,7 @@ author: viv3kanand
 ```{r}
 # renv::install("tidyverse")
 # renv::install("Seurat")
+# renv::install("gt")
 ```
 
 ### Load required libraries
@@ -22,6 +23,7 @@ author: viv3kanand
 
 require(tidyverse)
 require(Seurat)
+require(gt)
 ```
 
 ## Process data
@@ -31,10 +33,10 @@ require(Seurat)
 ```{r}
 #| echo: true
 
-li_WB <- list.files("../data/")
+li_WB <- list.files("../data/WB/")
 
 purrr::imap(setNames(li_WB, li_WB), function(obj, name){
-  Seurat::Read10X(paste0("../data/", obj)) |> 
+  Seurat::Read10X(paste0("../data/WB/", obj)) |> 
     Seurat::CreateSeuratObject(min.cells = 3,
                                project = name)
 }) -> seurat_list
@@ -52,8 +54,8 @@ source("../scripts/helper_scripts.R")
 # Filter cells with empirical cut off
 seurat_list <- seurat_list |> map(filterCell)
 
-# remove sample failed to QC
-# seurat_list$O3_Patient <- NULL
+# remove sample failed QC
+seurat_list$O3_Patient <- NULL
 
 # Merge datasets
 seurat_obj <- reduce(seurat_list, merge) |>
@@ -66,7 +68,22 @@ seurat_obj <- seurat_obj |>
   AddMetaData(metadata = meta.data)
 ```
 
-
+### Filtering summary
+```{r}
+lapply(seurat_list, function(obj){
+    emp <- emp_fun(obj)
+    filt <- filt_fun(obj, emp)
+    emp |> as.data.frame() |> 
+        rownames_to_column("Sample") |> 
+        mutate(nCount_RNA = round(nCount_RNA),
+               nFeature_RNA = round(nFeature_RNA),
+               nCells = nrow(obj@meta.data),
+               nCells_filt = nrow(filt@meta.data)) |> 
+        filter(Sample == 1)
+}) |> bind_rows(.id = "Sample") |> 
+    gt() |> 
+    tab_header(title = "Sample filtering based on following empirical cut off")
+```
 
 
 
