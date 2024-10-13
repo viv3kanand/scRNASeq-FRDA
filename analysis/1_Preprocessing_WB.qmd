@@ -1,0 +1,66 @@
+---
+title: "1. Preprocessing - scRNA-Seq - FRDA (Whole Blood)"
+format: html
+editor: source
+author: viv3kanand
+---
+
+## Package dependencies
+
+```{r}
+# renv::install("tidyverse")
+# renv::install("Seurat")
+```
+
+### Load required libraries
+
+```{r}
+#| echo: false
+#| include: false
+#| message: false
+#| warning: false
+
+require(tidyverse)
+require(Seurat)
+```
+
+## Process data
+
+```{r}
+#| echo: true
+
+li_WB <- list.files("../data/")
+
+purrr::imap(setNames(li_WB, li_WB), function(obj, name){
+  Seurat::Read10X(paste0("../data/", obj)) |> 
+    Seurat::CreateSeuratObject(min.cells = 3,
+                               project = name)
+}) -> seurat_list
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
