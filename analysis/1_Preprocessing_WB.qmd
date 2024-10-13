@@ -49,6 +49,20 @@ purrr::imap(setNames(li_WB, li_WB), function(obj, name){
 source("../scripts/helper_scripts.R")
 ```
 
+### Add batch metadata
+```{r}
+meta <- read.delim(text = "orig.ident	Batch_Lib	Batch_Seq	Condition
+C2_Control	1	3	Control
+O2_Control	2	3	Control
+S2_Control	1	1	Control
+S4_Control	4	2	Control
+N4_Patient	4	4	Patient
+O3_Patient	3	4	Patient
+O4_Patient	3	3	Patient
+S1_Patient	1	1	Patient
+S3_Patient	4	2	Patient
+")
+```
 
 ```{r}
 # Filter cells with empirical cut off
