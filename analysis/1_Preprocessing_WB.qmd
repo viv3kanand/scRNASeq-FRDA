@@ -26,6 +26,8 @@ require(Seurat)
 
 ## Process data
 
+### Load data
+
 ```{r}
 #| echo: true
 
@@ -39,9 +41,30 @@ purrr::imap(setNames(li_WB, li_WB), function(obj, name){
 
 ```
 
+### Filter and merge
+
+```{r}
+source("../scripts/helper_scripts.R")
+```
 
 
+```{r}
+# Filter cells with empirical cut off
+seurat_list <- seurat_list |> map(filterCell)
 
+# remove sample failed to QC
+# seurat_list$O3_Patient <- NULL
+
+# Merge datasets
+seurat_obj <- reduce(seurat_list, merge) |>
+  JoinLayers()  #https://github.com/satijalab/seurat/issues/7316
+
+meta.data <- seurat_obj@meta.data |> 
+  merge(meta, by = "orig.ident", all.x = TRUE)
+
+seurat_obj <- seurat_obj |> 
+  AddMetaData(metadata = meta.data)
+```
 
 
 
