@@ -1,0 +1,66 @@
+---
+title: "Figures"
+format: html
+editor: source
+author: viv3kanand
+---
+
+## Load libraries
+
+```{r}
+#| label: packages
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+require(Seurat)
+require(tidyverse)
+```
+
+```{r}
+#| echo: false
+#| eval: true
+
+seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
+
+```
+
+## Load data
+
+```{r}
+#| label: load data
+#| echo: true
+#| eval: false
+
+seurat_obj <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
