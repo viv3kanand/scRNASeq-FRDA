@@ -266,6 +266,7 @@ DimPlot(seurat_obj,
 ```
 
 ### Final annotation
+
 ```{r}
 #| label: annotation
 #| echo: true
@@ -297,7 +298,7 @@ seurat_obj$cell_type <- Idents(seurat_obj) # change metadata column with idents
 
 DimPlot(seurat_obj, 
         reduction = "umap.harmony", 
-        group.by = c("cell_types"), 
+        group.by = c("cell_type"), 
         pt.size = 1, 
         label = TRUE) & 
   NoLegend()

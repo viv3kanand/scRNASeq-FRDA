@@ -803,10 +803,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">RunUMAP</span>(<span class="at">reduction =</span> <span class="st">"harmony"</span>, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">reduction.name =</span> <span class="st">"umap.harmony"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
+<section id="subset-low-quality-clusters" class="level3">
+<h3 class="anchored" data-anchor-id="subset-low-quality-clusters">Subset low quality clusters</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#cluster 4 - Mito and ribo genes, low quality</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#cluster 22 - multiple position, low quality</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>seurat_obj <span class="ot">&lt;-</span> <span class="fu">subset</span>(seurat_obj, <span class="at">idents =</span> <span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">22</span>), <span class="at">invert =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="dimplot---sct_snn_res.1" class="level3">
+<h3 class="anchored" data-anchor-id="dimplot---sct_snn_res.1">Dimplot - SCT_snn_res.1</h3>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_obj, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap.harmony"</span>, </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">group.by =</span> <span class="fu">c</span>(<span class="st">"SCT_snn_res.1"</span>), </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">pt.size =</span> <span class="dv">1</span>, </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>) <span class="sc">&amp;</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">NoLegend</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1_Preprocessing_WB_files/figure-html/scatter%20plot%20-%20SCT_snn_res.1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="final-annotation" class="level3">
+<h3 class="anchored" data-anchor-id="final-annotation">Final annotation</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(seurat_obj) <span class="ot">&lt;-</span> <span class="st">"SCT_snn_res.1"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>seurat_obj[[<span class="st">"cell_type"</span>]] <span class="ot">&lt;-</span> <span class="fu">Idents</span>(seurat_obj) <span class="co"># create cell_type metadata</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(seurat_obj) <span class="ot">&lt;-</span> <span class="st">"cell_type"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>cluster.ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Neutrophil"</span>, <span class="st">"CD4 Naive"</span>, <span class="st">"Th|Treg"</span>, <span class="st">"B cells"</span>, <span class="st">"NK - Dim"</span>, <span class="st">"NK - Bright"</span>, <span class="st">"CD4 Naive"</span>, <span class="st">"Neutrophil"</span>, <span class="st">"CD8 Naive"</span>, <span class="st">"NK - T"</span>, <span class="st">"CD14 Mono"</span>, <span class="st">"Th|Treg"</span>, <span class="st">"Erythrocytes"</span>, <span class="st">"Mix T_1"</span>, <span class="st">"Mix T_2"</span>, <span class="st">"Mix T_3"</span>, <span class="st">"Plasmablast"</span>, <span class="st">"CD16 Mono"</span>, <span class="st">"Platelet"</span>, <span class="st">"T subtype"</span>, <span class="st">"Plasma cells"</span>, <span class="st">"cDC"</span>, <span class="st">"pDC"</span>, <span class="st">"Cycling T"</span>, <span class="st">"B cells"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cluster.ids) <span class="ot">&lt;-</span> <span class="fu">levels</span>(seurat_obj)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>seurat_obj <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(seurat_obj, cluster.ids)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>seurat_obj<span class="sc">$</span>cell_type <span class="ot">&lt;-</span> <span class="fu">Idents</span>(seurat_obj) <span class="co"># change metadata column with idents</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="dimplot---cell-types" class="level3">
+<h3 class="anchored" data-anchor-id="dimplot---cell-types">Dimplot - Cell types</h3>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(seurat_obj, </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">reduction =</span> <span class="st">"umap.harmony"</span>, </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">group.by =</span> <span class="fu">c</span>(<span class="st">"cell_type"</span>), </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">pt.size =</span> <span class="dv">1</span>, </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="cn">TRUE</span>) <span class="sc">&amp;</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">NoLegend</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="1_Preprocessing_WB_files/figure-html/scatter%20plot%20-%20cell%20types-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 <section id="write-rds" class="level3">
 <h3 class="anchored" data-anchor-id="write-rds">Write rds</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(seurat_obj, <span class="at">file =</span> <span class="fu">paste0</span>(<span class="st">"RData/"</span>, <span class="fu">Sys.Date</span>(), <span class="st">"_seurat_WB.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(seurat_obj, <span class="at">file =</span> <span class="fu">paste0</span>(<span class="st">"RData/"</span>, <span class="fu">Sys.Date</span>(), <span class="st">"_seurat_WB.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
