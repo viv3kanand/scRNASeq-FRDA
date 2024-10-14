@@ -193,7 +193,23 @@ DimPlot(seurat_obj,
 
 ```
 
+### Perform integration
+```{r}
+DefaultAssay(seurat_obj) <- "SCT"
 
+seurat_obj <- seurat_obj |> 
+  IntegrateLayers(assay = "SCT",
+                  method = HarmonyIntegration, 
+                  group.by.vars = c("Batch_Lib", "Batch_Seq"),
+                  orig.reduction = "pca", 
+                  new.reduction = "harmony", 
+                  verbose = TRUE)
+
+seurat_obj <- seurat_obj |> 
+  FindNeighbors(reduction = "harmony", dims = 1:30) |> 
+  FindClusters(resolution = seq(0.1,1,0.1)) |> 
+  RunUMAP(reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
+```
 
 
 
