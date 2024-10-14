@@ -8,30 +8,67 @@ author: viv3kanand
 ## Package dependencies
 
 ```{r}
-# renv::install("tidyverse")
+#| label: packages
+#| echo: true
+
+# options(renv.config.pak.enabled = TRUE)
+# renv::install("Matrix")
 # renv::install("Seurat")
+# 
+# setRepositories(ind = 1:3, addURLs = c('https://satijalab.r-universe.dev', 'https://bnprks.r-universe.dev/'))
+# renv::install("BPCells")
+# renv::install("presto")
+# renv::install("glmGamPoi")
+
+# renv::install("satijalab/seurat-data")
+# renv::install("mojaveazure/seurat-disk")
+# renv::install("satijalab/azimuth")
+# renv::install("satijalab/seurat-wrappers")
+
+
+# renv::install("future")
+
+# renv::install("Bioc::multtest") #metap dependency
+# renv::install("metap")
+
+# renv::install("tidyverse")
 # renv::install("gt")
 ```
 
 ### Load required libraries
 
 ```{r}
+#| label: load packages
 #| echo: false
 #| include: false
 #| message: false
 #| warning: false
 
-require(tidyverse)
 require(Seurat)
+require(Azimuth)
+require(future)
+require(data.table)
+
+require(tidyverse)
 require(gt)
+
+```
+### Option presets
+```{r}
+options(Seurat.object.assay.calcn = TRUE)
+plan("multicore", workers = 40)
+options(future.globals.maxSize = 150000 * 1024^2)
+setDTthreads(threads = 20)
 ```
 
-## Process data
+## Data processing
 
-### Load data
+### Load 10X matrices
 
 ```{r}
+#| label: load 10x matrices
 #| echo: true
+#| eval: true
 
 li_WB <- list.files("../data/WB/")
 
@@ -43,14 +80,23 @@ purrr::imap(setNames(li_WB, li_WB), function(obj, name){
 
 ```
 
-### Filter and merge
+### Helper scripts
 
 ```{r}
+#| label: source helper scripts
+#| echo: true
+#| eval: true
+
 source("../scripts/helper_scripts.R")
 ```
 
 ### Add batch metadata
+
 ```{r}
+#| label: add metadata
+#| echo: true
+#| eval: true
+
 meta <- read.delim(text = "orig.ident	Batch_Lib	Batch_Seq	Condition
 C2_Control	1	3	Control
 O2_Control	2	3	Control
@@ -64,7 +110,13 @@ S3_Patient	4	2	Patient
 ")
 ```
 
+### Filter and merge
+
 ```{r}
+#| label: filter and merge
+#| echo: true
+#| eval: false
+
 # Filter cells with empirical cut off
 seurat_list <- seurat_list |> map(filterCell)
 
@@ -83,7 +135,12 @@ seurat_obj <- seurat_obj |>
 ```
 
 ### Filtering summary
+
 ```{r}
+#| label: filter summary
+#| echo: true
+#| eval: true
+
 lapply(seurat_list, function(obj){
     emp <- emp_fun(obj)
     filt <- filt_fun(obj, emp)
@@ -98,6 +155,49 @@ lapply(seurat_list, function(obj){
     gt() |> 
     tab_header(title = "Sample filtering based on following empirical cut off")
 ```
+
+
+## Normalization and find clusters
+```{r}
+#| label: normalization
+#| echo: true
+#| eval: false
+
+DefaultAssay(seurat_obj) <- "RNA"
+
+seurat_obj <- seurat_obj |> 
+  NormalizeData() |> 
+  FindVariableFeatures(selection.method = "vst") |> 
+  ScaleData()
+
+seurat_obj <- RunAzimuth(seurat_obj, reference = "pbmcref") # reference for later
+
+seurat_obj[["RNA"]] <- split(seurat_obj[["RNA"]], f = seurat_obj$Condition) #split into condition
+
+seurat_obj %<>% SCTransform(vars.to.regress = "percent.mt", verbose = TRUE) 
+
+seurat_obj %<>% RunPCA()
+
+seurat_obj %<>% FindNeighbors(dims = 1:30)
+
+seurat_obj %<>% FindClusters(resolution = 0.1, cluster.name = "cluster.unintegrated")
+
+seurat_obj %<>% RunUMAP(dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
+
+
+write_rds(seurat_obj, file = "RData/2_seurat_obj.rds")
+
+DimPlot(seurat_obj, 
+        reduction = "umap.unintegrated", 
+        group.by = c("Condition", "predicted.celltype.l1"))
+
+```
+
+
+
+
+
+
 
 
 
