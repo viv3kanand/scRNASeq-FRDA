@@ -3,6 +3,7 @@ title: "1. Preprocessing - scRNA-Seq - FRDA (Whole Blood)"
 format: html
 editor: source
 author: viv3kanand
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
 ## Package dependencies
@@ -164,7 +165,8 @@ lapply(seurat_list, function(obj){
         filter(Sample == 1)
 }) |> bind_rows(.id = "Sample") |> 
     gt() |> 
-    tab_header(title = "Sample filtering based on following empirical cut off")
+    tab_header(title = "Sample filtering statistics")
+
 ```
 
 
@@ -196,13 +198,6 @@ seurat_obj %<>% FindClusters(resolution = 0.1, cluster.name = "cluster.unintegra
 
 seurat_obj %<>% RunUMAP(dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
 
-
-write_rds(seurat_obj, file = "RData/2_seurat_obj.rds")
-
-DimPlot(seurat_obj, 
-        reduction = "umap.unintegrated", 
-        group.by = c("Condition", "predicted.celltype.l1"))
-
 ```
 
 ### Perform integration
@@ -226,9 +221,100 @@ seurat_obj <- seurat_obj |>
   FindNeighbors(reduction = "harmony", dims = 1:30) |> 
   FindClusters(resolution = seq(0.1,1,0.1)) |> 
   RunUMAP(reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
+
+```
+
+### Subset low quality clusters
+
+```{r}
+#| label: subset
+#| echo: true
+#| eval: false
+
+#cluster 4 - Mito and ribo genes, low quality
+#cluster 22 - multiple position, low quality
+
+seurat_obj <- subset(seurat_obj, idents = c(4,22), invert = TRUE)
+```
+
+```{r}
+#| label: preload rds
+#| echo: false
+#| eval: true
+
+seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
+
+```
+
+### Dimplot - SCT_snn_res.1
+
+```{r}
+#| label: scatter plot - SCT_snn_res.1
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+DimPlot(seurat_obj, 
+        reduction = "umap.harmony", 
+        group.by = c("SCT_snn_res.1"), 
+        pt.size = 1, 
+        label = TRUE) & 
+  NoLegend()
+
+```
+
+### Final annotation
+```{r}
+#| label: annotation
+#| echo: true
+#| eval: false
+
+Idents(seurat_obj) <- "SCT_snn_res.1"
+seurat_obj[["cell_type"]] <- Idents(seurat_obj) # create cell_type metadata
+Idents(seurat_obj) <- "cell_type"
+
+cluster.ids <- c("Neutrophil", "CD4 Naive", "Th|Treg", "B cells", "NK - Dim", "NK - Bright", "CD4 Naive", "Neutrophil", "CD8 Naive", "NK - T", "CD14 Mono", "Th|Treg", "Erythrocytes", "Mix T_1", "Mix T_2", "Mix T_3", "Plasmablast", "CD16 Mono", "Platelet", "T subtype", "Plasma cells", "cDC", "pDC", "Cycling T", "B cells")
+
+names(cluster.ids) <- levels(seurat_obj)
+
+seurat_obj <- RenameIdents(seurat_obj, cluster.ids)
+
+seurat_obj$cell_type <- Idents(seurat_obj) # change metadata column with idents
+
+```
+
+### Dimplot - Cell types
+
+```{r}
+#| label: scatter plot - cell types
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+DimPlot(seurat_obj, 
+        reduction = "umap.harmony", 
+        group.by = c("cell_types"), 
+        pt.size = 1, 
+        label = TRUE) & 
+  NoLegend()
+
 ```
 
 
+### Write rds
+
+```{r}
+#| label: write files
+#| echo: true
+#| eval: false
+
+write_rds(seurat_obj, file = paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+
+```
 
 
 
