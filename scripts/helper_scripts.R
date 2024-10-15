@@ -20,3 +20,20 @@ filterCell <- function(obj){
   
   return(combined)
 }
+
+knee_plot <- function(bc_rank) {
+  knee_plt <- tibble(rank = bc_rank[["rank"]],
+                     total = bc_rank[["total"]]) %>% 
+    distinct() %>% 
+    dplyr::filter(total > 0)
+  annot <- tibble(inflection = metadata(bc_rank)[["inflection"]],
+                  rank_cutoff = max(bc_rank$rank[bc_rank$total > metadata(bc_rank)[["inflection"]]]))
+  p <- ggplot(knee_plt, aes(total, rank)) +
+    geom_line() +
+    geom_hline(aes(yintercept = rank_cutoff), data = annot, linetype = 2) +
+    geom_vline(aes(xintercept = inflection), data = annot, linetype = 2) +
+    scale_x_log10(guide = "axis_logticks") + 
+    scale_y_log10(guide = "axis_logticks") +
+    labs(y = "Rank", x = "Total UMIs")
+  return(p)
+}
