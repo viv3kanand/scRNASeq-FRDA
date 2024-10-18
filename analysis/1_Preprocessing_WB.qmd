@@ -235,6 +235,7 @@ seurat_obj <- seurat_obj |>
 #cluster 22 - multiple position, low quality
 
 seurat_obj <- subset(seurat_obj, idents = c(4,22), invert = TRUE)
+
 ```
 
 ```{r}
@@ -304,7 +305,6 @@ DimPlot(seurat_obj,
   NoLegend()
 
 ```
-
 
 ### Write rds
 

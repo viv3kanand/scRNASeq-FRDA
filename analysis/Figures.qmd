@@ -15,7 +15,11 @@ author: viv3kanand
 #| warning: false
 
 require(Seurat)
+require(DropletUtils)
 require(tidyverse)
+require(MetBrewer)
+require(ggpointdensity)
+require(scico)
 ```
 
 ```{r}
@@ -37,11 +41,50 @@ seurat_obj <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
 
 ```
 
+## Helper scripts
 
+```{r}
+#| label: source helper scripts
+#| echo: true
+#| eval: true
 
+source("../scripts/helper_scripts.R")
 
+```
 
+## QC
 
+### Library saturation
+
+```{r}
+#| label: saturation
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+ggplot(seurat_list$C2_Control@meta.data, aes(nCount_RNA, nFeature_RNA)) +
+    geom_bin2d(bins = 50) +
+    MetBrewer::scale_fill_met_c(palette = "Hiroshige", direction = -1) +
+    scale_x_log10(guide = "axis_logticks") + scale_y_log10(guide = "axis_logticks") +
+    labs(x = "Total UMI counts", y = "Number of genes detected")
+
+```
+
+### Knee plot
+
+```{r}
+#| label: knee plot
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+knee_plot(barcodeRanks(seurat_list$C2_Control[["RNA"]]$counts, lower = 10))
+
+```
 
 
 
