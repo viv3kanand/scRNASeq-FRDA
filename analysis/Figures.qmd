@@ -114,6 +114,13 @@ p2 <- seurat_obj@meta.data |>
     ylab("Density") +
     geom_vline(xintercept = 500)
 
+p3 <- seurat_obj@meta.data |> 
+    ggplot(aes(color = Condition, x = percent.mt, fill = Condition)) + 
+    geom_density(alpha = 0.2) + 
+    #scale_x_log10() + 
+    theme_classic() +
+    geom_vline(xintercept = c(5, 10))
+
 
 ```
 
