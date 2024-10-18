@@ -121,7 +121,9 @@ p3 <- seurat_obj@meta.data |>
     theme_classic() +
     geom_vline(xintercept = c(5, 10))
 
+p4 <- FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") & NoLegend()
 
+p1 + p2 + p3 + p4
 ```
 
 
