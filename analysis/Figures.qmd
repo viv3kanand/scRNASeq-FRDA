@@ -106,6 +106,14 @@ p1 <- seurat_obj@meta.data |>
     ylab("Density") +
     geom_vline(xintercept = 500)
 
+p2 <- seurat_obj@meta.data |> 
+    ggplot(aes(color = Condition, x = nCount_RNA , fill = Condition)) + 
+    geom_density(alpha = 0.2) + 
+    scale_x_log10() + 
+    theme_classic() +
+    ylab("Density") +
+    geom_vline(xintercept = 500)
+
 
 ```
 
