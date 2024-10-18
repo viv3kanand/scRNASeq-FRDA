@@ -97,6 +97,17 @@ ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
 ```
 
 
+```{r}
+p1 <- seurat_obj@meta.data |> 
+    ggplot(aes(color = Condition, x = nFeature_RNA  , fill = Condition)) + 
+    geom_density(alpha = 0.2) + 
+    scale_x_log10() + 
+    theme_classic() +
+    ylab("Density") +
+    geom_vline(xintercept = 500)
+
+
+```
 
 
 
