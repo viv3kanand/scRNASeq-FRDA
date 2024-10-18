@@ -613,6 +613,29 @@
       ],
       "Hash": "152dbbcde6a9a7c7f3beef79b68cd76a"
     },
+    "MetBrewer": {
+      "Package": "MetBrewer",
+      "Version": "0.3.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "MetBrewer",
+      "RemoteUsername": "BlakeRMills",
+      "RemotePkgRef": "BlakeRMills/MetBrewer",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "8f06216764633854ba668bb52fc8db053675276e",
+      "Requirements": [
+        "cowplot",
+        "ggplot2",
+        "ggstream",
+        "glue",
+        "graphics",
+        "lifecycle",
+        "rlang",
+        "stats"
+      ],
+      "Hash": "113041cccbe354f9bef4c866cdfd8494"
+    },
     "ProtGenerics": {
       "Package": "ProtGenerics",
       "Version": "1.36.0",
@@ -2024,6 +2047,22 @@
       ],
       "Hash": "44c6a2f8202d5b7e878ea274b1092426"
     },
+    "ggpointdensity": {
+      "Package": "ggpointdensity",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "LKremer",
+      "RemoteRepo": "ggpointdensity",
+      "RemoteRef": "master",
+      "RemoteSha": "4c6fec024432f5ab4beb21b7b22a41ce02b627cd",
+      "Requirements": [
+        "R",
+        "ggplot2"
+      ],
+      "Hash": "23853afb1c8abbb279abe2f043ea8198"
+    },
     "ggrepel": {
       "Package": "ggrepel",
       "Version": "0.9.6",
@@ -2053,6 +2092,23 @@
         "withr"
       ],
       "Hash": "66488692cb8621bc78df1b9b819497a6"
+    },
+    "ggstream": {
+      "Package": "ggstream",
+      "Version": "0.1.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "dplyr",
+        "forcats",
+        "ggplot2",
+        "magrittr",
+        "purrr",
+        "stats",
+        "tidyr"
+      ],
+      "Hash": "4512013654d28dbf39dc4a8f5b9bdde2"
     },
     "glmGamPoi": {
       "Package": "glmGamPoi",
@@ -3413,6 +3469,24 @@
         "scales"
       ],
       "Hash": "d316e4abb854dd1677f7bd3ad08bc4e8"
+    },
+    "scico": {
+      "Package": "scico",
+      "Version": "1.5.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "scico",
+      "RemoteUsername": "thomasp85",
+      "RemotePkgRef": "thomasp85/scico",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "e94d08c334c8de7ba5dd0c405baeb578a5d2651c",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "scales"
+      ],
+      "Hash": "d6808a21cf061b0d85c735e881f291e8"
     },
     "sctransform": {
       "Package": "sctransform",
