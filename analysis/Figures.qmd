@@ -88,6 +88,14 @@ knee_plot(barcodeRanks(seurat_list$C2_Control[["RNA"]]$counts, lower = 10))
 
 
 
+```{r}
+ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
+  geom_pointdensity() +
+  scale_color_scico(palette = "devon", direction = -1, end = 0.9) +
+  labs(x = "Total UMI counts", y = "Percentage mitochondrial")
+
+```
+
 
 
 
