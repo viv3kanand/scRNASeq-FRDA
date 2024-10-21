@@ -248,17 +248,17 @@ DimPlot(seurat_obj,
 #| echo: true
 #| eval: false
 
-Idents(seurat_obj) <- "SCT_snn_res.1"
-seurat_obj[["cell_type"]] <- Idents(seurat_obj) # create cell_type metadata
-Idents(seurat_obj) <- "cell_type"
+Idents(merged_data) <- "SCT_snn_res.1"
+merged_data[["cell_type"]] <- Idents(merged_data) # create cell_type metadata
+Idents(merged_data) <- "cell_type"
 
-cluster.ids <- c("Neutrophil", "CD4 Naive", "Th|Treg", "B cells", "NK - Dim", "NK - Bright", "CD4 Naive", "Neutrophil", "CD8 Naive", "NK - T", "CD14 Mono", "Th|Treg", "Erythrocytes", "Mix T_1", "Mix T_2", "Mix T_3", "Plasmablast", "CD16 Mono", "Platelet", "T subtype", "Plasma cells", "cDC", "pDC", "Cycling T", "B cells")
+cluster.ids <- c("CD14 Mono", "NK|CD56 Bright", "CD4 TCM|TEM|Th17|Th2", "CD8 TEM|TCM|TEFF", "CD14 Mono", "CD4 TCM|TEM|Th17|Th2", "CD4 Naive", "CD4 TCM|TEM|Th17|Th2", "B Naive", "CD4 Naive", "CD8 Naive", "Platelet", "CD14 Mono", "CD4 Naive", "CD8 TEM|TCM|TEFF", "CD16 Mono", "B Naive", "gDT", "B Memory", "CD8 Naive", "CD4 Naive", "cDC", "PTGDS high NK", "MAIT", "pDC", "CD14 Mono", "Cycling T cells", "B Naive", "LEF1 high gDT", "Plasmablast", "B Naive", "HSPC")
 
-names(cluster.ids) <- levels(seurat_obj)
+names(cluster.ids) <- levels(merged_data)
 
-seurat_obj <- RenameIdents(seurat_obj, cluster.ids)
+merged_data <- RenameIdents(merged_data, cluster.ids)
 
-seurat_obj$cell_type <- Idents(seurat_obj) # change metadata column with idents
+merged_data$cell_type <- Idents(merged_data) # change metadata column with idents
 
 ```
 
