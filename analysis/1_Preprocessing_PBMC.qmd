@@ -1,0 +1,340 @@
+---
+title: "1. Preprocessing - scRNA-Seq - FRDA (Whole Blood)"
+format: html
+editor: source
+author: viv3kanand
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+## Package dependencies
+
+```{r}
+#| label: packages
+#| echo: true
+#| eval: false
+
+# options(renv.config.pak.enabled = TRUE)
+# renv::install("Matrix")
+# renv::install("Seurat")
+# 
+# setRepositories(ind = 1:3, addURLs = c('https://satijalab.r-universe.dev', 'https://bnprks.r-universe.dev/'))
+# renv::install("BPCells")
+# renv::install("presto")
+# renv::install("glmGamPoi")
+
+# renv::install("satijalab/seurat-data")
+# renv::install("mojaveazure/seurat-disk")
+# renv::install("satijalab/azimuth")
+# renv::install("satijalab/seurat-wrappers")
+
+
+# renv::install("future")
+
+# renv::install("Bioc::multtest") #metap dependency
+# renv::install("metap")
+
+# renv::install("tidyverse")
+# renv::install("gt")
+```
+
+### Load required libraries
+
+```{r}
+#| label: load packages
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+require(Seurat)
+require(Azimuth)
+require(data.table)
+require(future)
+
+require(tidyverse)
+require(gt)
+
+```
+
+### Option presets
+```{r}
+#| label: options
+#| echo: false
+#| eval: true
+#| warning: false
+
+options(Seurat.object.assay.calcn = TRUE)
+plan("multicore", workers = 40)
+options(future.globals.maxSize = 150000 * 1024^2)
+setDTthreads(threads = 20)
+
+```
+
+## Data processing
+
+### Load 10X matrices
+
+```{r}
+#| label: load 10x matrices
+#| echo: true
+#| eval: true
+
+li_WB <- list.files("../data/WB/")
+
+purrr::imap(setNames(li_WB, li_WB), function(obj, name){
+  Seurat::Read10X(paste0("../data/WB/", obj)) |> 
+    Seurat::CreateSeuratObject(min.cells = 3,
+                               project = name)
+}) -> seurat_list
+
+```
+
+### Helper scripts
+
+```{r}
+#| label: source helper scripts
+#| echo: true
+#| eval: true
+
+source("../scripts/helper_scripts.R")
+
+```
+
+### Add batch metadata
+
+```{r}
+#| label: add metadata
+#| echo: true
+#| eval: true
+
+meta <- read.delim(text = "orig.ident	Batch_Lib	Batch_Seq	Condition
+C2_Control	1	3	Control
+O2_Control	2	3	Control
+S2_Control	1	1	Control
+S4_Control	4	2	Control
+N4_Patient	4	4	Patient
+O3_Patient	3	4	Patient
+O4_Patient	3	3	Patient
+S1_Patient	1	1	Patient
+S3_Patient	4	2	Patient
+")
+
+```
+
+### Filter and merge
+
+```{r}
+#| label: filter and merge
+#| echo: true
+#| eval: false
+
+# Filter cells with empirical cut off
+seurat_list <- seurat_list |> map(filterCell)
+
+# remove sample failed QC
+seurat_list$O3_Patient <- NULL
+
+# Merge datasets
+seurat_obj <- reduce(seurat_list, merge) |>
+  JoinLayers()  #https://github.com/satijalab/seurat/issues/7316
+
+meta.data <- seurat_obj@meta.data |> 
+  merge(meta, by = "orig.ident", all.x = TRUE)
+
+seurat_obj <- seurat_obj |> 
+  AddMetaData(metadata = meta.data)
+
+```
+
+### Filtering summary
+
+```{r}
+#| label: filter summary
+#| echo: true
+#| eval: true
+
+lapply(seurat_list, function(obj){
+    emp <- emp_fun(obj)
+    filt <- filt_fun(obj, emp)
+    emp |> as.data.frame() |> 
+        rownames_to_column("Sample") |> 
+        mutate(nCount_RNA = round(nCount_RNA),
+               nFeature_RNA = round(nFeature_RNA),
+               nCells = nrow(obj@meta.data),
+               nCells_filt = nrow(filt@meta.data)) |> 
+        filter(Sample == 1)
+}) |> bind_rows(.id = "Sample") |> 
+    gt() |> 
+    tab_header(title = "Sample filtering statistics")
+
+```
+
+
+### Normalization and find clusters
+
+```{r}
+#| label: normalization
+#| echo: true
+#| eval: false
+
+DefaultAssay(seurat_obj) <- "RNA"
+
+seurat_obj <- seurat_obj |> 
+  NormalizeData() |> 
+  FindVariableFeatures(selection.method = "vst") |> 
+  ScaleData()
+
+seurat_obj <- RunAzimuth(seurat_obj, reference = "pbmcref") # reference for later
+
+seurat_obj[["RNA"]] <- split(seurat_obj[["RNA"]], f = seurat_obj$Condition) #split into condition
+
+seurat_obj %<>% SCTransform(vars.to.regress = "percent.mt", verbose = TRUE) 
+
+seurat_obj %<>% RunPCA()
+
+seurat_obj %<>% FindNeighbors(dims = 1:30)
+
+seurat_obj %<>% FindClusters(resolution = 0.1, cluster.name = "cluster.unintegrated")
+
+seurat_obj %<>% RunUMAP(dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
+
+```
+
+### Perform integration
+
+```{r}
+#| label: integration
+#| echo: true
+#| eval: false
+
+DefaultAssay(seurat_obj) <- "SCT"
+
+seurat_obj <- seurat_obj |> 
+  IntegrateLayers(assay = "SCT",
+                  method = HarmonyIntegration, 
+                  group.by.vars = c("Batch_Lib", "Batch_Seq"),
+                  orig.reduction = "pca", 
+                  new.reduction = "harmony", 
+                  verbose = TRUE)
+
+seurat_obj <- seurat_obj |> 
+  FindNeighbors(reduction = "harmony", dims = 1:30) |> 
+  FindClusters(resolution = seq(0.1,1,0.1)) |> 
+  RunUMAP(reduction = "harmony", dims = 1:30, reduction.name = "umap.harmony")
+
+```
+
+### Subset low quality clusters
+
+```{r}
+#| label: subset
+#| echo: true
+#| eval: false
+
+#cluster 4 - Mito and ribo genes, low quality
+#cluster 22 - multiple position, low quality
+
+seurat_obj <- subset(seurat_obj, idents = c(4,22), invert = TRUE)
+
+```
+
+```{r}
+#| label: preload rds
+#| echo: false
+#| eval: true
+
+seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
+
+```
+
+### Dimplot - SCT_snn_res.1
+
+```{r}
+#| label: scatter plot - SCT_snn_res.1
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+DimPlot(seurat_obj, 
+        reduction = "umap.harmony", 
+        group.by = c("SCT_snn_res.1"), 
+        pt.size = 1, 
+        label = TRUE) & 
+  NoLegend()
+
+```
+
+### Final annotation
+
+```{r}
+#| label: annotation
+#| echo: true
+#| eval: false
+
+Idents(seurat_obj) <- "SCT_snn_res.1"
+seurat_obj[["cell_type"]] <- Idents(seurat_obj) # create cell_type metadata
+Idents(seurat_obj) <- "cell_type"
+
+cluster.ids <- c("Neutrophil", "CD4 Naive", "Th|Treg", "B cells", "NK - Dim", "NK - Bright", "CD4 Naive", "Neutrophil", "CD8 Naive", "NK - T", "CD14 Mono", "Th|Treg", "Erythrocytes", "Mix T_1", "Mix T_2", "Mix T_3", "Plasmablast", "CD16 Mono", "Platelet", "T subtype", "Plasma cells", "cDC", "pDC", "Cycling T", "B cells")
+
+names(cluster.ids) <- levels(seurat_obj)
+
+seurat_obj <- RenameIdents(seurat_obj, cluster.ids)
+
+seurat_obj$cell_type <- Idents(seurat_obj) # change metadata column with idents
+
+```
+
+### Dimplot - Cell types
+
+```{r}
+#| label: scatter plot - cell types
+#| echo: true
+#| eval: true
+#| fig-width: 10
+#| fig-height: 7
+#| fig-align: center
+
+DimPlot(seurat_obj, 
+        reduction = "umap.harmony", 
+        group.by = c("cell_type"), 
+        pt.size = 1, 
+        label = TRUE) & 
+  NoLegend()
+
+```
+
+### Write rds
+
+```{r}
+#| label: write files
+#| echo: true
+#| eval: false
+
+write_rds(seurat_obj, file = paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

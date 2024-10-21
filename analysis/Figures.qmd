@@ -87,7 +87,6 @@ knee_plot(barcodeRanks(seurat_list$C2_Control[["RNA"]]$counts, lower = 10))
 ```
 
 
-
 ```{r}
 ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
   geom_pointdensity() +
