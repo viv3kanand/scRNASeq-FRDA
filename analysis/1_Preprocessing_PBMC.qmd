@@ -79,14 +79,14 @@ setDTthreads(threads = 20)
 #| echo: true
 #| eval: true
 
-li_b1 <- list.files("../data/PBMC/", pattern = "h5")
+li_PBMC <- list.files("../data/PBMC/", pattern = "h5")
 
-purrr::imap(setNames(li_b1, gsub(pattern = "_filtered_feature_bc_matrix.h5", 
-                              replacement = "", li_b1)), 
+purrr::imap(setNames(li_PBMC, gsub(pattern = "_filtered_feature_bc_matrix.h5", 
+                              replacement = "", li_PBMC)), 
             function(obj, name){
               Seurat::Read10X_h5(paste0("../data/PBMC/", obj)) |> 
                 Seurat::CreateSeuratObject(min.cells = 3,
-                                           project = paste0(name, "FRDA"))
+                                           project = name)
 }) -> seurat_list
 
 ```
@@ -110,15 +110,12 @@ source("../scripts/helper_scripts.R")
 #| eval: false
 
 # Filter cells with empirical cut off
-B1 %<>% map(filterCell)
-B2 %<>% map(filterCell)
+seurat_list %<>% map(filterCell)
 
 # Merge datasets
-seurat_obj <- Reduce(function(x, y) {
-  merge(x, y)
-}, c(B1,B2)) %>%
-  AddMetaData(gsub(".*B1$", "Control", 
-                   gsub(".*B2$", "FRDA", 
+seurat_obj <- reduce(seurat_list, merge) %>%
+  AddMetaData(gsub("control.*", "Control", 
+                   gsub("patient.*", "FRDA", 
                         .$orig.ident)),
               col.name = "Condition") %>%
   JoinLayers()  #https://github.com/satijalab/seurat/issues/7316
