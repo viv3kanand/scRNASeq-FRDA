@@ -79,25 +79,15 @@ setDTthreads(threads = 20)
 #| echo: true
 #| eval: true
 
-li_b1 <- list.files("../data/PBMC/B1/", pattern = "h5")
+li_b1 <- list.files("../data/PBMC/", pattern = "h5")
 
 purrr::imap(setNames(li_b1, gsub(pattern = "_filtered_feature_bc_matrix.h5", 
                               replacement = "", li_b1)), 
             function(obj, name){
-              Seurat::Read10X_h5(paste0("../data/PBMC/B1/", obj)) |> 
+              Seurat::Read10X_h5(paste0("../data/PBMC/", obj)) |> 
                 Seurat::CreateSeuratObject(min.cells = 3,
-                                           project = paste0(name, "B1"))
-}) -> B1
-
-li_b2 <- list.files("../data/PBMC/B2/", pattern = "h5")
-
-purrr::imap(setNames(li_b2, gsub(pattern = "_filtered_feature_bc_matrix.h5", 
-                              replacement = "", li_b2)), 
-            function(obj, name){
-              Seurat::Read10X_h5(paste0("../data/PBMC/B2/", obj)) |> 
-                Seurat::CreateSeuratObject(min.cells = 3,
-                                           project = paste0(name, "B2"))
-}) -> B2
+                                           project = paste0(name, "FRDA"))
+}) -> seurat_list
 
 ```
 
@@ -124,7 +114,7 @@ B1 %<>% map(filterCell)
 B2 %<>% map(filterCell)
 
 # Merge datasets
-merged_data <- Reduce(function(x, y) {
+seurat_obj <- Reduce(function(x, y) {
   merge(x, y)
 }, c(B1,B2)) %>%
   AddMetaData(gsub(".*B1$", "Control", 
