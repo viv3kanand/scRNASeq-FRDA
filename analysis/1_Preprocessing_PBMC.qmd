@@ -188,7 +188,6 @@ DefaultAssay(seurat_obj) <- "SCT"
 seurat_obj <- seurat_obj |> 
   IntegrateLayers(assay = "SCT",
                   method = HarmonyIntegration, 
-                  group.by.vars = c("Batch_Lib", "Batch_Seq"),
                   orig.reduction = "pca", 
                   new.reduction = "harmony", 
                   verbose = TRUE)
@@ -207,10 +206,10 @@ seurat_obj <- seurat_obj |>
 #| echo: true
 #| eval: false
 
-#cluster 4 - Mito and ribo genes, low quality
-#cluster 22 - multiple position, low quality
+# cluster 27 - CD14 and B cell markers
+# cluster 19 - platelet and T cell markers
 
-seurat_obj <- subset(seurat_obj, idents = c(4,22), invert = TRUE)
+seurat_obj <- subset(seurat_obj, idents = c(19, 27), invert = TRUE)
 
 ```
 
