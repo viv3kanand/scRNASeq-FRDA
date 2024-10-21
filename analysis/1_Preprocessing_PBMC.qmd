@@ -218,7 +218,7 @@ seurat_obj <- subset(seurat_obj, idents = c(19, 27), invert = TRUE)
 #| echo: false
 #| eval: true
 
-seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
+seurat_obj <- read_rds("../data/2024-10-07_sce_PBMC.rds")
 
 ```
 
@@ -288,7 +288,7 @@ DimPlot(seurat_obj,
 #| echo: true
 #| eval: false
 
-write_rds(seurat_obj, file = paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+write_rds(seurat_obj, file = paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
 
 ```
 
