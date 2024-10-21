@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 data/
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
+omnipathr-log/
