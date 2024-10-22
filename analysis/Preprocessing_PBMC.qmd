@@ -1,5 +1,5 @@
 ---
-title: "1. Preprocessing - scRNA-Seq - FRDA (Whole Blood)"
+title: "1. Preprocessing - scRNA-Seq - FRDA (PBMC)"
 format: html
 editor: source
 author: viv3kanand
@@ -227,7 +227,7 @@ seurat_obj <- read_rds("../data/2024-10-07_sce_PBMC.rds")
 ```{r}
 #| label: scatter plot - SCT_snn_res.1
 #| echo: true
-#| eval: true
+#| eval: false
 #| fig-width: 10
 #| fig-height: 7
 #| fig-align: center
@@ -267,7 +267,7 @@ merged_data$cell_type <- Idents(merged_data) # change metadata column with ident
 ```{r}
 #| label: scatter plot - cell types
 #| echo: true
-#| eval: true
+#| eval: false
 #| fig-width: 10
 #| fig-height: 7
 #| fig-align: center
