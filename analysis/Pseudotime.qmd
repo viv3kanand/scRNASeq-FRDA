@@ -28,7 +28,19 @@ renv::install("Bioc::condiments")
 #| warning: false
 
 require(condiments)
+
 ```
+
+## Load data
+
+```{r}
+#| echo: true
+#| eval: true
+
+seurat_obj <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+
+```
+
 
 ## Trajectory inference
 
