@@ -77,7 +77,7 @@ net_TF <- decoupleR::get_collectri(organism = 'human',
 ### Run ulm
 
 ```{r}
-#| label: download databases
+#| label: run ulm
 #| echo: true
 #| eval: true
 
@@ -90,7 +90,26 @@ acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_WB@assays$RNA$data),
 
 ```
 
+### Extract ulm and update seurat object
 
+```{r}
+#| label: create seurat obj
+#| echo: true
+#| eval: true
+
+
+seu_WB[['tfsulm']] <- acts_TF |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
+DefaultAssay(seu_WB) <- "tfsulm"
+
+seu_WB <- Seurat::ScaleData(seu_WB)
+seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
+```
 
 
 
