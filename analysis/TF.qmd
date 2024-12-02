@@ -47,3 +47,26 @@ require(OmnipathR)
 require(Seurat)
 
 ```
+
+## Load data
+
+```{r}
+#| label: load data
+#| echo: true
+#| eval: true
+
+seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
