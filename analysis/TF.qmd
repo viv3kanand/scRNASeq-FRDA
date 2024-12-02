@@ -32,4 +32,18 @@ renv::install("saezlab/OmnipathR")
 
 ```
 
+## Load required libraries
 
+```{r}
+#| label: load packages
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+require(tidyverse)
+require(decoupleR)
+require(OmnipathR)
+require(Seurat)
+
+```
