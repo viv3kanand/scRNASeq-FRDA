@@ -27,6 +27,7 @@ renv::install("Bioc::condiments")
 #| message: false
 #| warning: false
 
+require(tidyverse)
 require(condiments)
 
 ```
@@ -49,6 +50,25 @@ seurat_obj <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 We used condiments for calculating an imbalance score for each cell which represents the deviations of the local distribution of conditions in comparison with the global distribution in the same neighborhood of that cell.
 
 ```{r}
+df <- bind_cols(
+  as.data.frame(seurat_obj@reductions$umap.harmony@cell.embeddings),
+  as.data.frame(seurat_obj@meta.data[,c(6,26, 29)])
+  ) |> 
+  sample_frac(1)
 
+scores_FA <- condiments::imbalance_score(
+  Object = df |> select(umapharmony_1, umapharmony_2) |>  as.matrix(), 
+  conditions = df$Condition,
+  k = 20, 
+  smooth = 40)
+
+df$scores_FA <- scores_FA$scaled_scores
+
+
+ggplot(df, aes(x = umapharmony_1, y = umapharmony_2, col = scores_FA)) +
+    geom_point(size = .7) +
+    scale_color_viridis_c(option = "C") +
+    labs(col = "Scores")
 ```
+
 
