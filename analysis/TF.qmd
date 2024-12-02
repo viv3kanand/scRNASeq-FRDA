@@ -6,8 +6,9 @@ author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
+## Prerequisites
 
-## Option presets
+### Option presets
 
 ```{r}
 #| label: options
@@ -20,7 +21,7 @@ options(renv.config.pak.enabled = TRUE)
 
 ```
 
-## Installation
+### Installation
 
 ```{r}
 #| label: install packages
@@ -32,7 +33,7 @@ renv::install("saezlab/OmnipathR")
 
 ```
 
-## Load required libraries
+### Load required libraries
 
 ```{r}
 #| label: load packages
@@ -48,7 +49,9 @@ require(Seurat)
 
 ```
 
-## Load data
+## Transcription Factor Enrichment
+
+### Load data
 
 ```{r}
 #| label: load data
@@ -56,8 +59,10 @@ require(Seurat)
 #| eval: true
 
 seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
-
+seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 ```
+
+### Download databases
 
 ```{r}
 #| label: download databases
@@ -67,10 +72,23 @@ seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 net_TF <- decoupleR::get_collectri(organism = 'human', 
                                    split_complexes = FALSE)
 
-net_TF
 ```
 
+### Run ulm
 
+```{r}
+#| label: download databases
+#| echo: true
+#| eval: true
+
+acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_WB@assays$RNA$data), 
+                              net = net_TF, 
+                              .source = 'source',
+                              .target = 'target',
+                              .mor='mor', 
+                              minsize = 5)
+
+```
 
 
 
