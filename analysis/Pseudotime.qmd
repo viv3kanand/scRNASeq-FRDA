@@ -1,0 +1,22 @@
+---
+title: "Pseudotime"
+format: html
+editor: source
+author: viv3kanand
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+
+## Installation
+
+```{r}
+#| label: load packages
+#| echo: true
+#| eval: false
+
+renv::install("Bioc::condiments")
+```
+
+
+
+
