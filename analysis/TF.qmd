@@ -59,8 +59,16 @@ seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 
 ```
 
+```{r}
+#| label: download databases
+#| echo: true
+#| eval: true
 
+net_TF <- decoupleR::get_collectri(organism = 'human', 
+                                   split_complexes = FALSE)
 
+net_TF
+```
 
 
 
