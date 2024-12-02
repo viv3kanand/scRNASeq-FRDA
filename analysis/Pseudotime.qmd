@@ -1,5 +1,5 @@
 ---
-title: "Pseudotime"
+title: "Trajectory Inference"
 format: html
 editor: source
 author: viv3kanand
@@ -52,7 +52,7 @@ We used condiments for calculating an imbalance score for each cell which repres
 ```{r}
 df <- bind_cols(
   as.data.frame(seurat_obj@reductions$umap.harmony@cell.embeddings),
-  as.data.frame(seurat_obj@meta.data[,c(6,26, 29)])
+  as.data.frame(seurat_obj@meta.data[,c(6,29)])
   ) |> 
   sample_frac(1)
 
@@ -68,7 +68,7 @@ cad_ncad <- subset(x = seurat_obj, subset = Condition2 %in% c("CAD", "NCAD"))
 
 df_cad <- bind_cols(
   as.data.frame(cad_ncad@reductions$umap.harmony@cell.embeddings),
-  as.data.frame(cad_ncad@meta.data[,c(6,26, 29)])
+  as.data.frame(cad_ncad@meta.data[,c(26, 29)])
   ) |> 
   sample_frac(1)
 
@@ -80,15 +80,22 @@ scores_CAD <- condiments::imbalance_score(
 
 df_cad$scores <- scores_CAD$scaled_scores
 
-ggplot(df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+p1 <- ggplot(df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
     geom_point(size = .7) +
     scale_color_viridis_c(option = "C") +
-    labs(col = "Scores")
+    labs(col = "Scores", title = "FRDA vs Control")
 
-ggplot(df_cad, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+p2 <- ggplot(df_cad, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
     geom_point(size = .7) +
     scale_color_viridis_c(option = "C") +
-    labs(col = "Scores")
+    labs(col = "Scores", title = "CAD vs NCAD")
 ```
+
+
+
+
+
+
+
 
 
