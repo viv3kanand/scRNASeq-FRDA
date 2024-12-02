@@ -30,4 +30,13 @@ renv::install("Bioc::condiments")
 require(condiments)
 ```
 
+## Trajectory inference
+
+### Imbalance score
+
+We used condiments for calculating an imbalance score for each cell which represents the deviations of the local distribution of conditions in comparison with the global distribution in the same neighborhood of that cell.
+
+```{r}
+
+```
 
