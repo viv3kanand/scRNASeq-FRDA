@@ -6,3 +6,30 @@ author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
+
+## Option presets
+
+```{r}
+#| label: options
+#| echo: false
+#| eval: true
+#| warning: false
+
+options(Seurat.object.assay.calcn = TRUE)
+options(renv.config.pak.enabled = TRUE)
+
+```
+
+## Installation
+
+```{r}
+#| label: install packages
+#| echo: true
+#| eval: false
+
+renv::install("saezlab/decoupleR")
+renv::install("saezlab/OmnipathR")
+
+```
+
+

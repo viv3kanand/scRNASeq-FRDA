@@ -57,6 +57,7 @@ require(gt)
 ```
 
 ### Option presets
+
 ```{r}
 #| label: options
 #| echo: false
