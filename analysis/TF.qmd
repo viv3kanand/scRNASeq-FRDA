@@ -67,7 +67,7 @@ seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 ```{r}
 #| label: download databases
 #| echo: true
-#| eval: true
+#| eval: false
 
 net_TF <- decoupleR::get_collectri(organism = 'human', 
                                    split_complexes = FALSE)
@@ -79,7 +79,7 @@ net_TF <- decoupleR::get_collectri(organism = 'human',
 ```{r}
 #| label: run ulm
 #| echo: true
-#| eval: true
+#| eval: false
 
 acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_WB@assays$RNA$data), 
                               net = net_TF, 
@@ -95,7 +95,7 @@ acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_WB@assays$RNA$data),
 ```{r}
 #| label: create seurat obj
 #| echo: true
-#| eval: true
+#| eval: false
 
 seu_WB[['tfsulm']] <- acts_TF |> 
   tidyr::pivot_wider(id_cols = 'source', 
@@ -124,13 +124,11 @@ p1 <- Seurat::DimPlot(seurat_obj,
       Seurat::NoLegend() + 
       ggplot2::ggtitle('Cell types')
 
-
 colors <- rev(RColorBrewer::brewer.pal(n = 11, name = "RdBu")[c(2, 10)])
 
 p2 <- Seurat::FeaturePlot(seurat_obj, features = c("PAX5"), reduction = "umap.harmony") + 
       ggplot2::scale_colour_gradient2(low = colors[1], mid = 'white', high = colors[2]) +
       ggplot2::ggtitle('PAX5 activity')
-
 
 DefaultAssay(object = seurat_obj) <- "RNA"
 p3 <- Seurat::FeaturePlot(seurat_obj, 
@@ -160,6 +158,19 @@ t(as.matrix(seu_WB@assays$tfsulm@data)) |>
 ```
 
 
+```{r}
+t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
+    as.data.frame() %>%
+    dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                  Condition = seu_WB@meta.data$Condition) |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                        names_to = "source", 
+                        values_to = "score") |> 
+    group_by(source, cluster) |> 
+    summarise(ttest = list(t.test(score ~ Condition))) |> 
+    mutate(ttest = map(ttest, broom::tidy)) |> 
+    unnest(cols = c(ttest))
+```
 
 
 
