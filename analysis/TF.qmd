@@ -49,8 +49,6 @@ require(Seurat)
 
 ```
 
-## Transcription Factor Enrichment
-
 ### Load data
 
 ```{r}
@@ -73,6 +71,8 @@ net_TF <- decoupleR::get_collectri(organism = 'human',
                                    split_complexes = FALSE)
 
 ```
+
+## Transcription Factor Enrichment (Whole Blood)
 
 ### Run ulm
 
@@ -110,37 +110,12 @@ seu_WB <- Seurat::ScaleData(seu_WB)
 seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
 ```
 
-### Extract ulm and update seurat object
+### Calculate differential enrichment of TFs
 
 ```{r}
 #| label: create seurat obj
 #| echo: true
 #| eval: true
-
-p1 <- Seurat::DimPlot(seurat_obj, 
-                      reduction = "umap.harmony", 
-                      label = TRUE, 
-                      pt.size = 0.5) + 
-      Seurat::NoLegend() + 
-      ggplot2::ggtitle('Cell types')
-
-colors <- rev(RColorBrewer::brewer.pal(n = 11, name = "RdBu")[c(2, 10)])
-
-p2 <- Seurat::FeaturePlot(seurat_obj, features = c("PAX5"), reduction = "umap.harmony") + 
-      ggplot2::scale_colour_gradient2(low = colors[1], mid = 'white', high = colors[2]) +
-      ggplot2::ggtitle('PAX5 activity')
-
-DefaultAssay(object = seurat_obj) <- "RNA"
-p3 <- Seurat::FeaturePlot(seurat_obj, 
-                          features = c("PAX5"), reduction = "umap.harmony") + 
-      ggplot2::ggtitle('PAX5 expression')
-
-Seurat::DefaultAssay(seurat_obj) <- "tfsulm"
-
-p <- p1 | p2 | p3
-p
-
-
 
 t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
   as.data.frame() |> 
@@ -156,28 +131,5 @@ t(as.matrix(seu_WB@assays$tfsulm@data)) |>
                      values_from = mean) |> 
   write_csv("data/temp/TF_enrichment_WB.csv")
 ```
-
-
-```{r}
-t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
-    as.data.frame() %>%
-    dplyr::mutate(cluster = Seurat::Idents(seu_WB),
-                  Condition = seu_WB@meta.data$Condition) |> 
-    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
-                        names_to = "source", 
-                        values_to = "score") |> 
-    group_by(source, cluster) |> 
-    summarise(ttest = list(t.test(score ~ Condition))) |> 
-    mutate(ttest = map(ttest, broom::tidy)) |> 
-    unnest(cols = c(ttest))
-```
-
-
-
-
-
-
-
-
 
 
