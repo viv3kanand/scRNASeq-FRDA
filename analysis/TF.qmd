@@ -97,7 +97,6 @@ acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_WB@assays$RNA$data),
 #| echo: true
 #| eval: true
 
-
 seu_WB[['tfsulm']] <- acts_TF |> 
   tidyr::pivot_wider(id_cols = 'source', 
                      names_from = 'condition',
@@ -110,6 +109,62 @@ DefaultAssay(seu_WB) <- "tfsulm"
 seu_WB <- Seurat::ScaleData(seu_WB)
 seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
 ```
+
+### Extract ulm and update seurat object
+
+```{r}
+#| label: create seurat obj
+#| echo: true
+#| eval: true
+
+p1 <- Seurat::DimPlot(seurat_obj, 
+                      reduction = "umap.harmony", 
+                      label = TRUE, 
+                      pt.size = 0.5) + 
+      Seurat::NoLegend() + 
+      ggplot2::ggtitle('Cell types')
+
+
+colors <- rev(RColorBrewer::brewer.pal(n = 11, name = "RdBu")[c(2, 10)])
+
+p2 <- Seurat::FeaturePlot(seurat_obj, features = c("PAX5"), reduction = "umap.harmony") + 
+      ggplot2::scale_colour_gradient2(low = colors[1], mid = 'white', high = colors[2]) +
+      ggplot2::ggtitle('PAX5 activity')
+
+
+DefaultAssay(object = seurat_obj) <- "RNA"
+p3 <- Seurat::FeaturePlot(seurat_obj, 
+                          features = c("PAX5"), reduction = "umap.harmony") + 
+      ggplot2::ggtitle('PAX5 expression')
+
+Seurat::DefaultAssay(seurat_obj) <- "tfsulm"
+
+p <- p1 | p2 | p3
+p
+
+
+
+t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = seu_WB$cell_type,
+                condition = seu_WB$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -condition), 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  dplyr::group_by(cluster, condition, source) |> 
+  dplyr::summarise(mean = mean(score)) |>
+  tidyr::pivot_wider(id_cols = c(cluster, source),
+                     names_from = condition,
+                     values_from = mean) |> 
+  write_csv("data/temp/TF_enrichment_WB.csv")
+```
+
+
+
+
+
+
+
 
 
 
