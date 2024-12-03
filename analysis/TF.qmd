@@ -118,18 +118,28 @@ seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
 #| eval: true
 
 t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
-  as.data.frame() |> 
+  as.data.frame() %>%
   dplyr::mutate(cluster = seu_WB$cell_type,
-                condition = seu_WB$Condition) |> 
-  tidyr::pivot_longer(cols = c(-cluster, -condition), 
+                Condition = seu_WB@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                       names_to = "source", 
                       values_to = "score") |> 
-  dplyr::group_by(cluster, condition, source) |> 
-  dplyr::summarise(mean = mean(score)) |>
-  tidyr::pivot_wider(id_cols = c(cluster, source),
-                     names_from = condition,
-                     values_from = mean) |> 
-  write_csv("data/temp/TF_enrichment_WB.csv")
+  mutate(Condition = factor(Condition, levels = c("Patient", "Control"))) |> 
+  group_by(source, cluster) |> 
+  summarise(ttest = list(t.test(score ~ Condition))) |> 
+  mutate(ttest = map(ttest, broom::tidy)) |> 
+  unnest(cols = c(ttest)) -> TF_list_WB
 ```
+
+### Write differential TF enrichment to file
+
+```{r}
+write_csv(TF_list_WB, "../data/temp/TF_enrichment_WB.csv")
+```
+
+
+
+
+
 
 
