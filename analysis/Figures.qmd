@@ -13,10 +13,8 @@ author: viv3kanand
 #| eval: false
 options(renv.config.pak.enabled = TRUE)
 
-renv::install("scCustomize")
-renv::install("MetBrewer")
 renv::install("ggpointdensity")
-renv::install("Bioc::dittoSeq")
+renv::install("paletteer")
 
 ```
 
@@ -33,10 +31,8 @@ renv::install("Bioc::dittoSeq")
 require(Seurat)
 require(DropletUtils)
 require(tidyverse)
-require(MetBrewer)
 require(ggpointdensity)
 # require(scico)
-require(scCustomize)
 
 ```
 
@@ -88,7 +84,7 @@ source("../scripts/helper_scripts.R")
 
 ggplot(seurat_list$C2_Control@meta.data, aes(nCount_RNA, nFeature_RNA)) +
     geom_bin2d(bins = 50) +
-    MetBrewer::scale_fill_met_c(palette = "Hiroshige", direction = -1) +
+    scico:: scale_fill_scico(palette = "davos", direction = -1) +
     scale_x_log10(guide = "axis_logticks") + scale_y_log10(guide = "axis_logticks") +
     labs(x = "Total UMI counts", y = "Number of genes detected")
 
@@ -154,6 +150,9 @@ p1 + p2 + p3 + p4
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
 
 ```{r}
+# plot settings
+umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20")
+
 # Whole blood
 
 DimPlot(seu_WB, 
@@ -162,13 +161,36 @@ DimPlot(seu_WB,
         pt.size = 0.5, 
         label = TRUE, 
         label.size = 5,
-        cols = paletteer::paletteer_d("ggthemes::Tableau_20")) & 
+        cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
   NoLegend() &
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
+
+# PBMC
+
+P3A <- DimPlot(seu_PBMC, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 0.5,
+               label = TRUE, 
+               label.size = 5,
+               raster = FALSE,
+               cols = umap_col) & 
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  NoLegend() &
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+
+P3B
+
+
+
+
 
 ```
 
