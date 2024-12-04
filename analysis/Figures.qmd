@@ -8,11 +8,15 @@ author: viv3kanand
 ## Install packages
 
 ```{r}
+#| label: install
+#| echo: true
+#| eval: false
 options(renv.config.pak.enabled = TRUE)
 
 renv::install("scCustomize")
 renv::install("MetBrewer")
 renv::install("ggpointdensity")
+renv::install("Bioc::dittoSeq")
 
 ```
 
@@ -152,6 +156,14 @@ p1 + p2 + p3 + p4
 ```{r}
 # Whole blood
 
+DimPlot(seu_WB, 
+        reduction = "umap.harmony", 
+        group.by = c("cell_type"), 
+        pt.size = 0.5, 
+        label = TRUE, 
+        label.size = 5,
+        cols = paletteer::paletteer_d("ggthemes::Tableau_20")) & 
+    NoLegend()
 
 ```
 
