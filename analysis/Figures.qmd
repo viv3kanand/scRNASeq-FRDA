@@ -36,12 +36,15 @@ require(scCustomize)
 
 ```
 
+### Load data
+
 ```{r}
+#| label: load data
 #| echo: false
 #| eval: true
 
-seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
-
+seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 ```
 
 ## Load data
@@ -51,7 +54,8 @@ seurat_obj <- read_rds("../data/2024-10-14_seurat_WB.rds")
 #| echo: true
 #| eval: false
 
-seurat_obj <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+seu_WB <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+seu_PBMC <- read_rds(paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
 
 ```
 
@@ -147,8 +151,6 @@ p1 + p2 + p3 + p4
 
 ```{r}
 # Whole blood
-# Fig 3A
-
 
 
 ```
