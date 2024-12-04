@@ -125,8 +125,15 @@ p4 <- FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_R
 p1 + p2 + p3 + p4
 ```
 
+<!-- Todo list -->
 
-
+<!-- Panel 1: Bulk RNAseq: PCA plot, Volcano plot, GO/KEGG plot, Heatmap of immune system/neutrophil related genes -->
+<!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
+<!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
+<!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, , TF analysis -->
+<!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
+<!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
+<!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
 
 
 
