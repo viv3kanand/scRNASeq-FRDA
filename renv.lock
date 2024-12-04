@@ -606,18 +606,6 @@
       ],
       "Hash": "fecd026026c4d45e3b57eee97bbbba92"
     },
-    "GlobalOptions": {
-      "Package": "GlobalOptions",
-      "Version": "0.1.2",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "methods",
-        "utils"
-      ],
-      "Hash": "c3f7b221e60c28f5f3533d74c6fef024"
-    },
     "HDF5Array": {
       "Package": "HDF5Array",
       "Version": "1.32.1",
@@ -734,29 +722,6 @@
         "methods"
       ],
       "Hash": "152dbbcde6a9a7c7f3beef79b68cd76a"
-    },
-    "MetBrewer": {
-      "Package": "MetBrewer",
-      "Version": "0.3.0",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "MetBrewer",
-      "RemoteUsername": "BlakeRMills",
-      "RemotePkgRef": "BlakeRMills/MetBrewer",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "8f06216764633854ba668bb52fc8db053675276e",
-      "Requirements": [
-        "cowplot",
-        "ggplot2",
-        "ggstream",
-        "glue",
-        "graphics",
-        "lifecycle",
-        "rlang",
-        "stats"
-      ],
-      "Hash": "113041cccbe354f9bef4c866cdfd8494"
     },
     "ModelMetrics": {
       "Package": "ModelMetrics",
@@ -1808,25 +1773,6 @@
       ],
       "Hash": "0e14e01ce07e7c88fd25de6d4260d26b"
     },
-    "circlize": {
-      "Package": "circlize",
-      "Version": "0.4.16",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "GlobalOptions",
-        "R",
-        "colorspace",
-        "grDevices",
-        "graphics",
-        "grid",
-        "methods",
-        "shape",
-        "stats",
-        "utils"
-      ],
-      "Hash": "bf366c80e2b55a5383b4af8fa2a10b74"
-    },
     "class": {
       "Package": "class",
       "Version": "7.3-22",
@@ -2585,26 +2531,6 @@
       ],
       "Hash": "23853afb1c8abbb279abe2f043ea8198"
     },
-    "ggprism": {
-      "Package": "ggprism",
-      "Version": "1.0.5",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "digest",
-        "ggplot2",
-        "glue",
-        "grid",
-        "gtable",
-        "rlang",
-        "scales",
-        "stats",
-        "tibble",
-        "utils"
-      ],
-      "Hash": "6b1020c155c1048c18f39df11eb464e8"
-    },
     "ggrastr": {
       "Package": "ggrastr",
       "Version": "1.0.2",
@@ -2650,23 +2576,6 @@
         "withr"
       ],
       "Hash": "66488692cb8621bc78df1b9b819497a6"
-    },
-    "ggstream": {
-      "Package": "ggstream",
-      "Version": "0.1.0",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "dplyr",
-        "forcats",
-        "ggplot2",
-        "magrittr",
-        "purrr",
-        "stats",
-        "tidyr"
-      ],
-      "Hash": "4512013654d28dbf39dc4a8f5b9bdde2"
     },
     "glmGamPoi": {
       "Package": "glmGamPoi",
@@ -3111,28 +3020,6 @@
         "utils"
       ],
       "Hash": "8954069286b4b2b0d023d1b288dce978"
-    },
-    "janitor": {
-      "Package": "janitor",
-      "Version": "2.2.0",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "dplyr",
-        "hms",
-        "lifecycle",
-        "lubridate",
-        "magrittr",
-        "purrr",
-        "rlang",
-        "snakecase",
-        "stringi",
-        "stringr",
-        "tidyr",
-        "tidyselect"
-      ],
-      "Hash": "5baae149f1082f466df9d1442ba7aa65"
     },
     "jquerylib": {
       "Package": "jquerylib",
@@ -4334,49 +4221,6 @@
       ],
       "Hash": "d53dbfddf695303ea4ad66f86e99b95d"
     },
-    "scCustomize": {
-      "Package": "scCustomize",
-      "Version": "2.1.2",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "Matrix",
-        "R",
-        "Seurat",
-        "SeuratObject",
-        "circlize",
-        "cli",
-        "cowplot",
-        "data.table",
-        "dplyr",
-        "forcats",
-        "ggbeeswarm",
-        "ggplot2",
-        "ggprism",
-        "ggrastr",
-        "ggrepel",
-        "glue",
-        "grDevices",
-        "grid",
-        "janitor",
-        "lifecycle",
-        "magrittr",
-        "methods",
-        "paletteer",
-        "patchwork",
-        "pbapply",
-        "purrr",
-        "rlang",
-        "scales",
-        "scattermore",
-        "stats",
-        "stringi",
-        "stringr",
-        "tibble",
-        "tidyr"
-      ],
-      "Hash": "69256f9879395d03722affee9ff63aaa"
-    },
     "scales": {
       "Package": "scales",
       "Version": "1.3.0",
@@ -4445,6 +4289,24 @@
         "scales"
       ],
       "Hash": "d316e4abb854dd1677f7bd3ad08bc4e8"
+    },
+    "scico": {
+      "Package": "scico",
+      "Version": "1.5.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "scico",
+      "RemoteUsername": "thomasp85",
+      "RemotePkgRef": "thomasp85/scico",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "e94d08c334c8de7ba5dd0c405baeb578a5d2651c",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "scales"
+      ],
+      "Hash": "d6808a21cf061b0d85c735e881f291e8"
     },
     "sctransform": {
       "Package": "sctransform",
@@ -4635,18 +4497,6 @@
         "stats"
       ],
       "Hash": "140182ee5aecc5f1e2973986b9753077"
-    },
-    "snakecase": {
-      "Package": "snakecase",
-      "Version": "0.11.1",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Requirements": [
-        "R",
-        "stringi",
-        "stringr"
-      ],
-      "Hash": "58767e44739b76965332e8a4fe3f91f1"
     },
     "snow": {
       "Package": "snow",
