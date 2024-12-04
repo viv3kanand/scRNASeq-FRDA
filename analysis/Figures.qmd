@@ -5,6 +5,18 @@ editor: source
 author: viv3kanand
 ---
 
+## Install packages
+
+```{r}
+options(renv.config.pak.enabled = TRUE)
+
+renv::install("scCustomize")
+renv::install("MetBrewer")
+renv::install("ggpointdensity")
+
+```
+
+
 ## Load libraries
 
 ```{r}
@@ -19,7 +31,9 @@ require(DropletUtils)
 require(tidyverse)
 require(MetBrewer)
 require(ggpointdensity)
-require(scico)
+# require(scico)
+require(scCustomize)
+
 ```
 
 ```{r}
@@ -130,6 +144,16 @@ p1 + p2 + p3 + p4
 <!-- Panel 1: Bulk RNAseq: PCA plot, Volcano plot, GO/KEGG plot, Heatmap of immune system/neutrophil related genes -->
 <!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
+
+```{r}
+# Whole blood
+# Fig 3A
+
+
+
+```
+
+
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, , TF analysis -->
 <!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
 <!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
