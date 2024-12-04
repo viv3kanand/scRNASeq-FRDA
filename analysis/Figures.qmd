@@ -163,7 +163,12 @@ DimPlot(seu_WB,
         label = TRUE, 
         label.size = 5,
         cols = paletteer::paletteer_d("ggthemes::Tableau_20")) & 
-    NoLegend()
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  NoLegend() &
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
 
 ```
 
