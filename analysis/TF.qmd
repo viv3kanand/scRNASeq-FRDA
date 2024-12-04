@@ -138,7 +138,72 @@ write_csv(TF_list_WB, "../data/temp/TF_enrichment_WB.csv")
 ```
 
 
+## Transcription Factor Enrichment (PBMC)
 
+### Run ulm
+
+```{r}
+#| label: run ulm pbmc
+#| echo: true
+#| eval: false
+
+acts_TF <- decoupleR::run_ulm(mat = as.matrix(seu_PBMC@assays$RNA$data), 
+                              net = net_TF, 
+                              .source = 'source',
+                              .target = 'target',
+                              .mor='mor', 
+                              minsize = 5)
+
+```
+
+### Extract ulm and update seurat object
+
+```{r}
+#| label: create seurat obj pbmc
+#| echo: true
+#| eval: false
+
+seu_PBMC[['tfsulm']] <- acts_TF |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
+DefaultAssay(seu_PBMC) <- "tfsulm"
+
+seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
+
+```
+
+### Calculate differential enrichment of TFs
+
+```{r}
+#| label: create seurat obj pbmc
+#| echo: true
+#| eval: true
+
+t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
+  as.data.frame() %>%
+  dplyr::mutate(cluster = seu_PBMC$cell_type,
+                Condition = seu_PBMC@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  mutate(Condition = factor(Condition, levels = c("FRDA", "Control"))) |> 
+  group_by(source, cluster) |> 
+  summarise(ttest = list(t.test(score ~ Condition))) |> 
+  mutate(ttest = map(ttest, broom::tidy)) |> 
+  unnest(cols = c(ttest)) -> TF_list_PBMC
+
+```
+
+### Write differential TF enrichment to file
+
+```{r}
+write_csv(TF_list_PBMC, "../data/temp/TF_enrichment_PBMC.csv")
+```
 
 
 
