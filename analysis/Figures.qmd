@@ -150,6 +150,13 @@ p1 + p2 + p3 + p4
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
 
 ```{r}
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
+
+
 # plot settings
 umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20")
 
@@ -192,7 +199,8 @@ P3A <- DimPlot(seu_PBMC,
         axis.ticks.y = element_blank())
 
 # Figure 3B - Marker genes - Dot plot
-markers_PBMC <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
+
+markers_PBMC <- c("CD34", "TNFRSF17", "LEF1", "CLEC4C", "NRP1", "KLRB1", "PTGDS", "FCER1A", "CLEC10A", "TNFRSF13B", "TRDC", "FCGR3A", "MS4A7", "PPBP", "CD8A", "CD79A", "MS4A1", "CCR7", "CCR4", "NKG7", "GNLY", "NCAM1", "CD14", "LYZ")
 
 P3B <- DotPlot(seu_PBMC, features = markers_PBMC) + RotatedAxis()
 
