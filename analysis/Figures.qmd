@@ -153,15 +153,15 @@ p1 + p2 + p3 + p4
 # plot settings
 umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20")
 
-# Whole blood
+# Whole blood (Supplementary)
 
-DimPlot(seu_WB, 
-        reduction = "umap.harmony", 
-        group.by = c("cell_type"), 
-        pt.size = 0.5, 
-        label = TRUE, 
-        label.size = 5,
-        cols = umap_col) & 
+S1A <- DimPlot(seu_WB, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 0.5, 
+               label = TRUE, 
+               label.size = 5,
+               cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
   NoLegend() &
   theme(axis.text.x = element_blank(),
@@ -169,7 +169,12 @@ DimPlot(seu_WB,
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
 
-# PBMC
+
+markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
+
+S1B <- DotPlot(seu_PBMC, features = markers_WB) + RotatedAxis()
+
+# Figure 3A - UMAP - PBMC
 
 P3A <- DimPlot(seu_PBMC, 
                reduction = "umap.harmony", 
@@ -186,8 +191,12 @@ P3A <- DimPlot(seu_PBMC,
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank())
 
-P3B
+# Figure 3B - Marker genes - Dot plot
+markers_PBMC <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
+P3B <- DotPlot(seu_PBMC, features = markers_PBMC) + RotatedAxis()
+
+# Figure 3C - DEG-upset plot (all cell types)
 
 
 
@@ -196,6 +205,9 @@ P3B
 
 
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, , TF analysis -->
+
+
+
 <!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
 <!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
 <!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
