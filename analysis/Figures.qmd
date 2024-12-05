@@ -256,7 +256,23 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-# Figure 3C - DEG-upset plot (all cell types)
+# Figure 3C - Cell proportion
+
+scale_this <- function(x){
+  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+}
+
+P3C <- seu_PBMC@meta.data |>
+  group_by(cell_type, Condition, orig.ident) |>
+  summarise(count = n(), .groups = "keep") |> 
+  group_by(orig.ident) |> 
+  mutate(scaled = scale_this(count)) |> 
+  ggplot(aes(Condition, scaled)) +
+  geom_boxplot() + facet_wrap(~cell_type, scales = "free") +
+  stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+
+# Figure 4C - DEG-upset plot (all cell types)
 
 
 
