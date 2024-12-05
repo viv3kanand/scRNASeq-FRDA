@@ -45,6 +45,12 @@ require(ggpointdensity)
 
 seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
+
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
 ```
 
 ## Load data
@@ -56,6 +62,12 @@ seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 
 seu_WB <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
 seu_PBMC <- read_rds(paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
+
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
 
 ```
 
@@ -258,10 +270,6 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
 
 # Figure 3C - Cell proportion
 
-scale_this <- function(x){
-  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
-}
-
 P3C <- seu_PBMC@meta.data |>
   group_by(cell_type, Condition, orig.ident) |>
   summarise(count = n(), .groups = "keep") |> 
@@ -270,7 +278,6 @@ P3C <- seu_PBMC@meta.data |>
   ggplot(aes(Condition, scaled)) +
   geom_boxplot() + facet_wrap(~cell_type, scales = "free") +
   stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
-
 
 # Figure 4C - DEG-upset plot (all cell types)
 
