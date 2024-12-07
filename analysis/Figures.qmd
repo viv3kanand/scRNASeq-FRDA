@@ -106,6 +106,8 @@ custom_theme <- function(){
     theme(text = element_text(family = font,
                               size = text_size),
           line = element_line(linewidth = line_size),
+          legend.title = element_text(size = rel(1.5)),
+          
           axis.title = element_text(size = rel(1.5)),
           axis.text = element_text(size = rel(1.15)),
           plot.title = element_text(size = rel(1.5),
@@ -113,7 +115,7 @@ custom_theme <- function(){
           panel.grid = element_blank(),
           plot.background = element_rect(fill = "white"),
           legend.position = "right",
-          legend.text=element_text(size=text_size))
+          legend.text=element_text(size = text_size))
 }
 
 
@@ -319,11 +321,14 @@ seu_PBMC@meta.data |>
 seu_PBMC@meta.data |>
     count(cell_type, Condition, orig.ident) |> 
     group_by(cell_type, Condition) |>
-    mutate(prop = count / sum(count)) |> 
+    mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
     geom_col(position = position_dodge()) +
-    labs(y = "% Cells") +
-    theme_minimal()
+    scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
+    labs(x = "Cell type", y = "Relative abundance (%)") +
+    custom_theme() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          legend.text=element_text(size=rel(1.15)))
 ```
 
 
