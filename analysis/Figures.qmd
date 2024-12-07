@@ -314,6 +314,19 @@ seu_PBMC@meta.data |>
     mutate(prop = n / sum(n)) |>
     ggplot(aes(fill = Condition, y = prop, x = cell_type)) + 
     geom_bar(position=position_dodge(), stat="identity")
+
+
+seu_PBMC@meta.data |> 
+    group_by(cell_type, Condition, orig.ident) |>
+    summarise(count = n(), .groups = "keep") |> 
+    group_by(cell_type, Condition) |> 
+    mutate(prop = count / sum(count)) |> 
+    ggplot(aes(x = cell_type, y = prop, fill = Condition)) +
+    geom_col(position = position_dodge()) +
+    geom_text(aes(label = round(100 * prop)),
+              position = position_dodge(0.9),
+              vjust = -.2) +
+    labs(y = "% Cells")
 ```
 
 
