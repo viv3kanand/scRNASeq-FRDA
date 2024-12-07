@@ -319,11 +319,13 @@ seu_PBMC@meta.data |>
 
 
 seu_PBMC@meta.data |>
-    count(cell_type, Condition, orig.ident) |> 
-    group_by(cell_type, Condition) |>
+    count(cell_type, Condition) |> 
+    group_by(cell_type) |>
     mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
     geom_col(position = position_dodge()) +
+    geom_text(aes(label = round(100 * prop)),
+              position = position_dodge(.9), vjust = -.2) +
     scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
     labs(x = "Cell type", y = "Relative abundance (%)") +
     custom_theme() +
