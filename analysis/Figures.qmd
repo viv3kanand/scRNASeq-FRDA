@@ -276,14 +276,44 @@ P3C <- seu_PBMC@meta.data |>
   group_by(orig.ident) |> 
   mutate(scaled = scale_this(count)) |> 
   ggplot(aes(Condition, scaled)) +
-  geom_boxplot() + facet_wrap(~cell_type, scales = "free") +
+  geom_boxplot() + 
+  facet_wrap(~cell_type, scales = "free") +
   stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+df_err <- seu_PBMC@meta.data |>
+  group_by(cell_type, Condition, orig.ident) |>
+  summarise(count = n(), .groups = "keep") |> 
+  group_by(cell_type, Condition) |> 
+  summarise(mean = mean(count),
+            se = sd(count)/sqrt(n()))
+
+
 
 # Figure 4C - DEG-upset plot (all cell types)
 
 
+seu_PBMC@meta.data |> 
+    group_by(cell_type, Condition, orig.ident) |>
+    summarise(count = n(), .groups = "keep") |> 
+    ggplot(aes(fill = Condition, y = count, x = cell_type)) + 
+    geom_bar(position="dodge", stat="identity")
 
 
+
+seu_PBMC@meta.data |> 
+    count(cell_type, Condition, orig.ident) |> 
+    group_by(cell_type, Condition) |>
+    mutate(prop = n / sum(n)) |> 
+    ggplot(aes(x = cell_type, y = prop, fill = Condition)) +
+    geom_bar(stat="identity", color="black", 
+             position=position_dodge())
+
+seu_PBMC@meta.data |> 
+    count(cell_type, Condition, orig.ident) |> 
+    group_by(cell_type, Condition) |>
+    mutate(prop = n / sum(n)) |>
+    ggplot(aes(fill = Condition, y = prop, x = cell_type)) + 
+    geom_bar(position=position_dodge(), stat="identity")
 ```
 
 
