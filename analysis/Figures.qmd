@@ -317,8 +317,7 @@ seu_PBMC@meta.data |>
 
 
 seu_PBMC@meta.data |>
-    group_by(cell_type, Condition, orig.ident) |>
-    summarise(count = n(), .groups = "drop") |>
+    count(cell_type, Condition, orig.ident) |> 
     group_by(cell_type, Condition) |>
     mutate(prop = count / sum(count)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
