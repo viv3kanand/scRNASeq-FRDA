@@ -283,39 +283,10 @@ P3C <- seu_PBMC@meta.data |>
   stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 df_err <- seu_PBMC@meta.data |>
-  group_by(cell_type, Condition, orig.ident) |>
-  summarise(count = n(), .groups = "keep") |> 
-  group_by(cell_type, Condition) |> 
-  summarise(mean = mean(count),
-            se = sd(count)/sqrt(n()))
-
-
-
-# Figure 4C - DEG-upset plot (all cell types)
-
-
-seu_PBMC@meta.data |> 
-    group_by(cell_type, Condition, orig.ident) |>
-    summarise(count = n(), .groups = "keep") |> 
-    ggplot(aes(fill = Condition, y = count, x = cell_type)) + 
-    geom_bar(position="dodge", stat="identity")
-
-
-
-seu_PBMC@meta.data |> 
-    count(cell_type, Condition, orig.ident) |> 
-    group_by(cell_type, Condition) |>
-    mutate(prop = n / sum(n)) |> 
-    ggplot(aes(x = cell_type, y = prop, fill = Condition)) +
-    geom_bar(stat="identity", color="black", 
-             position=position_dodge())
-
-seu_PBMC@meta.data |> 
-    count(cell_type, Condition, orig.ident) |> 
-    group_by(cell_type, Condition) |>
-    mutate(prop = n / sum(n)) |>
-    ggplot(aes(fill = Condition, y = prop, x = cell_type)) + 
-    geom_bar(position=position_dodge(), stat="identity")
+    count(cell_type, Condition, orig.ident) |>
+    group_by(cell_type, Condition) |> 
+    summarise(mean = mean(n),
+              se = sd(n)/sqrt(n()))
 
 
 seu_PBMC@meta.data |>
@@ -331,6 +302,8 @@ seu_PBMC@meta.data |>
     custom_theme() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
           legend.text=element_text(size=rel(1.15)))
+
+# Figure 4C - DEG-upset plot (all cell types)
 ```
 
 
