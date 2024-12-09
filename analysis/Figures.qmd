@@ -118,6 +118,13 @@ custom_theme <- function(){
           legend.text=element_text(size = text_size))
 }
 
+empty_axis <- function(){
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+}
+
 
 umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20")
 
@@ -227,11 +234,8 @@ S1A <- DimPlot(seu_WB,
                cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
   NoLegend() &
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()) +
-  custom_theme()
+  custom_theme() +
+  empty_axis()
 
 
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
@@ -254,11 +258,9 @@ P3A <- DimPlot(seu_PBMC,
                cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
   NoLegend() &
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()) +
-  custom_theme()
+  custom_theme() +
+  empty_axis()
+  
 
 # Figure 3B - Marker genes - Dot plot
 
@@ -271,6 +273,7 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # Figure 3C - Cell proportion
+
 
 P3C <- seu_PBMC@meta.data |> 
   count(cell_type, Condition) |> 
@@ -298,7 +301,13 @@ P3C <- seu_PBMC@meta.data |>
 ```{r}
 # Imbalance score
 
+imb_score <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
+P4A <- ggplot(imb_score, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+  geom_point(size = .7) +
+  scale_color_viridis_c(option = "C") +
+  custom_theme() +
+  empty_axis()
 
 ```
 
