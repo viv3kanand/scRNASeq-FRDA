@@ -54,6 +54,8 @@ require(Seurat)
 
 seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
 ```
 
 
@@ -78,6 +80,9 @@ scores_FA <- condiments::imbalance_score(
   smooth = 40)
 
 df$scores <- scores_FA$scaled_scores
+
+
+
 
 cad_ncad <- subset(x = seurat_obj, subset = Condition2 %in% c("CAD", "NCAD"))
 
