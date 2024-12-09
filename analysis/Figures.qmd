@@ -274,6 +274,7 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
 
 # Figure 3C - Cell proportion
 
+dcats_df <- run_dcats(seu_PBMC)
 
 P3C <- seu_PBMC@meta.data |> 
   count(cell_type, Condition) |> 
