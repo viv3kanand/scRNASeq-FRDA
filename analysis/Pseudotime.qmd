@@ -52,7 +52,7 @@ require(Seurat)
 #| echo: true
 #| eval: true
 
-seurat_obj <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
 
 ```
 
@@ -66,8 +66,8 @@ We used condiments for calculating an imbalance score for each cell which repres
 ```{r}
 
 df <- bind_cols(
-  as.data.frame(seurat_obj@reductions$umap.harmony@cell.embeddings),
-  as.data.frame(seurat_obj@meta.data[,c(6,29)])
+  as.data.frame(seu_PBMC@reductions$umap.harmony@cell.embeddings),
+  as.data.frame(seu_PBMC@meta.data[,c(6,29)])
   ) |> 
   sample_frac(1)
 

@@ -272,9 +272,9 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
 
 # Figure 3C - Cell proportion
 
-P3C <- seu_PBMC@meta.data |>
+P3C <- seu_PBMC@meta.data |> 
   count(cell_type, Condition) |> 
-  group_by(cell_type) |>
+  group_by(cell_type) |> 
   mutate(prop = n / sum(n)) |> 
   ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
   geom_col(position = position_dodge()) +
@@ -286,7 +286,6 @@ P3C <- seu_PBMC@meta.data |>
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         legend.text = element_text(size=rel(1.15)))
 
-
 # Figure 4C - DEG-upset plot (all cell types)
 
 
@@ -297,6 +296,9 @@ P3C <- seu_PBMC@meta.data |>
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, , TF analysis -->
 
 ```{r}
+# Imbalance score
+
+
 
 ```
 
