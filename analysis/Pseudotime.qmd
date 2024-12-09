@@ -82,7 +82,7 @@ scores_FA <- condiments::imbalance_score(
 df$scores <- scores_FA$scaled_scores
 
 
-
+write_rds(df, file = paste0("RData/", Sys.Date(), "_imbalance_score.rds"))
 
 cad_ncad <- subset(x = seurat_obj, subset = Condition2 %in% c("CAD", "NCAD"))
 

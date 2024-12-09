@@ -9,3 +9,4 @@ data/
 .DS_Store
 .quarto
 omnipathr-log/
+/analysis/RData
