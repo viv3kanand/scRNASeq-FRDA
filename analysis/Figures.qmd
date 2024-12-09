@@ -278,12 +278,20 @@ dcats_df <- run_dcats(seu_PBMC)
 
 P3C <- seu_PBMC@meta.data |> 
   count(cell_type, Condition) |> 
+  mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
   group_by(cell_type) |> 
-  mutate(prop = n / sum(n)) |> 
+  mutate(prop = n / sum(n),
+         stars = case_when(
+           dcats < 0.001 ~ "***",
+           dcats < 0.01 ~ "**",
+           dcats < 0.05 ~ "*",
+           TRUE ~ "")) |> 
   ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
   geom_col(position = position_dodge()) +
-  geom_text(aes(label = round(100 * prop)),
+  geom_text(aes(cell_type, label = round(100 * prop)),
             position = position_dodge(.9), vjust = -.2) +
+  geom_text(aes(label = stars), 
+            position = position_dodge(.9), vjust = -1.5) +
   scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
   labs(x = "Cell type", y = "Relative abundance (%)") +
   custom_theme() +
@@ -302,13 +310,14 @@ P3C <- seu_PBMC@meta.data |>
 ```{r}
 # Imbalance score
 
-imb_score <- read_rds("RData/2024-12-09_imbalance_score.rds")
+imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
-P4A <- ggplot(imb_score, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+P4A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   geom_point(size = .7) +
   scale_color_viridis_c(option = "C") +
   custom_theme() +
   empty_axis()
+
 
 ```
 
