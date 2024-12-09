@@ -272,37 +272,33 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC) +
 
 # Figure 3C - Cell proportion
 
-seu_PBMC@meta.data |>
-    count(cell_type, Condition) |> 
-    group_by(cell_type) |>
-    mutate(prop = n / sum(n)) |> 
-    ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
-    geom_col(position = position_dodge()) +
-    geom_text(aes(label = round(100 * prop)),
-              position = position_dodge(.9), vjust = -.2) +
-    scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
-    labs(x = "Cell type", y = "Relative abundance (%)") +
-    custom_theme() +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-          legend.text=element_text(size=rel(1.15)))
-
-
 P3C <- seu_PBMC@meta.data |>
-  group_by(cell_type, Condition, orig.ident) |>
-  summarise(count = n(), .groups = "keep") |> 
-  group_by(orig.ident) |> 
-  mutate(scaled = scale_this(count)) |> 
-  ggplot(aes(Condition, scaled)) +
-  geom_boxplot() + 
-  facet_wrap(~cell_type, scales = "free") +
-  stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+  count(cell_type, Condition) |> 
+  group_by(cell_type) |>
+  mutate(prop = n / sum(n)) |> 
+  ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
+  geom_col(position = position_dodge()) +
+  geom_text(aes(label = round(100 * prop)),
+            position = position_dodge(.9), vjust = -.2) +
+  scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
+  labs(x = "Cell type", y = "Relative abundance (%)") +
+  custom_theme() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.text = element_text(size=rel(1.15)))
+
 
 # Figure 4C - DEG-upset plot (all cell types)
+
+
+
 ```
 
 
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, , TF analysis -->
 
+```{r}
+
+```
 
 
 <!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
