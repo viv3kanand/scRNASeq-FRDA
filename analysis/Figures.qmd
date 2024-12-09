@@ -314,9 +314,30 @@ imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
 P4A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   geom_point(size = .7) +
-  scale_color_viridis_c(option = "C") +
+  scale_color_viridis_c(option = "D") +
   custom_theme() +
   empty_axis()
+
+# Volcano plot of DEGs
+
+DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
+
+DGE_PBMC[["CD14 Mono"]] |> 
+  mutate(Expression = case_when(
+    avg_log2FC >= 2 & p_val_adj <= 0.01 ~ "Upregulated",
+    avg_log2FC <= -2 & p_val_adj <= 0.01 ~ "Downregulated",
+    TRUE ~ "Not significant")) |>
+  ggplot(aes(x = avg_log2FC, y = -log10(p_val_adj + 1e-5))) +
+  geom_point(aes(color = Expression)) +
+  ggrepel::geom_text_repel(data = head(DGE_PBMC[["CD14 Mono"]][order(DGE_PBMC[["CD14 Mono"]][["p_val_adj"]]),], 10),
+                           aes(label = gene)) +
+  scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+  scale_x_continuous(name = "Log2 fold change") +
+  scale_y_continuous(name = "-Log10 padj") +
+  geom_hline(yintercept = 2, linetype = 2, color = "black") +
+  geom_vline(xintercept = c(-2, 2), linetype = 2, color = "black") +
+  custom_theme()
+
 
 
 ```
