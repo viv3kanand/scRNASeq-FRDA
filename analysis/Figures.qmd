@@ -358,7 +358,13 @@ REACTOME_CD14 |>
   dplyr::mutate(ID = stringr::str_sub(ID, 10) |> 
                   gsub(pattern = "_", replacement = " ") |> 
                   stringr::str_to_sentence()) |> 
-  dplyr::mutate(ID = factor(ID, levels = ID))
+  dplyr::mutate(ID = factor(ID, levels = ID)) |> 
+  ggplot(aes(x = NES, y = ID, fill = Enrichment)) + 
+  geom_bar(stat = "identity", alpha = 0.8) + 
+  scale_x_continuous(position="top") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
+  custom_theme()
 
 # CS-score
 
