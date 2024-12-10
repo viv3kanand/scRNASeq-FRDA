@@ -350,15 +350,16 @@ GSEA_CD14 <- lapply(files, function(file){
 
 names(GSEA_CD14) <- c("REACTOME", "BP")
 
+pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY", "GOBP_POSITIVE_REGULATION_OF_LYMPHOCYTE_DIFFERENTIATION", "GOBP_NIK_NF_KAPPAB_SIGNALING", "GOBP_CELLULAR_RESPONSE_TO_MOLECULE_OF_BACTERIAL_ORIGIN", "GOBP_POSITIVE_REGULATION_OF_ADAPTIVE_IMMUNE_RESPONSE", "GOBP_INFLAMMATORY_RESPONSE", "GOBP_CYTOKINE_PRODUCTION", "GOBP_MAPK_CASCADE", "GOBP_CELLULAR_EXTRAVASATION", "GOBP_LEUKOCYTE_TETHERING_OR_ROLLING", "GOBP_REGULATION_OF_MONOCYTE_CHEMOTAXIS", "REACTOME_SIGNALING_BY_INTERLEUKINS", "REACTOME_INNATE_IMMUNE_SYSTEM", "REACTOME_INTERLEUKIN_4_AND_INTERLEUKIN_13_SIGNALING", "REACTOME_NEUTROPHIL_DEGRANULATION", "REACTOME_INTERLEUKIN_10_SIGNALING", "REACTOME_CYTOKINE_SIGNALING_IN_IMMUNE_SYSTEM")
+
 do.call("rbind", GSEA_CD14) |> 
   as_tibble() |>  
   dplyr::select(c(1,5,6,7,8,9)) |>
   dplyr::mutate(Enrichment = ifelse(NES > 0, "Positive", "Negative")) |> 
   dplyr::arrange(desc(NES)) |> 
-  dplyr::slice( unique(c(1:10, n() - 0:9)) ) |> 
+  dplyr::filter(ID %in% pathway_list) |> 
   dplyr::arrange(NES) |> 
-  dplyr::mutate(ID = stringr::str_sub(ID, 10) |> 
-                  gsub(pattern = "_", replacement = " ") |> 
+  dplyr::mutate(ID = gsub(ID, pattern = "_|GO", replacement = " ") |> 
                   stringr::str_to_sentence()) |> 
   dplyr::mutate(ID = factor(ID, levels = ID)) |> 
   ggplot(aes(x = NES, y = ID, fill = Enrichment)) + 
