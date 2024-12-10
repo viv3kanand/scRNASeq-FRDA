@@ -369,9 +369,6 @@ do.call("rbind", GSEA_CD14) |>
   scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
   custom_theme()
 
-# CS-score
-
-
 # Cell Chat
 
 
@@ -389,8 +386,25 @@ do.call("rbind", GSEA_CD14) |>
 
 
 <!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
+
 <!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; CS-score, Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
 
+```{r}
+# CS-score
+
+files <- c("RData/CSCORE/2024-11-29_coex_CAD_C.xlsx", "RData/CSCORE/2024-11-29_coex_CAD_NCAD.xlsx")
+
+CS_CD14 <- lapply(files, function(file){
+  sheets <- openxlsx::getSheetNames(file)
+  lapply(setNames(sheets,sheets), function(sheet){
+    openxlsx::read.xlsx(file, sheet)
+    })
+  })
+
+names(CS_CD14) <- c("CAD_C", "CAD_NCAD")
+
+
+```
 
 
 
