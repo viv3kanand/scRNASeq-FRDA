@@ -348,6 +348,18 @@ sheets <- openxlsx::getSheetNames(file)
 
 REACTOME_CD14 <- openxlsx::read.xlsx(file, "CD14 Mono")
 
+REACTOME_CD14 |> 
+  as_tibble() |>  
+  dplyr::select(c(1,5,6,7,8,9)) |> 
+  dplyr::mutate(Enrichment = ifelse(NES > 0, "Positive", "Negative")) |> 
+  dplyr::arrange(desc(NES)) |> 
+  dplyr::slice( unique(c(1:10, n() - 0:9)) ) |> 
+  dplyr::arrange(NES) |> 
+  dplyr::mutate(ID = stringr::str_sub(ID, 10) |> 
+                  gsub(pattern = "_", replacement = " ") |> 
+                  stringr::str_to_sentence()) |> 
+  dplyr::mutate(ID = factor(ID, levels = ID))
+
 # CS-score
 
 
