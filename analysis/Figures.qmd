@@ -305,7 +305,7 @@ P3C <- seu_PBMC@meta.data |>
 ```
 
 
-<!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), CS-score, Cell Chat, TF analysis -->
+<!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), Cell Chat, TF analysis -->
 
 ```{r}
 # Imbalance score
@@ -342,13 +342,15 @@ DGE_PBMC[["CD14 Mono"]] |>
 
 # pathway analysis (GSEA KEGG, BP)
 
-file <- "RData/gsea/2024-09-26_GSEA_REACTOME.xlsx"
+files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
 
-sheets <- openxlsx::getSheetNames(file)
+GSEA_CD14 <- lapply(files, function(file){
+  openxlsx::read.xlsx(file, "CD14 Mono")
+})
 
-REACTOME_CD14 <- openxlsx::read.xlsx(file, "CD14 Mono")
+names(GSEA_CD14) <- c("REACTOME", "BP")
 
-REACTOME_CD14 |> 
+GSEA_CD14$REACTOME |> 
   as_tibble() |>  
   dplyr::select(c(1,5,6,7,8,9)) |> 
   dplyr::mutate(Enrichment = ifelse(NES > 0, "Positive", "Negative")) |> 
@@ -361,13 +363,26 @@ REACTOME_CD14 |>
   dplyr::mutate(ID = factor(ID, levels = ID)) |> 
   ggplot(aes(x = NES, y = ID, fill = Enrichment)) + 
   geom_bar(stat = "identity", alpha = 0.8) + 
-  scale_x_continuous(position="top") +
+  scale_x_continuous(position="bottom") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
   custom_theme()
 
 # CS-score
 
+ df |> 
+    arrange(`-log(p-value)`) |> 
+    mutate(Ingenuity.Canonical.Pathways = factor(Ingenuity.Canonical.Pathways, 
+                                                 levels = Ingenuity.Canonical.Pathways)) |> 
+    ggplot(aes(x=`-log(p-value)`, y=Ingenuity.Canonical.Pathways, fill = `z-score`)) +
+    geom_bar(stat = "identity") +
+    ggtitle(name) +
+    xlab("-log10(p-value)") +
+    ylab("Canonical Pathways") +
+    coord_fixed() +
+    scale_fill_gradientn(colours = palette5, limits = c(-3, 3), na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+    custom_theme()
 
 # Cell Chat
 
@@ -386,7 +401,7 @@ REACTOME_CD14 |>
 
 
 <!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
-<!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
+<!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; CS-score, Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
 
 
 
