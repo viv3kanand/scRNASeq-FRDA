@@ -350,9 +350,9 @@ GSEA_CD14 <- lapply(files, function(file){
 
 names(GSEA_CD14) <- c("REACTOME", "BP")
 
-GSEA_CD14$REACTOME |> 
+do.call("rbind", GSEA_CD14) |> 
   as_tibble() |>  
-  dplyr::select(c(1,5,6,7,8,9)) |> 
+  dplyr::select(c(1,5,6,7,8,9)) |>
   dplyr::mutate(Enrichment = ifelse(NES > 0, "Positive", "Negative")) |> 
   dplyr::arrange(desc(NES)) |> 
   dplyr::slice( unique(c(1:10, n() - 0:9)) ) |> 
@@ -370,19 +370,6 @@ GSEA_CD14$REACTOME |>
 
 # CS-score
 
- df |> 
-    arrange(`-log(p-value)`) |> 
-    mutate(Ingenuity.Canonical.Pathways = factor(Ingenuity.Canonical.Pathways, 
-                                                 levels = Ingenuity.Canonical.Pathways)) |> 
-    ggplot(aes(x=`-log(p-value)`, y=Ingenuity.Canonical.Pathways, fill = `z-score`)) +
-    geom_bar(stat = "identity") +
-    ggtitle(name) +
-    xlab("-log10(p-value)") +
-    ylab("Canonical Pathways") +
-    coord_fixed() +
-    scale_fill_gradientn(colours = palette5, limits = c(-3, 3), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
-    custom_theme()
 
 # Cell Chat
 
