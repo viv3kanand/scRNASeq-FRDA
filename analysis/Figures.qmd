@@ -406,30 +406,31 @@ names(CS_CD14) <- c("CAD_C", "CAD_NCAD")
 CS_CD14$CAD_C$M8 |> 
     as_tibble() |>  
     dplyr::select(c(1:10)) |> 
-    arrange(-log(pvalue)) |> 
+    arrange(-log(p.adjust)) |> 
     mutate(ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
            ID = factor(ID, levels = ID)) |> 
-    ggplot(aes(x = -log(pvalue), y = ID, fill = zScore)) +
+    ggplot(aes(x = -log(p.adjust), y = ID, fill = zScore)) +
     geom_bar(stat = "identity") +
-    xlab("-log10(p-value)") +
+    xlab("-log10(p-adjust)") +
     ylab("Module 8 Enrichment") +
-    # coord_fixed() +
-    scale_fill_gradientn(colours = c("#FF8E7BFF", "#009DBDFF"), limits = c(-3, 3), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+    scale_fill_gradientn(rescaler = ~ scales::rescale_mid(.x, mid = 0), 
+                         colours = c('#FF8E7BFF', '#FFFFFF', '#009DBDFF')) +
+    # scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
     custom_theme()
 
 CS_CD14$CAD_C$M8 |> 
     as_tibble() |>  
     dplyr::select(c(1:10,13)) |> 
-    arrange(GeneRatio) |> 
-    mutate(ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-           GR = sapply(parse(text = GeneRatio), eval) |> as.factor()) |> 
+    mutate(GR = sapply(parse(text = GeneRatio), eval),
+           ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+           GR = factor(GR, levels = unique(GR))) |> 
+    arrange(GR) |>
     ggplot(aes(x = GR, y = ID, color = -log(p.adjust), size = Count)) +
-    geom_point()
+    geom_point() +
+  scale_fill_gradientn(colours = c("#FF8E7BFF", "#009DBDFF"), limits = c(-3, 3), na.value = "grey") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+  custom_theme()
 
-
-idx <- order(df[[orderBy]], decreasing = decreasing)
-df$Description <- factor(df$Description, levels=rev(unique(df$Description[idx])))
 ```
 
 
