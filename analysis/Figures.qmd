@@ -421,10 +421,9 @@ CS_CD14$CAD_C$M8 |>
 CS_CD14$CAD_C$M8 |> 
     as_tibble() |>  
     dplyr::select(c(1:10,13)) |> 
-    arrange(-log(p.adjust)) |> 
+    arrange(GeneRatio) |> 
     mutate(ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-           ID = factor(ID, levels = ID),
-           GR = sapply(parse(text = GeneRatio), eval)) |> 
+           GR = sapply(parse(text = GeneRatio), eval) |> as.factor()) |> 
     ggplot(aes(x = GR, y = ID, color = -log(p.adjust), size = Count)) +
     geom_point()
 
@@ -432,6 +431,13 @@ CS_CD14$CAD_C$M8 |>
 idx <- order(df[[orderBy]], decreasing = decreasing)
 df$Description <- factor(df$Description, levels=rev(unique(df$Description[idx])))
 ```
+
+
+
+
+
+
+
 
 
 
