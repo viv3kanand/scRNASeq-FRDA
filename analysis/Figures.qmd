@@ -403,7 +403,19 @@ CS_CD14 <- lapply(files, function(file){
 
 names(CS_CD14) <- c("CAD_C", "CAD_NCAD")
 
-
+CS_CD14$CAD_C$M8 |> 
+    arrange(`-log(p-value)`) |> 
+    mutate(Ingenuity.Canonical.Pathways = factor(Ingenuity.Canonical.Pathways, 
+                                                 levels = Ingenuity.Canonical.Pathways)) |> 
+    ggplot(aes(x=`-log(p-value)`, y=Ingenuity.Canonical.Pathways, fill = `z-score`)) +
+    geom_bar(stat = "identity") +
+    ggtitle(name) +
+    xlab("-log10(p-value)") +
+    ylab("Canonical Pathways") +
+    coord_fixed() +
+    scale_fill_gradientn(colours = palette5, limits = c(-3, 3), na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+    custom_theme()
 ```
 
 
