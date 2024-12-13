@@ -394,6 +394,16 @@ seu_PBMC <- Seurat::ScaleData(seu_PBMC)
 seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 
 
+df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_PBMC))|> 
+  tidyr::pivot_longer(cols = -cluster, 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  dplyr::group_by(cluster, source) |> 
+  dplyr::summarise(mean = mean(score))
+
+
 ```
 
 
