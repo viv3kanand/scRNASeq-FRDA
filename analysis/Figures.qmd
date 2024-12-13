@@ -431,12 +431,12 @@ seu_PBMC@meta.data |>
 
 t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
   as.data.frame() |> 
-  dplyr::mutate(cluster = Seurat::Idents(seu_PBMC),
-                Condition = seu_PBMC@meta.data$Condition) |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                Condition = seu_WB@meta.data$Condition) |> 
   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                       names_to = "source", 
                       values_to = "score") |> 
-  filter(source == "STAT1" & cluster == c()) |> 
+  filter(source == "STAT1" & cluster == c("Neutrophil", "B cells", "CD4 Naive", "CD8 Naive")) |> 
   ggplot(aes(Condition, score)) +
   # stat_dots(aes(fill = cluster), side = "left", justification = 1.05) +
   ggdist::stat_halfeye(aes(fill = cluster), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
