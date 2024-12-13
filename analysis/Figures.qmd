@@ -413,6 +413,10 @@ seu_PBMC@meta.data |>
 ```{r}
 
 
+# TF-STAT1 signaling
+
+acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
+
 
 ```
 
