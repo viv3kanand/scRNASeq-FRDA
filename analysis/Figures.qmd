@@ -379,6 +379,20 @@ do.call("rbind", GSEA_CD14) |>
 
 # TF analysis
 
+acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
+
+seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
+DefaultAssay(seu_PBMC) <- "tfsulm"
+
+seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
+
 
 ```
 
@@ -415,31 +429,28 @@ seu_PBMC@meta.data |>
 
 # TF-STAT1 signaling
 
-acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
-
-seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
-  tidyr::pivot_wider(id_cols = 'source', 
-                     names_from = 'condition',
-                     values_from = 'score') |> 
-  tibble::column_to_rownames('source') |> 
-  Seurat::CreateAssayObject()
-
-DefaultAssay(seu_PBMC) <- "tfsulm"
-
-seu_PBMC <- Seurat::ScaleData(seu_PBMC)
-seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
-
-
-
-
-
-t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
+t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
   as.data.frame() |> 
-  dplyr::mutate(cluster = Seurat::Idents(seurat_obj),
-                Condition = seurat_obj@meta.data$Condition) |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_PBMC),
+                Condition = seu_PBMC@meta.data$Condition) |> 
   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                       names_to = "source", 
-                      values_to = "score")
+                      values_to = "score") |> 
+  filter(source == "STAT1" & cluster == c()) |> 
+  ggplot(aes(Condition, score)) +
+  # stat_dots(aes(fill = cluster), side = "left", justification = 1.05) +
+  ggdist::stat_halfeye(aes(fill = cluster), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
+  geom_boxplot(aes(fill = cluster), width = 0.1, outlier.colour = "grey") + 
+  facet_grid(~cluster) +
+  theme_ggdist(base_size=18, base_family="Helvetica") +
+  theme(text = element_text(size=18),
+        axis.text.x = element_text(angle=0, hjust=.5, vjust = 0.5, color = "black"),
+        axis.text.y = element_text(color = "black"),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        legend.position="none") +
+  scale_fill_met_d(palette_name = "Egypt") +
+  ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 ```
 
 
