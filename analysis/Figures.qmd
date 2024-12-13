@@ -430,6 +430,16 @@ seu_PBMC <- Seurat::ScaleData(seu_PBMC)
 seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 
 
+
+
+
+t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = Seurat::Idents(seurat_obj),
+                Condition = seurat_obj@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                      names_to = "source", 
+                      values_to = "score")
 ```
 
 
