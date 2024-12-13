@@ -394,13 +394,16 @@ seu_PBMC <- Seurat::ScaleData(seu_PBMC)
 seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 
 
+# average enrichment of TF in Condition for each cell type
+
 df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
   as.data.frame() |> 
-  dplyr::mutate(cluster = Seurat::Idents(seu_PBMC))|> 
+  dplyr::mutate(cluster = seu_PBMC$cell_type,
+                condition = seu_PBMC$Condition)|> 
   tidyr::pivot_longer(cols = -cluster, 
                       names_to = "source", 
                       values_to = "score") |> 
-  dplyr::group_by(cluster, source) |> 
+  dplyr::group_by(cluster, source, condition) |> 
   dplyr::summarise(mean = mean(score))
 
 
