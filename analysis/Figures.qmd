@@ -417,6 +417,18 @@ seu_PBMC@meta.data |>
 
 acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
 
+seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
+DefaultAssay(seu_PBMC) <- "tfsulm"
+
+seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
+
 
 ```
 
