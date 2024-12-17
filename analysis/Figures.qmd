@@ -481,7 +481,6 @@ t(as.matrix(seu_PBMC@assays$RNA$data[il10_glist,])) |>
 pheatmap::pheatmap(mat = il10_mat,
                    color = colors.use,
                    border_color = "white",
-                   breaks = my_breaks,
                    cellwidth = 15,
                    cellheight = 15,
                    treeheight_row = 20,
