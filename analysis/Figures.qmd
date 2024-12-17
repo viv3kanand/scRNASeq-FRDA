@@ -443,18 +443,23 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 <!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
 
 ```{r}
-# Il-10 levels in FA vs HC
+# Il-10 levels in FA vs HC (Module score)
 
 seu_PBMC@meta.data |> 
     select(orig.ident, Condition, cell_type, 30) |>
     dplyr::filter(cell_type == "CD14 Mono") |> 
-    pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), names_to = "source", values_to = "score") |> 
+    pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
+                 names_to = "source", 
+                 values_to = "score") |> 
     ggplot(aes(Condition, score)) +
     geom_boxplot(width = 0.5, outlier.colour = "grey") + 
     custom_theme() +
     ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 # IL-10 pathway genes (Reactome) heatmap
+gene_sets <- msigdbr::msigdbr(species = "Homo sapiens", subcategory = "CP:REACTOME")
+gene_sets <- gene_sets[gene_sets$gene_symbol %in% rownames(seu_PBMC@assays$RNA@features@.Data),]
+il10_glist <- gene_sets[gene_sets$gs_name == "REACTOME_INTERLEUKIN_10_SIGNALING", ]$gene_symbol
 
 
 
@@ -468,6 +473,7 @@ seu_PBMC@meta.data |>
     summarise(prop = length(which(il10 > 0))/length(il10)) |> 
     ggplot(aes(Condition, prop)) +
     geom_boxplot() + 
+  custom_theme() +
     ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 
