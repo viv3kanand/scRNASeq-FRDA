@@ -390,7 +390,7 @@ seu_PBMC[['tfsulm']] <- acts_TF_PBMC |>
 
 DefaultAssay(seu_PBMC) <- "tfsulm"
 
-seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+seu_PBMC <- Seurat::ScaleData(seu_PBMC, scale.max = 1000000)
 seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 
 
@@ -400,7 +400,7 @@ df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |>
   as.data.frame() |> 
   dplyr::mutate(cluster = seu_PBMC$cell_type,
                 condition = seu_PBMC$Condition)|> 
-  tidyr::pivot_longer(cols = -cluster, 
+  tidyr::pivot_longer(cols = c(-cluster, -condition), 
                       names_to = "source", 
                       values_to = "score") |> 
   dplyr::group_by(cluster, source, condition) |> 
@@ -415,10 +415,10 @@ tfs <- df |>
 
 df |> 
   dplyr::filter(source %in% tfs & cluster == "CD14 Mono") |> 
-  tidyr::pivot_wider(id_cols = c('Condition'), 
+  tidyr::pivot_wider(id_cols = c('condition'), 
                      names_from = 'source',
                      values_from = 'mean') |>
-  tibble::column_to_rownames('Condition') |> 
+  tibble::column_to_rownames('condition') |> 
   as.matrix() -> top_acts_mat
 
 colors <- rev(RColorBrewer::brewer.pal(n = 11, name = "RdBu"))
@@ -435,6 +435,8 @@ pheatmap::pheatmap(mat = top_acts_mat,
                    cellheight = 15,
                    treeheight_row = 20,
                    treeheight_col = 20)
+
+apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 ```
 
 
