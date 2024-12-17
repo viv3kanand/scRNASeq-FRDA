@@ -406,12 +406,22 @@ df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |>
   dplyr::group_by(cluster, source, condition) |> 
   dplyr::summarise(mean = mean(score))
 
-df |> 
+tfs <- df |> 
   dplyr::group_by(source, cluster) |> 
   dplyr::summarise(std = stats::sd(mean)) |> 
   dplyr::arrange(-abs(std)) |> 
   head(25) |> 
   dplyr::pull(source)
+
+df |> 
+  dplyr::filter(source %in% tfs & cluster == "CD14 Mono") |> 
+  tidyr::pivot_wider(id_cols = c('Condition'), 
+                     names_from = 'source',
+                     values_from = 'mean') |>
+  tibble::column_to_rownames('Condition') |> 
+  as.matrix() -> top_acts_mat
+
+
 ```
 
 
