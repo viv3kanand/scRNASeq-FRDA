@@ -457,10 +457,26 @@ seu_PBMC@meta.data |>
     ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 # IL-10 pathway genes (Reactome) heatmap
+
 gene_sets <- msigdbr::msigdbr(species = "Homo sapiens", subcategory = "CP:REACTOME")
 gene_sets <- gene_sets[gene_sets$gene_symbol %in% rownames(seu_PBMC@assays$RNA@features@.Data),]
-il10_glist <- gene_sets[gene_sets$gs_name == "REACTOME_INTERLEUKIN_10_SIGNALING", ]$gene_symbol
+il10_glist <- gene_sets[gene_sets$gs_name == "REACTOME_INTERLEUKIN_10_SIGNALING", ]$gene_symbol |> unique()
 
+t(as.matrix(seu_PBMC@assays$RNA$data[il10_glist,])) |> 
+    as.data.frame() |> 
+    dplyr::mutate(cluster = seu_PBMC$cell_type,
+                  condition = seu_PBMC$Condition2)|> 
+    tidyr::pivot_longer(cols = c(-cluster, -condition), 
+                        names_to = "source", 
+                        values_to = "score") |> 
+    dplyr::group_by(cluster, source, condition) |> 
+    dplyr::summarise(mean = mean(score)) |> 
+    dplyr::filter(cluster == "CD14 Mono" & !is.na(condition)) |> 
+    tidyr::pivot_wider(id_cols = c('condition'), 
+                       names_from = 'source',
+                       values_from = 'mean') |>
+    tibble::column_to_rownames('condition') |>
+    as.matrix() -> il10_mat
 
 
 # IL-10 producing cells proportion
