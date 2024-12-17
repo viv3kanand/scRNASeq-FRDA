@@ -450,14 +450,8 @@ seu_PBMC@meta.data |>
     dplyr::filter(cell_type == "CD14 Mono") |> 
     pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), names_to = "source", values_to = "score") |> 
     ggplot(aes(Condition, score)) +
-    geom_boxplot(aes(fill = cell_type), width = 0.5, outlier.colour = "grey") + 
-    theme_bw(base_size=18, base_family="Helvetica") +
-    theme(text = element_text(size=18),
-          axis.text.x = element_text(angle=0, hjust=.5, vjust = 0.5, color = "black"),
-          axis.text.y = element_text(color = "black"),
-          plot.title = element_text(hjust = 0.5),
-          plot.subtitle = element_text(hjust = 0.5),
-          legend.position="none") +
+    geom_boxplot(width = 0.5, outlier.colour = "grey") + 
+    custom_theme() +
     ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 # IL-10 pathway genes (Reactome) heatmap
