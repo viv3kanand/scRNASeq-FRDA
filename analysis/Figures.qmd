@@ -421,7 +421,14 @@ df |>
   tibble::column_to_rownames('Condition') |> 
   as.matrix() -> top_acts_mat
 
-
+pheatmap::pheatmap(mat = top_acts_mat,
+                   color = colors.use,
+                   border_color = "white",
+                   breaks = my_breaks,
+                   cellwidth = 15,
+                   cellheight = 15,
+                   treeheight_row = 20,
+                   treeheight_col = 20)
 ```
 
 
