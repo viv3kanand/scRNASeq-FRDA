@@ -406,8 +406,7 @@ df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |>
   dplyr::group_by(cluster, source, condition) |> 
   dplyr::summarise(mean = mean(score))
 
-
-top_TF |> 
+df |> 
   dplyr::group_by(source, cluster) |> 
   dplyr::summarise(std = stats::sd(mean)) |> 
   dplyr::arrange(-abs(std)) |> 
@@ -472,6 +471,11 @@ t(as.matrix(seu_WB@assays$tfsulm@data)) |>
         legend.position="none") +
   scale_fill_met_d(palette_name = "Egypt") +
   ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+
+# PRR pathway score
+
+
 ```
 
 
