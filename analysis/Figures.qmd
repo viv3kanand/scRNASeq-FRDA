@@ -421,6 +421,12 @@ df |>
   tibble::column_to_rownames('Condition') |> 
   as.matrix() -> top_acts_mat
 
+colors <- rev(RColorBrewer::brewer.pal(n = 11, name = "RdBu"))
+colors.use <- grDevices::colorRampPalette(colors = colors)(100)
+
+my_breaks <- c(seq(-2, 0, length.out = ceiling(100 / 2) + 1),
+               seq(0.05, 2, length.out = floor(100 / 2)))
+
 pheatmap::pheatmap(mat = top_acts_mat,
                    color = colors.use,
                    border_color = "white",
