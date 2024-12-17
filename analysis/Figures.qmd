@@ -407,6 +407,12 @@ df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |>
   dplyr::summarise(mean = mean(score))
 
 
+top_TF |> 
+  dplyr::group_by(source, cluster) |> 
+  dplyr::summarise(std = stats::sd(mean)) |> 
+  dplyr::arrange(-abs(std)) |> 
+  head(25) |> 
+  dplyr::pull(source)
 ```
 
 
@@ -415,6 +421,8 @@ df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |>
 ```{r}
 # Il-10 levels in FA vs HC
 
+
+# IL-10 pathway genes (Reactome) heatmap
 
 
 
