@@ -465,7 +465,7 @@ il10_glist <- gene_sets[gene_sets$gs_name == "REACTOME_INTERLEUKIN_10_SIGNALING"
 t(as.matrix(seu_PBMC@assays$RNA$data[il10_glist,])) |> 
     as.data.frame() |> 
     dplyr::mutate(cluster = seu_PBMC$cell_type,
-                  condition = seu_PBMC$Condition2)|> 
+                  condition = seu_PBMC$Condition)|> 
     tidyr::pivot_longer(cols = c(-cluster, -condition), 
                         names_to = "source", 
                         values_to = "score") |> 
@@ -503,10 +503,15 @@ seu_PBMC@meta.data |>
 ```
 
 
-<!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
+<!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores, Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
 
 
 ```{r}
+# Metascape results
+
+
+# IFN pathway gene heatmap/scores
+
 
 
 # TF-STAT1 signaling
