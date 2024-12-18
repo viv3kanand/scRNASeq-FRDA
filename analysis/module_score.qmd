@@ -1,0 +1,51 @@
+---
+title: "Module Score"
+format: html
+editor: source
+author: viv3kanand
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+## Load libraries
+
+```{r}
+#| label: packages
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+require(Seurat)
+require(tidyverse)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
