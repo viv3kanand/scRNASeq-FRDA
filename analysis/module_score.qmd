@@ -20,7 +20,22 @@ require(tidyverse)
 
 ```
 
+### Load data
 
+```{r}
+#| label: load data
+#| echo: false
+#| eval: true
+
+seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
+
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
+```
 
 
 
