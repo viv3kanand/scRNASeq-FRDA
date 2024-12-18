@@ -69,6 +69,23 @@ Idents(seu_WB) <- "cell_type"
 DefaultAssay(seu_PBMC) <- "RNA"
 Idents(seu_PBMC) <- "cell_type"
 
+
+# TF analysis
+
+acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
+
+seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
+DefaultAssay(seu_PBMC) <- "tfsulm"
+
+seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
+
 ```
 
 ## Helper scripts
@@ -377,21 +394,7 @@ do.call("rbind", GSEA_CD14) |>
 # Cell Chat
 
 
-# TF analysis
 
-acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
-
-seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
-  tidyr::pivot_wider(id_cols = 'source', 
-                     names_from = 'condition',
-                     values_from = 'score') |> 
-  tibble::column_to_rownames('source') |> 
-  Seurat::CreateAssayObject()
-
-DefaultAssay(seu_PBMC) <- "tfsulm"
-
-seu_PBMC <- Seurat::ScaleData(seu_PBMC, scale.max = 1000000)
-seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 
 
 # average enrichment of TF in Condition for each cell type
