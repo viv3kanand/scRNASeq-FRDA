@@ -51,23 +51,7 @@ Idents(seu_WB) <- "cell_type"
 
 DefaultAssay(seu_PBMC) <- "RNA"
 Idents(seu_PBMC) <- "cell_type"
-```
 
-## Load data
-
-```{r}
-#| label: load data
-#| echo: true
-#| eval: false
-
-seu_WB <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
-seu_PBMC <- read_rds(paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
-
-DefaultAssay(seu_WB) <- "RNA"
-Idents(seu_WB) <- "cell_type"
-
-DefaultAssay(seu_PBMC) <- "RNA"
-Idents(seu_PBMC) <- "cell_type"
 
 
 # TF analysis
@@ -85,6 +69,23 @@ DefaultAssay(seu_PBMC) <- "tfsulm"
 
 seu_PBMC <- Seurat::ScaleData(seu_PBMC)
 seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
+```
+
+## Load data
+
+```{r}
+#| label: load data
+#| echo: true
+#| eval: false
+
+seu_WB <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+seu_PBMC <- read_rds(paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
+
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
 
 ```
 
