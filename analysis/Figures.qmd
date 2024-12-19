@@ -490,6 +490,8 @@ pheatmap::pheatmap(mat = il10_mat,
                    treeheight_row = 20,
                    treeheight_col = 20)
 
+DoHeatmap(subset(seu_PBMC, subset = cell_type == "CD14 Mono"), features = il10_glist, cells = 1:33000, group.by = "Condition")
+
 # IL-10 producing cells proportion
 
 seu_PBMC@meta.data |>
