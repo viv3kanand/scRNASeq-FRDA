@@ -44,13 +44,14 @@ require(ggpointdensity)
 #| eval: true
 
 seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
+
 seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 
 DefaultAssay(seu_WB) <- "RNA"
 Idents(seu_WB) <- "cell_type"
-
-DefaultAssay(seu_PBMC) <- "RNA"
-Idents(seu_PBMC) <- "cell_type"
 
 
 
@@ -462,7 +463,7 @@ seu_PBMC@meta.data |>
 
 # IL-10 pathway genes (Reactome) heatmap
 
-gene_sets <- msigdbr::msigdbr(species = "Homo sapiens", subcategory = "CP:REACTOME")
+gene_sets <- msigdbr::msigdbr(species = "Homo sapiens")
 gene_sets <- gene_sets[gene_sets$gene_symbol %in% rownames(seu_PBMC@assays$RNA@features@.Data),]
 il10_glist <- gene_sets[gene_sets$gs_name == "REACTOME_INTERLEUKIN_10_SIGNALING", ]$gene_symbol |> unique()
 
