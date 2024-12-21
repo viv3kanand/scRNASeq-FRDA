@@ -231,6 +231,33 @@ p1 + p2 + p3 + p4
 <!-- Todo list -->
 
 <!-- Panel 1: Bulk RNAseq: PCA plot, Volcano plot, GO/KEGG plot, Heatmap of immune system/neutrophil related genes -->
+
+```{r}
+# Volcano plot
+dge_bulk <- read_csv("../data/DEseq2-gene-batch-corrected-14Nov22.csv", col_names = TRUE)
+
+dge_bulk |> 
+  mutate(
+    Expression = case_when(
+      log2FoldChange >= 1 & padj <= 0.05 ~ "Upregulated",
+      log2FoldChange <= -1 & padj <= 0.05 ~ "Downregulated",
+      TRUE ~ "Not significant")) |>
+  ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
+  geom_point(aes(color = Expression)) +
+  ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 10),
+                           aes(label = Gene)) +
+  scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+  scale_x_continuous(name = "Log2 Fold Change") +
+  scale_y_continuous(name = "-Log10 padj") +
+  geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
+  geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
+  custom_theme()
+
+
+
+```
+
+
 <!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
 
