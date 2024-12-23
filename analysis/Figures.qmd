@@ -580,11 +580,14 @@ seu_WB@meta.data |>
 
 neu_glist <- gene_sets[gene_sets$gs_name == "REACTOME_NEUTROPHIL_DEGRANULATION", ]$gene_symbol |> unique()
 
-neu_dge <- openxlsx::read.xlsx("../data/2024-09-26_DGE_sc_res_WB_filtered.xlsx", "Neutrophil")
+seu_WB <- AddModuleScore(seu_WB, features = list(neu_glist), name = "NEUD")
 
-neu_glist <- neu_dge[neu_dge$gene %in% neu_glist,]$gene
-
-DoHeatmap(subset(seu_WB, idents = "Neutrophil"), features = neu_glist, cells = 1:5000, group.by = "Condition")
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, NEUD) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, NEUD)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 # TF-STAT1 signaling
 
