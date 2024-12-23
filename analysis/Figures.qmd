@@ -475,7 +475,7 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
 tf_trrust |> 
-  arrange(-log(qvalue)) |> 
+  arrange(desc(-log(qvalue))) |> 
   head(10) |> 
     mutate(TF = factor(TF, levels = TF)) |> 
     ggplot(aes(x = -log(qvalue), y = TF, fill = qvalue)) +
