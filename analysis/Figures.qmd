@@ -234,7 +234,7 @@ p1 + p2 + p3 + p4
 
 ```{r}
 # Volcano plot
-dge_bulk <- read_csv("../data/DEseq2-gene-batch-corrected-14Nov22.csv", col_names = TRUE)
+dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv", col_names = TRUE)
 
 dge_bulk |> 
   mutate(
@@ -253,6 +253,8 @@ dge_bulk |>
   geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
   custom_theme()
 
+
+count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv", )
 
 
 ```
@@ -566,7 +568,11 @@ seu_PBMC@meta.data |>
 # Neutrophil degranulation pathway genes heatmap/ pathway scores
 neu_glist <- gene_sets[gene_sets$gs_name == "REACTOME_NEUTROPHIL_DEGRANULATION", ]$gene_symbol |> unique()
 
-DoHeatmap(subset(seu_PBMC, subset = cell_type == "CD14 Mono"), features = neu_glist, cells = 1:30000, group.by = "Condition")
+neu_dge <- openxlsx::read.xlsx("../data/2024-09-26_DGE_sc_res_WB_filtered.xlsx", "Neutrophil")
+
+neu_glist <- neu_dge[neu_dge$gene %in% neu_glist,]$gene
+
+DoHeatmap(subset(seu_WB, idents = "Neutrophil"), features = neu_glist, cells = 1:5000, group.by = "Condition")
 
 # TF-STAT1 signaling
 
