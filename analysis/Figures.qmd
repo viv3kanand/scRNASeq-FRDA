@@ -474,7 +474,16 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 # TRRUST analysis
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
-
+tf_trrust |> 
+  arrange(-log(qvalue)) |> 
+  head(10) |> 
+    mutate(TF = factor(TF, levels = TF)) |> 
+    ggplot(aes(x = -log(qvalue), y = TF, fill = qvalue)) +
+    geom_bar(stat = "identity") +
+    xlab("-log10(p-adjust)") +
+    ylab("Top TF") +
+    scale_fill_gradientn(colours = c('#FF8E7BFF', '#009DBDFF')) +
+    custom_theme()
 
 
 ```
