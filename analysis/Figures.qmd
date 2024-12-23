@@ -569,6 +569,12 @@ seu_WB <- JoinLayers(seu_WB)
 
 seu_WB <- AddModuleScore(seu_WB, features = list(IFN), name = "IFN")
 
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, IFN1) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, IFN1)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 # Neutrophil degranulation pathway genes heatmap/ pathway scores
 
