@@ -387,17 +387,39 @@ DGE_PBMC[["CD14 Mono"]] |>
   geom_vline(xintercept = c(-2, 2), linetype = 2, color = "black") +
   custom_theme()
 
-subset.cd14 <- subset(seu_WB, idents = "CD14 Mono")
-Idents(subset.cd14) <- "Condition"
-avg.cd14.mono <- log1p(AverageExpression(subset.cd14, verbose = FALSE)$RNA) |> as.data.frame()
+cd14_PBMC <- subset(seu_PBMC, idents = "CD14 Mono")
+Idents(cd14_PBMC) <- "Condition"
+avg.cd14.mono <- log1p(AverageExpression(cd14_PBMC, verbose = FALSE)$RNA) |> as.data.frame()
 avg.cd14.mono$gene <- rownames(avg.cd14.mono)
 
 genes.to.label = c("FXN", "ISG15", "LY6E", "IFI6", "ISG20", "MX1", "IFIT2", "IFIT1", "CXCL10", "CCL8")
+genes.to.label <- head(DGE_PBMC[["CD14 Mono"]][order(DGE_PBMC[["CD14 Mono"]][["p_val_adj"]]),], 10) |> pull(gene)
 
-p <- ggplot(avg.cd14.mono, aes(Control, Patient)) + geom_point() + ggtitle("CD14 Mono")
+p <- ggplot(avg.cd14.mono, aes(Control, FRDA)) + geom_point() + ggtitle("CD14 Mono")
 
 LabelPoints(p, points = genes.to.label, repel = TRUE)
 
+DGE_PBMC$`CD14 Mono` |> 
+    mutate(
+        Expression = case_when(
+            avg_log2FC >= 1 & p_val_adj <= 0.01 ~ "Upregulated",
+            avg_log2FC <= -1 & p_val_adj <= 0.01 ~ "Downregulated",
+            TRUE ~ "Not significant")) |>
+    merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
+
+
+DGE_PBMC$`CD14 Mono` |> 
+    mutate(
+        Expression = case_when(
+            avg_log2FC >= 2 & p_val_adj <= 0.01 ~ "Upregulated",
+            avg_log2FC <= -2 & p_val_adj <= 0.01 ~ "Downregulated",
+            TRUE ~ "Not significant")) |>
+    merge(avg.cd14.mono, by.x = "gene", by.y = "gene") |>
+    ggplot(aes(Control, FRDA)) + 
+    geom_point(aes(color = Expression)) + 
+    ggtitle("CD14 Mono") + 
+    scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+    custom_theme()
 
 # pathway analysis (GSEA KEGG, BP)
 
