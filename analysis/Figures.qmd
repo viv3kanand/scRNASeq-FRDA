@@ -234,7 +234,7 @@ p1 + p2 + p3 + p4
 
 ```{r}
 # Volcano plot
-dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv", col_names = TRUE)
+dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
 
 dge_bulk |> 
   mutate(
@@ -254,7 +254,9 @@ dge_bulk |>
   custom_theme()
 
 
-count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv", )
+count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv")
+meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv")
+
 
 
 ```
@@ -454,8 +456,6 @@ do.call("rbind", GSEA_CD14) |>
 
 
 
-
-
 # average enrichment of TF in Condition for each cell type
 
 df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
@@ -513,7 +513,6 @@ tf_trrust |>
   ylab("Top 20 TF") +
   scale_fill_gradientn(colours = c('#FFFFFF', '#FF8E7BFF'), limits = c(0, 30), na.value = "grey") +
   custom_theme()
-
 
 ```
 

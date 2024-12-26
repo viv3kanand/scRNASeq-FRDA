@@ -1,0 +1,19 @@
+---
+title: "GSEA"
+format: html
+editor: source
+author: viv3kanand
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+### Bulk
+
+```{r}
+dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
+
+```
+
+```{r}
+
+```
+
