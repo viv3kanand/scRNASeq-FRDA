@@ -254,10 +254,24 @@ dge_bulk |>
   custom_theme()
 
 
-count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv")
-meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv")
+# GO/KEGG plot
+
+ego_bulk <- read_rds("RData/ego_bulk.rds")
+
+go_list <- c("cytokine-mediated signaling pathway", "response to lipopolysaccharide", "response to molecule of bacterial origin", "response to chemokine", "chemokine-mediated signaling pathway", "neutrophil migration", "cell chemotaxis", "myeloid leukocyte migration", "extracellular matrix organization", "neutrophil chemotaxis", "leukocyte mediated immunity", "cellular response to interleukin-1", "regulation of leukocyte activation", "neutrophil mediated cytotoxicity", "monocyte chemotaxis", "neutrophil mediated immunity", "regulation of interleukin-8 production", "type II interferon production", "regulation of neuroinflammatory response", "activation of immune response", "regulation of inflammatory response", "regulation of innate immune response", "regulation of nervous system development")
 
 
+ego_bulk@result |> 
+    filter(Description %in% go_list) |> 
+    as_tibble() |> 
+    dplyr::select(c(1:10,13)) |> 
+    mutate(GeneRatio = eval(parse(text = GeneRatio)),
+           order = GeneRatio, .by = Description) |> 
+    ggplot(aes(x = GeneRatio, y = reorder(Description, order), color = -log(p.adjust), size = Count)) +
+    geom_point() + 
+  scale_fill_gradientn(colours = c("#FF8E7BFF", "#009DBDFF"), na.value = "grey") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+  custom_theme()
 
 ```
 

@@ -34,6 +34,8 @@ ego <- enrichGO(dge_bulk_filt,
          pvalueCutoff = 0.05)
 
 openxlsx::write.xlsx(ego, paste0("RData/", Sys.Date(), "_enrichGO_bulk.xlsx"))
+
+write_rds(ego, "RData/ego_bulk.rds")
 ```
 
 

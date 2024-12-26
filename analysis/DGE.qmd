@@ -6,6 +6,11 @@ author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
+```{r}
+require(DESeq2)
+require(tidyverse)
+```
+
 
 ```{r}
 count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
