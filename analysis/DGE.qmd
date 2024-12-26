@@ -6,3 +6,19 @@ author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
+
+```{r}
+count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
+  dplyr::distinct(Gene, .keep_all = TRUE) |> 
+  tibble::column_to_rownames("Gene")
+
+meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |> 
+  tibble::column_to_rownames("SampleID")
+```
+
+
+
+```{r}
+
+```
+
