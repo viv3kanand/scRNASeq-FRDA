@@ -6,6 +6,15 @@ author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
+### Load lirbary
+```{r}
+require(msigdbr)
+require(clusterProfiler)
+require(tidyverse)
+
+```
+
+
 ### Bulk
 
 ```{r}
@@ -14,6 +23,20 @@ dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
 ```
 
 ```{r}
+sets <- c("GO:BP", "GO:CC", "GO:MF", "CP:REACTOME", "CP:KEGG")
+
+gene_sets <- lapply(setNames(sets, sets), function(x){
+  msigdbr(species = "Homo sapiens", subcategory = x)
+})
+```
+
+
+
+```{r}
+gene_sets <- lapply(gene_sets, function(sets){
+  sets[sets$gene_symbol %in% dge_bulk$Gene,]
+})
 
 ```
+
 
