@@ -74,5 +74,15 @@ gsea_bulk <- lapply(gene_sets, function(x) {
 write_rds(gsea_bulk, "RData/gsea_bulk.rds")
 ```
 
+```{r}
+lapply(gsea_bulk, function(df){
+  return(df@result)
+}) -> write_gsea
 
+names(write_gsea) <- c("GO_BP", "GO_CC", "GO_MF", "REACTOME", "KEGG")
+
+
+openxlsx::write.xlsx(write_gsea, paste0("RData/", Sys.Date(), "_gsea_bulk.xlsx"))
+
+```
 
