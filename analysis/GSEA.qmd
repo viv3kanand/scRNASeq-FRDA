@@ -40,3 +40,12 @@ gene_sets <- lapply(gene_sets, function(sets){
 ```
 
 
+```{r}
+filtered_df <- dge_bulk |> 
+  dplyr::arrange(dplyr::desc(abs(log2FoldChange))) |> 
+  dplyr::distinct(Gene, .keep_all = TRUE)
+```
+
+
+
+
