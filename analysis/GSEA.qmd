@@ -47,5 +47,32 @@ filtered_df <- dge_bulk |>
 ```
 
 
+```{r}
+gsea_bulk <- lapply(gene_sets, function(x) {
+  epsilon <- filtered_df[filtered_df$padj > 0,] |> 
+  na.omit() |> 
+  pull(padj) |> 
+  min() # Define a positive constant as the min value
+  lfc_vector <- -log10(pmax(filtered_df$padj, epsilon)) * sign(filtered_df$log2FoldChange)
+  names(lfc_vector) <- filtered_df$Gene
+  lfc_vector <- sort(lfc_vector, decreasing = TRUE)
+  
+  set.seed(666)
+  clusterProfiler::GSEA(geneList = lfc_vector,
+                        minGSSize = 10,
+                        maxGSSize = 500,
+                        pvalueCutoff = 0.05,
+                        nPermSimple = 5e4,
+                        seed = TRUE,
+                        pAdjustMethod = "BH",
+                        TERM2GENE = dplyr::select(x,
+                                                  gs_name,
+                                                  gene_symbol)) -> gsea_results
+  return(gsea_results)
+  })
+
+write_rds(gsea_bulk, "RData/gsea_bulk.rds")
+```
+
 
 
