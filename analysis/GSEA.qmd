@@ -23,6 +23,22 @@ dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
 ```
 
 ```{r}
+dge_bulk_filt <- dge_bulk |> filter(abs(log2FoldChange) > 1 & padj < 0.05) |> pull(Gene)
+
+ego <- enrichGO(dge_bulk_filt,
+         OrgDb = 'org.Hs.eg.db',
+         keyType = "SYMBOL",
+         ont = "ALL",
+         pAdjustMethod = "BH",
+         universe = dge_bulk$Gene,
+         pvalueCutoff = 0.05)
+
+openxlsx::write.xlsx(ego, paste0("RData/", Sys.Date(), "_enrichGO_bulk.xlsx"))
+```
+
+
+
+```{r}
 sets <- c("GO:BP", "GO:CC", "GO:MF", "CP:REACTOME", "CP:KEGG")
 
 gene_sets <- lapply(setNames(sets, sets), function(x){
