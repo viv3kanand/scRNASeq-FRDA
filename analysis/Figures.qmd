@@ -685,6 +685,21 @@ M9 <- c("granulocyte chemotaxis", "granulocyte migration", "leukocyte chemotaxis
 
 M15 <- c("defense response to virus", "response to virus", "defense response to other organism", "interferon-mediated signaling pathway", "response to type I interferon", "innate immune response", "response to cytokine", "regulation of type I interferon production", "type I interferon production", "type I interferon-mediated signaling pathway", "cellular response to type I interferon")
 
+p1 <- CS_CD14$CAD_NCAD$M3 |> 
+  dplyr::select(c(1:10,13)) |> 
+  filter(Description %in% M3) |> 
+  mutate(GeneRatio = eval(parse(text = GeneRatio)),
+         ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+         order = GeneRatio, .by = ID) |> 
+  ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = -log10(p.adjust), size = Count)) +
+  geom_point() + 
+  labs(x = "Gene Ratio", y = "Gene Ontology") + 
+  scale_color_gradientn(colours = c('#FFFFFF', '#009DBDFF'), limit = c(0,max(-log10(CS_CD14$CAD_NCAD$M3$p.adjust))), na.value = "grey") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+  custom_theme()
+
+
+
 CS_CD14$CAD_C$M8 |> 
     as_tibble() |>  
     dplyr::select(c(1:10)) |> 
