@@ -695,7 +695,7 @@ p1 <- CS_CD14$CAD_NCAD$M3 |>
   geom_point() + 
   labs(x = "Gene Ratio", y = "Gene Ontology", title = "Module 3") + 
   scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
 p2 <- CS_CD14$CAD_NCAD$M9 |> 
@@ -708,7 +708,7 @@ p2 <- CS_CD14$CAD_NCAD$M9 |>
   geom_point() + 
   labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
   scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
 p3 <- CS_CD14$CAD_NCAD$M15 |> 
@@ -721,66 +721,10 @@ p3 <- CS_CD14$CAD_NCAD$M15 |>
     geom_point() + 
     labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
     scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
 wrap_plots(p1,p2,p3)
-
-CS_CD14$CAD_C$M8 |> 
-    as_tibble() |>  
-    dplyr::select(c(1:10)) |> 
-    arrange(-log(p.adjust)) |> 
-    mutate(ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-           ID = factor(ID, levels = ID)) |> 
-    ggplot(aes(x = -log(p.adjust), y = ID, fill = zScore)) +
-    geom_bar(stat = "identity") +
-    xlab("-log10(p-adjust)") +
-    ylab("Module 8 Enrichment") +
-    scale_fill_gradientn(rescaler = ~ scales::rescale_mid(.x, mid = 0), 
-                         colours = c('#FF8E7BFF', '#FFFFFF', '#009DBDFF')) +
-    # scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
-    custom_theme()
-
-
-CS_CD14$CAD_C$M8 |> 
-    as_tibble() |>  
-    dplyr::select(c(1:10,13)) |> 
-    mutate(GR = sapply(parse(text = GeneRatio), eval),
-           ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-           GR = factor(GR, levels = unique(GR))) |> 
-    arrange(GR) |>
-    ggplot(aes(x = GR, y = ID, color = -log(p.adjust), size = Count)) +
-    geom_point() +
-  scale_fill_gradientn(colours = c("#FF8E7BFF", "#009DBDFF"), limits = c(-3, 3), na.value = "grey") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
-  custom_theme()
-
-CS_CD14$CAD_C$M8 |> 
-  dplyr::select(c(1:10,13)) |> 
-  mutate(GeneRatio = eval(parse(text = GeneRatio)),
-         ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-         order = GeneRatio, .by = ID) |> 
-  ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = -log10(p.adjust), size = Count)) +
-  geom_point() + 
-  labs(x = "Gene Ratio", y = "Gene Ontology") + 
-  scale_color_gradientn(colours = c('#FFFFFF', '#009DBDFF'), limit = c(0,5), na.value = "grey") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
-  custom_theme()
-
-
-CS_CD14$CAD_NCAD$M9 |> 
-  dplyr::select(c(1:10,13)) |> 
-  mutate(GeneRatio = eval(parse(text = GeneRatio)),
-         ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
-         order = GeneRatio, .by = ID) |> 
-  ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = -log10(p.adjust), size = Count)) +
-  geom_point() + 
-  labs(x = "Gene Ratio", y = "Gene Ontology") + 
-  scale_color_gradientn(colours = c('#FFFFFF', '#009DBDFF'), limit = c(0,5), na.value = "grey") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
-  custom_theme()
-
-
 
 ```
 
