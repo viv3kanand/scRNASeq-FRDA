@@ -111,6 +111,37 @@ p2 <- ggplot(df_cad, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
     labs(col = "Scores", title = "CAD vs NCAD")
 ```
 
+```{r}
+sce <- SingleCellExperiment(assays = List(counts = seu_PBMC@assays$RNA$counts),
+                            reducedDims = SimpleList(UMAP = seu_PBMC@reductions$umap.harmony@cell.embeddings),
+                            colData = list(orig.ident = seu_PBMC$orig.ident,
+                                           Condition = seu_PBMC$Condition,
+                                           Condition2 = seu_PBMC$Condition2,
+                                           cell_type = seu_PBMC$cell_type))
+```
+
+
+```{r}
+sce <- read_rds("../data/2024-12-26_sce_PBMC.rds")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
