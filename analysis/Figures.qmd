@@ -693,8 +693,8 @@ p1 <- CS_CD14$CAD_NCAD$M3 |>
          order = GeneRatio, .by = ID) |> 
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
-  labs(x = "Gene Ratio", y = "Gene Ontology") + 
-  scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), na.value = "grey") +
+  labs(x = "Gene Ratio", y = "Gene Ontology", title = "Module 3") + 
+  scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
   custom_theme()
 
@@ -706,13 +706,25 @@ p2 <- CS_CD14$CAD_NCAD$M9 |>
          order = GeneRatio, .by = ID) |> 
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
-  labs(x = "Gene Ratio", y = "Gene Ontology") + 
-  scale_color_gradientn(colours = c('#FFFFFF', '#009DBDFF'), na.value = "grey") +
+  labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
+  scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
   custom_theme()
 
+p3 <- CS_CD14$CAD_NCAD$M15 |> 
+    dplyr::select(c(1:10,13)) |> 
+    filter(Description %in% M15) |> 
+    mutate(GeneRatio = eval(parse(text = GeneRatio)),
+           ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+           order = GeneRatio, .by = ID) |> 
+    ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
+    geom_point() + 
+    labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
+    scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 30)) +
+    custom_theme()
 
-
+wrap_plots(p1,p2,p3)
 
 CS_CD14$CAD_C$M8 |> 
     as_tibble() |>  
