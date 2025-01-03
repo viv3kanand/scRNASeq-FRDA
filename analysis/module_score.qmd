@@ -47,6 +47,13 @@ IFN <- c("TRANK1", "MOV10", "SMCHD1", "C19orf66", "TNK2", "NCF1", "ANKFY1", "C14
 seu_WB <- JoinLayers(seu_WB)
 
 seu_WB <- AddModuleScore(seu_WB, features = list(IFN), name = "IFN")
+
+
+gene_sets <- msigdbr::msigdbr(species = "Homo sapiens")
+
+neu_glist <- gene_sets[gene_sets$gs_name == "REACTOME_NEUTROPHIL_DEGRANULATION", ]$gene_symbol |> unique()
+
+seu_WB <- AddModuleScore(seu_WB, features = list(neu_glist), name = "NEUD")
 ```
 
 
