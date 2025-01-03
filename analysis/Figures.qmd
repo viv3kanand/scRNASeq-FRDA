@@ -412,7 +412,7 @@ genes.to.label <- head(DGE_PBMC[["CD14 Mono"]][order(DGE_PBMC[["CD14 Mono"]][["p
 p <- ggplot(avg.cd14.mono, aes(Control, FRDA)) + geom_point() + ggtitle("CD14 Mono")
 
 LabelPoints(p, points = genes.to.label, repel = TRUE)
-
+# 
 DGE_PBMC$`CD14 Mono` |> 
     mutate(
         Expression = case_when(
