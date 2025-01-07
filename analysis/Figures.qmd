@@ -617,10 +617,6 @@ seu_WB@meta.data |>
 
 # Neutrophil degranulation pathway genes heatmap/ pathway scores
 
-neu_glist <- gene_sets[gene_sets$gs_name == "REACTOME_NEUTROPHIL_DEGRANULATION", ]$gene_symbol |> unique()
-
-seu_WB <- AddModuleScore(seu_WB, features = list(neu_glist), name = "NEUD")
-
 seu_WB@meta.data |> 
     select(orig.ident, Condition, cell_type, NEUD) |>
     filter(cell_type == "Neutrophil") |> 
