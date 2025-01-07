@@ -471,8 +471,6 @@ do.call("rbind", GSEA_CD14) |>
 
 # Cell Chat
 
-
-
 # average enrichment of TF in Condition for each cell type
 
 df <- t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
@@ -693,7 +691,7 @@ p1 <- CS_CD14$CAD_NCAD$M3 |>
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
   labs(x = "Gene Ratio", y = "Gene Ontology", title = "Module 3") + 
-  scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
+  scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
@@ -706,7 +704,7 @@ p2 <- CS_CD14$CAD_NCAD$M9 |>
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
   labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
-  scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
+  scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
@@ -719,7 +717,7 @@ p3 <- CS_CD14$CAD_NCAD$M15 |>
     ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
     geom_point() + 
     labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
-    scale_color_gradientn(colours = c('#009DBDFF', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
+    scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 

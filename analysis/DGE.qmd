@@ -7,10 +7,12 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
 ```{r}
+require(Seurat)
 require(DESeq2)
 require(tidyverse)
 ```
 
+## Bulk
 
 ```{r}
 count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
@@ -23,6 +25,25 @@ meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
 identical(colnames(count_bulk), rownames(meta_bulk))
 ```
 
+## Single cell
+
+### Load data
+
+```{r}
+#| label: load data
+#| echo: true
+#| eval: false
+
+seu_WB <- read_rds(paste0("RData/", Sys.Date(), "_seurat_WB.rds"))
+seu_PBMC <- read_rds(paste0("RData/", Sys.Date(), "_seurat_PBMC.rds"))
+
+DefaultAssay(seu_WB) <- "RNA"
+Idents(seu_WB) <- "cell_type"
+
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
+
+```
 
 
 ```{r}

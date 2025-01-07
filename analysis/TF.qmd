@@ -185,7 +185,7 @@ seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
 #| eval: true
 
 t(as.matrix(seu_PBMC@assays$tfsulm@data)) |> 
-  as.data.frame() %>%
+  as.data.frame() |> 
   dplyr::mutate(cluster = seu_PBMC$cell_type,
                 Condition = seu_PBMC@meta.data$Condition) |> 
   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
