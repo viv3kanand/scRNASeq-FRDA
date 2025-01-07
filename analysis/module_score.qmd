@@ -64,6 +64,11 @@ seu_WB[["module_score"]] <- AddModuleScore(seu_WB, features = gene_list, name = 
                        values_from = 'score') |> 
     tibble::column_to_rownames("source") |>
     Seurat::CreateAssayObject()
+
+DefaultAssay(seu_WB) <- "module_score"
+seu_WB <- Seurat::ScaleData(seu_WB)
+seu_WB@assays$module_score@data <- seu_WB@assays$module_score@scale.data
+
 ```
 
 

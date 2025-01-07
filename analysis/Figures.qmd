@@ -153,6 +153,10 @@ palette3 <- c("#3A488AFF", "#BE3428FF") # paletteer_d("lisa::OskarSchlemmer")
 palette4 <- c("#CF597EFF", "#009392FF") # paletteer_d("rcartocolor::Temps")
 palette5 <- c("#CF597EFF", "#E9E29CFF", "#009392FF")
 
+palette6 <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#FFFFBF", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2" , "#D53E4F", "#004E64", "#DBB957", "#8FA6CB", "#66C2A5")
+
+palette7 <- brewer.pal(11,'Spectral')
+
 ```
 
 ## QC
@@ -246,12 +250,13 @@ dge_bulk |>
   geom_point(aes(color = Expression)) +
   ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 10),
                            aes(label = Gene)) +
-  scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+  scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
   scale_x_continuous(name = "Log2 Fold Change") +
   scale_y_continuous(name = "-Log10 padj") +
   geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
   geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
   custom_theme()
+
 
 
 # GO/KEGG plot
@@ -268,7 +273,7 @@ ego_bulk@result |>
     ggplot(aes(x = GeneRatio, y = reorder(Description, order),color = -log10(p.adjust), size = Count)) +
     geom_point() + 
     labs(x = "Gene Ratio", y = "Gene Ontology") + 
-    scale_color_gradientn(colours = c('#FFFFFF', '#009DBDFF'), limit = c(0,8), na.value = "grey") +
+    scale_color_gradientn(colours = c('#FFFFFF', '#3288BD'), limit = c(0,8), na.value = "grey") +
     scale_y_discrete(labels = function(x) stringr::str_to_sentence(x)) +
     custom_theme()
 ```
@@ -394,7 +399,7 @@ DGE_PBMC[["CD14 Mono"]] |>
   geom_point(aes(color = Expression)) +
   ggrepel::geom_text_repel(data = head(DGE_PBMC[["CD14 Mono"]][order(DGE_PBMC[["CD14 Mono"]][["p_val_adj"]]),], 10),
                            aes(label = gene)) +
-  scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+  scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
   scale_x_continuous(name = "Log2 fold change") +
   scale_y_continuous(name = "-Log10 padj") +
   geom_hline(yintercept = 2, linetype = 2, color = "black") +
@@ -427,7 +432,7 @@ CD14_plot_data |>
     geom_point(aes(color = Expression)) + 
     ggtitle("CD14 Mono") + 
     ggrepel::geom_text_repel(data = head(CD14_plot_data |> filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |> arrange(p_val_adj, desc(abs(avg_log2FC))), 20), aes(label = gene), max.overlaps = 20, force = 10) +
-    scale_color_manual(values = c("#FF8E7BFF", "grey", "#009DBDFF")) +
+    scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
     custom_theme()
 
 # pathway analysis (GSEA KEGG, BP)
@@ -461,7 +466,7 @@ do.call("rbind", GSEA_CD14) |>
   geom_bar(stat = "identity", alpha = 0.8) + 
   scale_x_continuous(position="bottom") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-  scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
+  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
   custom_theme()
 
 # Cell Chat
@@ -523,7 +528,7 @@ tf_trrust |>
   geom_bar(stat = "identity") +
   xlab("-log10(p-adjust)") +
   ylab("Top 20 TF") +
-  scale_fill_gradientn(colours = c('#FFFFFF', '#FF8E7BFF'), limits = c(0, 30), na.value = "grey") +
+  scale_fill_gradientn(colours = c('#FFFFFF', '#3288BD'), limits = c(0, 30), na.value = "grey") +
   custom_theme()
 
 ```
@@ -602,12 +607,6 @@ seu_PBMC@meta.data |>
 
 
 # IFN pathway gene heatmap/scores
-
-IFN <- c("TRANK1", "MOV10", "SMCHD1", "C19orf66", "TNK2", "NCF1", "ANKFY1", "C14orf159", "DDX60L", "PGAP1", "STAT2", "PNPT1", "ISG20", "RBCK1", "ZCCHC2", "SAMD4A", "PARP14", "RNF213", "PPM1K", "SAMD9", "SP100", "PARP11", "PRKD2", "PI4K2B", "TRIM14", "FTSJD2", "SCLT1", "SMTNL1", "CD38", "NT5C3", "PHF11", "ADAR", "PML", "SP110", "ZNFX1", "NUB1", "ZBP1", "ECE1", "PARP10", "TRIM22", "C6orf192", "TRIM5", "HSH2D", "TMEM229B", "PARP12", "SNTB1", "ZNF618", "STX17", "NADK", "ATP10A", "GTPBP1", "XRN1", "YEATS2", "TRIM56", "TDRD7", "IFI16", "DDX58", "SAMD9L", "N4BP1", "JAK2", "SPATS2L", "NMI", "DRAP1", "LGALS9", "SRGAP2", "APOL6", "CHST12", "TMEM140", "CNP", "FAM125A", "GMPR", "MX2", "HERC5", "GNB4", "LAG3", "DTX3L", "EIF2AK2", "TRIM25", "ABCD1", "HERC6", "DYNLT1", "DHX58", "OAS2", "RP4-697K14.7.1", "IFIH1", "GTPBP2", "GPR155", "APOL1", "UNC93B1", "FGD2", "SP140", "RIN2", "ACOT9", "NAPA", "UBA7", "DDX60", "LGALS3BP", "FAR2", "TLR3", "CHMP5", "IFI35", "MYD88", "OAS3", "UBE2L6", "AZI2", "TMEM62", "CBR1", "BAG1", "MLKL", "BRCA2", "MX1", "CXCL11", "CASP10", "TRIM21", "IFITM1", "PLSCR1", "BST2", "PARP9", "DBF4B", "IRF7", "C5orf56", "AXL", "PSMB9", "BLVRA", "RBM43", "C22orf28", "FMNL2", "CBWD2", "TREX1", "NEXN", "ISG15", "STAP1", "TRAFD1", "RASGRP3", "TNFSF10", "IFI44", "XAF1", "CD2AP", "SAT1", "RTP4", "GBP4", "IFIT5", "SLC38A5", "ZC3HAV1L", "RSAD2", "DISC1", "SCARB2", "CPNE5", "TOR1B", "OAS1", "USP18", "FRMD3", "OASL", "AGRN", "SSTR3", "GPD2", "LY6E", "TTC21A", "MUSTN1", "ETV7", "SPTLC2", "CDK18", "TAP2", "TNFSF13B", "EPSTI1", "IFIT2", "SCIMP", "FANCA", "CFH", "TAP1", "ATF5", "LAP3", "IFITM2", "C9orf91", "MAML2", "IL4I1", "HPSE", "HESX1", "MSR1", "IFIT1", "FAM46A", "KLHDC7B", "CMPK2", "RRBP1", "IFITM3", "APOBEC3A", "NFIX", "ODF2L", "IFI44L", "SIGLEC14", "JUP", "IFIT3", "EMP1", "DYSF", "OSBPL5", "SLFN13", "IFI6", "FBXO6", "OSBPL1A", "PRKCE", "TTC7B", "AIM2", "HSPA1B", "HSPA1A", "NDC80", "TYMP", "STAT1", "SSB", "MCOLN2", "SLFN5", "SCO2", "ASCL2", "IL1RN", "BAHCC1", "ATF3", "LRRC3", "LAMP3", "AKT1S1", "IL15RA", "IL18RAP", "ENDOD1", "IRF9", "SLFN12", "PLEKHN1", "WARS", "MYOF", "TLR7", "MASTL", "SECTM1", "GBP5", "HEG1", "LYN", "DSP", "GPBAR1", "MEFV", "FAM70A", "MT2A", "LILRA5", "FAM26F", "GBP1", "VAMP5", "SLFN12L", "GCH1", "ITSN1", "RUFY4", "GCNT1", "IL15", "SIGLEC1", "CXCL10", "LGALS2", "IFI27", "BUB1", "SERPING1", "FGL2", "GLT1D1", "IDO1", "PIWIL4", "ODF3B", "TCN2", "IGFBP4", "BATF2", "KIAA1522", "FFAR2", "IL1R2", "CCL8", "ABTB2", "MNDA", "RBMS2", "C7orf58", "CXCL9", "CCL13", "CCL7")
-
-seu_WB <- JoinLayers(seu_WB)
-
-seu_WB <- AddModuleScore(seu_WB, features = list(IFN), name = "IFN")
 
 seu_WB@meta.data |> 
     select(orig.ident, Condition, cell_type, IFN1) |>

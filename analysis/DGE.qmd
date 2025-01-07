@@ -19,6 +19,8 @@ count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |>
 
 meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |> 
   tibble::column_to_rownames("SampleID")
+
+identical(colnames(count_bulk), rownames(meta_bulk))
 ```
 
 
