@@ -651,8 +651,9 @@ t(as.matrix(seu_WB@assays$tfsulm@data)) |>
 
 
 # PRR pathway score
+
 seu_WB@meta.data |> 
-    select(orig.ident, Condition, cell_type, NEUD) |>
+    select(orig.ident, Condition, cell_type, RIG1) |>
     filter(cell_type == "Neutrophil") |> 
     ggplot(aes(Condition, RIG1)) +
     geom_boxplot() + 
