@@ -54,5 +54,34 @@ bulk <- AggregateExpression(merged_data,
                             return.seurat = TRUE, #aggregated values are placed in the 'counts' layer
                             assays = "RNA", 
                             group.by = c("orig.ident", "cell_type", "Condition"))
+
+
+DGE_bulk <- lapply(
+  setNames(unique(bulk$cell_type), unique(bulk$cell_type)), function(celltype) {
+    subset.bulk <- subset(bulk, cell_type == celltype)
+    Idents(subset.bulk) <- "Condition"
+    de_markers <- FindMarkers(subset.bulk, 
+                              ident.1 = "FRDA",
+                              ident.2 = "Control", 
+                              slot = "counts", 
+                              test.use = "DESeq2",
+                              verbose = TRUE) |> 
+      rownames_to_column(var = "gene") |> 
+      left_join(y = unique(annotations[, c("gene_name", "description")]),
+               by = c("gene" = "gene_name"))
+    
+    return(de_markers)
+})
+
+write_rds(DGE_bulk, "RData/DGE_bulk_res_1.rds")
 ```
+
+
+
+
+
+
+
+
+
 
