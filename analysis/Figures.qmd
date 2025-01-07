@@ -651,9 +651,12 @@ t(as.matrix(seu_WB@assays$tfsulm@data)) |>
 
 
 # PRR pathway score
-rig1_glist <- gene_sets[gene_sets$gs_name == "KEGG_RIG_I_LIKE_RECEPTOR_SIGNALING_PATHWAY", ]$gene_symbol |> unique()
-
-seu_WB <- AddModuleScore(seu_WB, features = list(rig1_glist), name = "RIG1")
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, NEUD) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, RIG1)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
 ```
 
