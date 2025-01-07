@@ -43,6 +43,8 @@ Idents(seu_WB) <- "cell_type"
 DefaultAssay(seu_PBMC) <- "RNA"
 Idents(seu_PBMC) <- "cell_type"
 
+annotations <- read_rds("RData/annotations.rda")
+
 ```
 
 ### PBMC - Pseudobulk
