@@ -138,6 +138,7 @@ bulk_CAD_NCAD <- lapply(
     
     return(de_markers)
 })
+
 ```
 
 
@@ -194,6 +195,29 @@ DGE_sc <- lapply(
 
 write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_PBMC.rds"))
 ```
+
+#### CAD vs NCAD (PBMC)
+
+```{r}
+sc_CAD_C <- lapply(
+  setNames(unique(merged_data$cell_type), unique(merged_data$cell_type)), function(celltype) {
+    subset.sc <- subset(merged_data, cell_type == celltype)
+    Idents(subset.sc) <- "Condition2"
+    de_markers <- FindMarkers(subset.sc, 
+                              ident.1 = "CAD",
+                              ident.2 = "Control", 
+                              only.pos = FALSE, 
+                              logfc.threshold = 0.25,
+                              verbose = TRUE) |> 
+      rownames_to_column(var = "gene") |> 
+      left_join(y = unique(annotations[, c("gene_name", "description")]),
+               by = c("gene" = "gene_name"))
+    
+    return(de_markers)
+})
+```
+
+
 
 #### FRDA vs Control (Whole Blood)
 
