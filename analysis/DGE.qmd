@@ -12,7 +12,9 @@ require(DESeq2)
 require(tidyverse)
 ```
 
-## Bulk
+## Bulk RNA-Seq
+
+### load data
 
 ```{r}
 count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
@@ -47,9 +49,9 @@ annotations <- read_rds("RData/annotations.rda")
 
 ```
 
-### Pseudobulk DGE
+### Differential Expression Analysis (Pseudobulk)
 
-#### PBMC - FRDA vs Control
+#### FRDA vs Control (PBMC)
 
 ```{r}
 bulk <- AggregateExpression(seu_PBMC,
@@ -78,7 +80,17 @@ DGE_bulk <- lapply(
 write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_PBMC.rds"))
 ```
 
-#### Whole Blood - FRDA vs Control
+### CAD vs NCAD (PBMC)
+
+```{r}
+bulk <- AggregateExpression(merged_data, # NA columns will be ignored
+                            return.seurat = TRUE, #aggregated values are placed in the 'counts' layer
+                            assays = "RNA", 
+                            group.by = c("orig.ident", "cell_type", "Condition2"))
+```
+
+
+#### FRDA vs Control (Whole Blood)
 
 ```{r}
 bulk <- AggregateExpression(seu_WB,
@@ -107,9 +119,9 @@ DGE_bulk <- lapply(
 write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_WB.rds"))
 ```
 
-### Single cell DGE
+### Differential Expression Analysis (Single cell resolution)
 
-#### PBMC - FRDA vs Control
+#### FRDA vs Control (PBMC)
 
 ```{r}
 DGE_sc <- lapply(
@@ -132,7 +144,7 @@ DGE_sc <- lapply(
 write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_PBMC.rds"))
 ```
 
-#### Whole Blood - FRDA vs Control
+#### FRDA vs Control (Whole Blood)
 
 ```{r}
 DGE_sc <- lapply(
