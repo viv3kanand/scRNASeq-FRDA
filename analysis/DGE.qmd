@@ -139,6 +139,10 @@ bulk_CAD_NCAD <- lapply(
     return(de_markers)
 })
 
+bulk_DGE <- list("bulk_CAD_C" = bulk_CAD_C, "bulk_NCAD_C" = bulk_NCAD_C, "bulk_CAD_NCAD" = bulk_CAD_NCAD)
+
+write_rds(bulk_DGE, paste0("RData/", Sys.Date(),"_DGE_bulk.rds"))
+
 ```
 
 
@@ -169,6 +173,7 @@ DGE_bulk <- lapply(
 })
 
 write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_WB.rds"))
+
 ```
 
 ### Differential Expression Analysis (Single cell resolution)
@@ -194,6 +199,7 @@ DGE_sc <- lapply(
 })
 
 write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_PBMC.rds"))
+
 ```
 
 #### CAD vs NCAD (PBMC)
@@ -250,9 +256,11 @@ sc_CAD_NCAD <- lapply(
     return(de_markers)
 })
 
+sc_DGE <- list("sc_CAD_C" = sc_CAD_C, "sc_NCAD_C" = sc_NCAD_C, "sc_CAD_NCAD" = sc_CAD_NCAD)
+
+write_rds(sc_DGE, paste0("RData/", Sys.Date(),"_DGE_sc.rds"))
+
 ```
-
-
 
 #### FRDA vs Control (Whole Blood)
 
@@ -275,8 +283,8 @@ DGE_sc <- lapply(
 })
 
 write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_WB.rds"))
-```
 
+```
 
 
 
