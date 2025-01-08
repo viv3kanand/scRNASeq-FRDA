@@ -132,7 +132,28 @@ DGE_sc <- lapply(
 write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_PBMC.rds"))
 ```
 
+#### Whole Blood - FRDA vs Control
 
+```{r}
+DGE_sc <- lapply(
+  setNames(unique(seu_WB$cell_type), unique(seu_WB$cell_type)), function(celltype) {
+    subset.sc <- subset(seu_WB, cell_type == celltype)
+    Idents(subset.sc) <- "Condition"
+    de_markers <- FindMarkers(subset.sc, 
+                              ident.1 = "FRDA",
+                              ident.2 = "Control", 
+                              only.pos = FALSE, 
+                              logfc.threshold = 0.25,
+                              verbose = TRUE) |> 
+      rownames_to_column(var = "gene") |> 
+      left_join(y = unique(annotations[, c("gene_name", "description")]),
+               by = c("gene" = "gene_name"))
+    
+    return(de_markers)
+})
+
+write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_WB.rds"))
+```
 
 
 
