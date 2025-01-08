@@ -75,9 +75,13 @@ DGE_bulk <- lapply(
     return(de_markers)
 })
 
-write_rds(DGE_bulk, "RData/DGE_bulk_res_1.rds")
+write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res.rds"))
 ```
 
+
+```{r}
+
+```
 
 
 
