@@ -83,7 +83,7 @@ write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_PBMC.rds"))
 ### CAD vs NCAD (PBMC)
 
 ```{r}
-bulk <- AggregateExpression(merged_data, # NA columns will be ignored
+bulk <- AggregateExpression(seu_PBMC, # NA columns will be ignored
                             return.seurat = TRUE, #aggregated values are placed in the 'counts' layer
                             assays = "RNA", 
                             group.by = c("orig.ident", "cell_type", "Condition2"))
@@ -200,11 +200,28 @@ write_rds(DGE_sc, paste0("RData/", Sys.Date(), "_DGE_sc_res_PBMC.rds"))
 
 ```{r}
 sc_CAD_C <- lapply(
-  setNames(unique(merged_data$cell_type), unique(merged_data$cell_type)), function(celltype) {
-    subset.sc <- subset(merged_data, cell_type == celltype)
+  setNames(unique(seu_PBMC$cell_type), unique(seu_PBMC$cell_type)), function(celltype) {
+    subset.sc <- subset(seu_PBMC, cell_type == celltype)
     Idents(subset.sc) <- "Condition2"
     de_markers <- FindMarkers(subset.sc, 
                               ident.1 = "CAD",
+                              ident.2 = "Control", 
+                              only.pos = FALSE, 
+                              logfc.threshold = 0.25,
+                              verbose = TRUE) |> 
+      rownames_to_column(var = "gene") |> 
+      left_join(y = unique(annotations[, c("gene_name", "description")]),
+               by = c("gene" = "gene_name"))
+    
+    return(de_markers)
+})
+
+sc_NCAD_C <- lapply(
+  setNames(unique(seu_PBMC$cell_type), unique(seu_PBMC$cell_type)), function(celltype) {
+    subset.sc <- subset(seu_PBMC, cell_type == celltype)
+    Idents(subset.sc) <- "Condition2"
+    de_markers <- FindMarkers(subset.sc, 
+                              ident.1 = "NCAD",
                               ident.2 = "Control", 
                               only.pos = FALSE, 
                               logfc.threshold = 0.25,
