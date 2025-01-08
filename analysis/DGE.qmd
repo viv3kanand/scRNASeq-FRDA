@@ -25,7 +25,7 @@ meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
 identical(colnames(count_bulk), rownames(meta_bulk))
 ```
 
-## Single cell
+## scRNA-Seq Data
 
 ### Load data
 
@@ -47,7 +47,7 @@ annotations <- read_rds("RData/annotations.rda")
 
 ```
 
-### PBMC - Pseudobulk
+### Pseudobulk DGE
 
 #### FRDA vs Control
 
@@ -79,8 +79,27 @@ write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res.rds"))
 ```
 
 
-```{r}
+### Single cell DGE
 
+#### FRDA vs Control
+
+```{r}
+DGE_sc <- lapply(
+  setNames(unique(merged_data$cell_type), unique(merged_data$cell_type)), function(celltype) {
+    subset.sc <- subset(merged_data, cell_type == celltype)
+    Idents(subset.sc) <- "Condition"
+    de_markers <- FindMarkers(subset.sc, 
+                              ident.1 = "FRDA",
+                              ident.2 = "Control", 
+                              only.pos = FALSE, 
+                              logfc.threshold = 0.25,
+                              verbose = TRUE) |> 
+      rownames_to_column(var = "gene") |> 
+      left_join(y = unique(annotations[, c("gene_name", "description")]),
+               by = c("gene" = "gene_name"))
+    
+    return(de_markers)
+})
 ```
 
 
