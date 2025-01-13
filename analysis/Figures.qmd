@@ -153,7 +153,7 @@ palette3 <- c("#3A488AFF", "#BE3428FF") # paletteer_d("lisa::OskarSchlemmer")
 palette4 <- c("#CF597EFF", "#009392FF") # paletteer_d("rcartocolor::Temps")
 palette5 <- c("#CF597EFF", "#E9E29CFF", "#009392FF")
 
-palette6 <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#FFFFBF", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2" , "#D53E4F", "#004E64", "#DBB957", "#8FA6CB", "#66C2A5")
+palette6 <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#FFFFBF", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2", "#D53E4F", "#004E64", "#DBB957", "#8FA6CB", "#66C2A5")
 
 palette7 <- brewer.pal(11,'Spectral')
 
@@ -308,7 +308,7 @@ S1A <- DimPlot(seu_WB,
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
 S1B <- DotPlot(seu_WB, features = markers_WB) + 
-  scale_colour_gradient2(low = "#FF8E7BFF", mid = 'white', high = "#009DBDFF") +
+  scale_colour_gradient2(low = "#D53E4F", mid = 'white', high = "#3288BD") +
   RotatedAxis() +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -334,7 +334,7 @@ P3A <- DimPlot(seu_PBMC,
 markers_PBMC <- c("CD34", "TNFRSF17", "LEF1", "MKI67", "TOP2A", "CLEC4C", "NRP1", "KLRB1", "PTGDS", "FCER1A", "CLEC10A", "TNFRSF13B", "TRDC", "FCGR3A", "MS4A7", "PPBP", "CD8A", "CD79A", "MS4A1", "CCR7", "CCR4", "NKG7", "GNLY", "NCAM1", "CD14", "LYZ")
 
 P3B <- DotPlot(seu_PBMC, features = markers_PBMC) + 
-  scale_colour_gradient2(low = "#FF8E7BFF", mid = 'white', high = "#009DBDFF") +
+  scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
   RotatedAxis() +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -359,7 +359,7 @@ P3C <- seu_PBMC@meta.data |>
             position = position_dodge(.9), vjust = -.2) +
   geom_text(aes(label = stars), 
             position = position_dodge(.9), vjust = -1.5) +
-  scale_fill_manual(values = c("#FF8E7BFF", "#009DBDFF")) +
+  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
   labs(x = "Cell type", y = "Relative abundance (%)") +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),

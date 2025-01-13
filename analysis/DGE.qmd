@@ -21,11 +21,14 @@ count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |>
   dplyr::distinct(Gene, .keep_all = TRUE) |> 
   tibble::column_to_rownames("Gene")
 
-meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |> 
+meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
   tibble::column_to_rownames("SampleID")
 
 identical(colnames(count_bulk), rownames(meta_bulk))
+
 ```
+
+
 
 ## scRNA-Seq Data
 
@@ -78,6 +81,7 @@ DGE_bulk <- lapply(
 })
 
 write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_PBMC.rds"))
+
 ```
 
 ### CAD vs NCAD (PBMC)
@@ -144,7 +148,6 @@ bulk_DGE <- list("bulk_CAD_C" = bulk_CAD_C, "bulk_NCAD_C" = bulk_NCAD_C, "bulk_C
 write_rds(bulk_DGE, paste0("RData/", Sys.Date(),"_DGE_bulk.rds"))
 
 ```
-
 
 #### FRDA vs Control (Whole Blood)
 
