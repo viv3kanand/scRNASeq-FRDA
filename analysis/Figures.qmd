@@ -359,7 +359,7 @@ P3C <- seu_PBMC@meta.data |>
             position = position_dodge(.9), vjust = -.2) +
   geom_text(aes(label = stars), 
             position = position_dodge(.9), vjust = -1.5) +
-  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
   labs(x = "Cell type", y = "Relative abundance (%)") +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
