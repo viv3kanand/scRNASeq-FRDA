@@ -155,7 +155,7 @@ palette5 <- c("#CF597EFF", "#E9E29CFF", "#009392FF")
 
 palette6 <- c("#9E0142", "#D53E4F", "#F46D43", "#FDAE61", "#FEE08B", "#FFFFBF", "#E6F598", "#ABDDA4", "#66C2A5", "#3288BD", "#5E4FA2", "#D53E4F", "#004E64", "#DBB957", "#8FA6CB", "#66C2A5")
 
-palette7 <- brewer.pal(11,'Spectral')
+palette7 <- RColorBrewer::brewer.pal(11,'Spectral')
 
 ```
 
@@ -380,8 +380,9 @@ P3C <- seu_PBMC@meta.data |>
 imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
 P4A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
-  geom_point(size = .7) +
-  scale_color_viridis_c(option = "D") +
+  geom_point(size = 2, alpha = 0.8) +
+  scale_color_gradientn(colours = palette7) +
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
@@ -399,7 +400,7 @@ DGE_PBMC[["CD14 Mono"]] |>
   geom_point(aes(color = Expression)) +
   ggrepel::geom_text_repel(data = head(DGE_PBMC[["CD14 Mono"]][order(DGE_PBMC[["CD14 Mono"]][["p_val_adj"]]),], 10),
                            aes(label = gene)) +
-  scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
+  scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
   scale_x_continuous(name = "Log2 fold change") +
   scale_y_continuous(name = "-Log10 padj") +
   geom_hline(yintercept = 2, linetype = 2, color = "black") +
@@ -431,8 +432,13 @@ CD14_plot_data |>
     ggplot(aes(Control, FRDA)) + 
     geom_point(aes(color = Expression)) + 
     ggtitle("CD14 Mono") + 
-    ggrepel::geom_text_repel(data = head(CD14_plot_data |> filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |> arrange(p_val_adj, desc(abs(avg_log2FC))), 20), aes(label = gene), max.overlaps = 20, force = 10) +
-    scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
+    ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
+                                           filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |> 
+                                           arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
+                             aes(label = gene), 
+                             max.overlaps = 20, 
+                             force = 10) +
+    scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
     custom_theme()
 
 # pathway analysis (GSEA KEGG, BP)
