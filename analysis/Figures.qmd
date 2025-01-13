@@ -386,7 +386,7 @@ P4A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   custom_theme() +
   empty_axis()
 
-# Volcano plot of DEGs
+# P4B - Volcano plot of DEGs
 
 DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
 
@@ -424,7 +424,7 @@ CD14_plot_data |>
     scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
     custom_theme()
 
-# pathway analysis (GSEA KEGG, BP)
+# P4C - pathway analysis (GSEA KEGG, BP)
 
 files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
 
@@ -509,13 +509,14 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
 tf_trrust |> 
-  mutate(order = desc(qvalue), .by = TF) |>
+  mutate(order = desc(qvalue), .by = TF,
+         top20 = c("top20")) |>
   head(20) |> 
-  ggplot(aes(x = -log(qvalue), y = reorder(TF, order), fill = genes)) +
-  geom_bar(stat = "identity") +
+  ggplot(aes(x = top20, y = reorder(TF, order))) +
+  geom_point(aes(color = -log10(qvalue), size = genes)) +
   xlab("-log10(p-adjust)") +
   ylab("Top 20 TF") +
-  scale_fill_gradientn(colours = c('#FFFFFF', '#3288BD'), limits = c(0, 30), na.value = "grey") +
+  scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0, 8), na.value = "grey") +
   custom_theme()
 
 ```
