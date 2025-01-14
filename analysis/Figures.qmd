@@ -409,18 +409,18 @@ DGE_PBMC$`CD14 Mono` |>
     merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
 
 
-CD14_plot_data |> 
-    ggplot(aes(Control, FRDA)) + 
-    geom_point(aes(color = Expression)) + 
-    ggtitle("CD14 Mono") + 
-    ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
-                                           filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |> 
-                                           arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
-                             aes(label = gene), 
-                             max.overlaps = 20, 
-                             force = 10) +
-    scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
-    custom_theme()
+P4B <- CD14_plot_data |> 
+  ggplot(aes(Control, FRDA)) + 
+  geom_point(aes(color = Expression)) + 
+  ggtitle("CD14 Mono") + 
+  ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
+                                         filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
+                                         arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
+                           aes(label = gene), 
+                           max.overlaps = 20, 
+                           force = 10) +
+  scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
+  custom_theme()
 
 # P4C - pathway analysis (GSEA KEGG, BP)
 
@@ -454,6 +454,24 @@ do.call("rbind", GSEA_CD14) |>
   scale_x_continuous(position="bottom") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+  custom_theme()
+
+P4C <- do.call("rbind", GSEA_CD14) |> 
+  as_tibble() |>  
+  dplyr::select(c(1,5,6,7,8,9)) |>
+  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
+                order = NES, .by = ID,
+                top = c("top")) |> 
+  dplyr::filter(ID %in% pathway_list) |> 
+  dplyr::mutate(
+    ID = paste0(
+    str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
+    stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
+      gsub(ID, pattern = "_", replacement = " "))) |> 
+  ggplot(aes(x = top, y = reorder(ID, order))) + 
+  geom_point(aes(color = Enrichment, size = abs(NES))) +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  scale_color_manual(values = c("#3288BD", "#D53E4F")) +
   custom_theme()
 
 # Cell Chat
@@ -506,7 +524,7 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 # TRRUST analysis
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
-tf_trrust |> 
+P4D <- tf_trrust |> 
   mutate(order = desc(qvalue), .by = TF,
          top20 = c("top20")) |>
   head(20) |> 
@@ -514,7 +532,7 @@ tf_trrust |>
   geom_point(aes(color = -log10(qvalue), size = genes)) +
   xlab("-log10(p-adjust)") +
   ylab("Top 20 TF") +
-  scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0, 8), na.value = "grey") +
+  scale_color_gradientn(colours = c('#FEE08B', '#D53E4F'), limit = c(0, 8), na.value = "grey") +
   custom_theme()
 
 ```
