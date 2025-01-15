@@ -663,6 +663,27 @@ seu_WB@meta.data |>
     geom_boxplot() + 
     stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
+t(as.matrix(seu_WB@assays$module_score@data)) |> 
+    as.data.frame() |> 
+    dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                  Condition = seu_WB@meta.data$Condition) |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                        names_to = "source", 
+                        values_to = "score") |> 
+    filter(cluster == c("Neutrophil")) |> 
+    ggplot(aes(Condition, score)) +
+    # stat_dots(aes(fill = cluster), side = "left", justification = 1.05) +
+    ggdist::stat_halfeye(aes(fill = cluster), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
+    geom_boxplot(aes(fill = cluster), width = 0.1, outlier.colour = "grey") + 
+    facet_grid(~source) +
+    theme(text = element_text(size=18),
+          axis.text.x = element_text(angle=0, hjust=.5, vjust = 0.5, color = "black"),
+          axis.text.y = element_text(color = "black"),
+          plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5),
+          legend.position="none") +
+    ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
 ```
 
 

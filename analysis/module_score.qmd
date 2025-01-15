@@ -50,16 +50,16 @@ rig1_glist <- gene_sets[gene_sets$gs_name == "KEGG_RIG_I_LIKE_RECEPTOR_SIGNALING
 
 gene_list <- list("IFN" = IFN, "NEU" = neu_glist, "RIG1" = rig1_glist)
 
-seu_WB <- AddModuleScore(seu_WB, features = gene_list, name = names(gene_list))
+# seu_WB <- AddModuleScore(seu_WB, features = gene_list, name = names(gene_list))
 
 ```
 
 
 ```{r}
-seu_WB[["module_score"]] <- AddModuleScore(seu_WB, features = gene_list, name = names(gene_list))@meta.data |>
+seu_WB[["module_score"]] <- Seurat::AddModuleScore(seu_WB, features = gene_list, name = names(gene_list))@meta.data |>
     tibble::rownames_to_column("cells") |> 
-    dplyr::select(c(cells, 30:31)) |> 
-    tidyr::pivot_longer(cols = 2:3, names_to = "source", values_to = "score") |> 
+    dplyr::select(c(cells, IFN1:RIG13)) |> 
+    tidyr::pivot_longer(cols = 2:4, names_to = "source", values_to = "score") |> 
     tidyr::pivot_wider(id_cols = 'source', 
                        names_from = 'cells',
                        values_from = 'score') |> 
