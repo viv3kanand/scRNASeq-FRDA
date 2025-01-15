@@ -303,20 +303,21 @@ Idents(seu_PBMC) <- "cell_type"
 S1A <- DimPlot(seu_WB, 
                reduction = "umap.harmony", 
                group.by = c("cell_type"), 
-               pt.size = 0.5, 
+               pt.size = 1, 
                label = TRUE, 
                label.size = 5,
                cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
   NoLegend() &
   custom_theme() +
-  empty_axis()
+  empty_axis() +
+  NoLegend()
 
 
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
 S1B <- DotPlot(seu_WB, features = markers_WB) + 
-  scale_colour_gradient2(low = "#D53E4F", mid = 'white', high = "#3288BD") +
+  scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
   RotatedAxis() +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
@@ -714,7 +715,7 @@ p1 <- CS_CD14$CAD_NCAD$M3 |>
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
   labs(x = "Gene Ratio", y = "Gene Ontology", title = "Module 3") + 
-  scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
+  scale_color_gradientn(colours = c('#D53E4F', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
@@ -727,7 +728,7 @@ p2 <- CS_CD14$CAD_NCAD$M9 |>
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
   labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
-  scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
+  scale_color_gradientn(colours = c('#D53E4F', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), max(CS_CD14$CAD_NCAD$M9$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
@@ -740,7 +741,7 @@ p3 <- CS_CD14$CAD_NCAD$M15 |>
     ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
     geom_point() + 
     labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
-    scale_color_gradientn(colours = c('#3288BD', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
+    scale_color_gradientn(colours = c('#D53E4F', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust), max(CS_CD14$CAD_NCAD$M15$p.adjust)), na.value = "grey") +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
