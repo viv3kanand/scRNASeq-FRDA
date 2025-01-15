@@ -526,15 +526,14 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
 P4D <- tf_trrust |> 
-  mutate(order = desc(qvalue), .by = TF,
-         top20 = c("top20")) |>
-  head(20) |> 
-  ggplot(aes(x = top20, y = reorder(TF, order))) +
-  geom_point(aes(color = -log10(qvalue), size = genes)) +
-  xlab("-log10(p-adjust)") +
-  ylab("Top 20 TF") +
-  scale_color_gradientn(colours = c('#FEE08B', '#D53E4F'), limit = c(0, 8), na.value = "grey") +
-  custom_theme()
+    mutate(order = desc(qvalue), .by = TF) |>
+    head(20) |> 
+    ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+    geom_bar(aes(fill = genes), stat = "identity") +
+    xlab("-log10(p-adjust)") +
+    ylab("Top 20 TF") +
+    scale_fill_gradientn(colours = c('#FEE08B', '#D53E4F'), na.value = "grey") +
+    custom_theme()
 
 ```
 
