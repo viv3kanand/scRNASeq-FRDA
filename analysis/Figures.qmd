@@ -114,7 +114,7 @@ source("../scripts/helper_scripts.R")
 ```{r}
 # Theme elements
 font <- "Helvetica"
-text_size <- 10
+text_size <- 15
 line_size <- 0.5
 
 # Figure elements
@@ -454,7 +454,7 @@ do.call("rbind", GSEA_CD14) |>
   geom_bar(stat = "identity", alpha = 0.8) + 
   scale_x_continuous(position="bottom") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
   custom_theme()
 
 P4C <- do.call("rbind", GSEA_CD14) |> 
