@@ -10,3 +10,4 @@ data/
 .quarto
 omnipathr-log/
 /analysis/RData
+/analysis/figures

@@ -52,7 +52,7 @@ seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 
 DefaultAssay(seu_WB) <- "RNA"
 Idents(seu_WB) <- "cell_type"
-
+seu_WB <- JoinLayers(seu_WB)
 
 
 # TF analysis
