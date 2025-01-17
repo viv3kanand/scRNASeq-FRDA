@@ -484,6 +484,7 @@ do.call("rbind", GSEA_CD14) |>
                 gsub(ID, pattern = "_", replacement = " "))) |> 
     ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = 1 - p.adjust)) + 
     geom_bar(stat = "identity") + 
+    labs(title = NULL, x = "NES", y = "Gene Ontology") +
     scale_x_continuous(position="bottom") +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     scale_fill_manual(values = c("Enriched" = "#3288BD", "Depleted" = "#D53E4F"), breaks = c("Enriched", "Depleted")) +
