@@ -142,7 +142,7 @@ custom_theme <- function(){
           panel.grid = element_blank(),
           plot.background = element_rect(fill = "white"),
           legend.position = "right",
-          legend.text=element_text(size = text_size))
+          legend.text=element_text(size = rel(1.2)))
 }
 
 empty_axis <- function(){
@@ -438,19 +438,15 @@ pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGU
 do.call("rbind", GSEA_CD14) |> 
   as_tibble() |>  
   dplyr::select(c(1,5,6,7,8,9)) |>
-  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted")) |> 
-  dplyr::arrange(desc(NES)) |> 
+  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
+                order = NES, .by = ID) |> 
   dplyr::filter(ID %in% pathway_list) |> 
-  dplyr::arrange(NES) |> 
   dplyr::mutate(
     ID = paste0(
-      str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
-      stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
-        gsub(ID, pattern = "_", replacement = " ")
-      ),
-    ID = factor(ID, levels = ID)
-    ) |> 
-  ggplot(aes(x = NES, y = ID, fill = Enrichment)) + 
+    str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
+    stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
+      gsub(ID, pattern = "_", replacement = " "))) |> 
+  ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment)) + 
   geom_bar(stat = "identity", alpha = 0.8) + 
   scale_x_continuous(position="bottom") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
@@ -474,6 +470,25 @@ P4C <- do.call("rbind", GSEA_CD14) |>
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   scale_color_manual(values = c("#3288BD", "#D53E4F")) +
   custom_theme()
+
+do.call("rbind", GSEA_CD14) |> 
+    as_tibble() |>  
+    dplyr::select(c(1,5,6,7,8,9)) |>
+    dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
+                  order = NES, .by = ID) |> 
+    dplyr::filter(ID %in% pathway_list) |> 
+    dplyr::mutate(
+        ID = paste0(
+            str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
+            stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
+                gsub(ID, pattern = "_", replacement = " "))) |> 
+    ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = 1 - p.adjust)) + 
+    geom_bar(stat = "identity") + 
+    scale_x_continuous(position="bottom") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    scale_fill_manual(values = c("Enriched" = "#3288BD", "Depleted" = "#D53E4F"), breaks = c("Enriched", "Depleted")) +
+    scale_alpha_continuous(range = c(0.3, 1), guide = "none") +
+    custom_theme()
 
 # Cell Chat
 
