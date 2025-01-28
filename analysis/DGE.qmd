@@ -32,7 +32,16 @@ identical(colnames(count_bulk), rownames(meta_bulk))
 ```{r}
 dds <- DESeq2::DESeqDataSetFromMatrix(countData = count_bulk,
                                       colData = meta_bulk, 
-                                      design = ~ Condition + Batch + Gender)
+                                      design = ~ Condition + Batch + Gender + Sampling_Age)
+
+keep <- rowSums(counts(dds) >= 5) >= 3
+table(keep)
+dds <- dds[keep,]
+
+suppressWarnings(dds <- DESeq2::DESeq(dds, 
+                              parallel = TRUE, 
+                              BPPARAM=BiocParallel::MulticoreParam(20)))
+
 
 
 ```
