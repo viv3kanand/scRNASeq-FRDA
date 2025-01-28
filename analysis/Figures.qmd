@@ -342,6 +342,36 @@ ipa_bulk |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
+# Heatmap top genes
+
+vsd <- read_rds("RData/Bulk/2025-01-28_vsd.rds")
+
+top_genes <- dge_bulk |> filter(abs(log2FoldChange) > 1 & padj < 0.05) |> pull(Gene)
+
+mat_sel <- assay(vsd) |>
+  as.data.frame() |> 
+  filter(row.names(assay(vsd)) %in% top_genes)
+
+colors.use <- grDevices::colorRampPalette(colors = c("#D53E4F","#FFFFFF", "#3288BD"))(100)
+
+my_breaks <- c(seq(-2, 0, length.out = ceiling(100 / 2) + 1),
+               seq(0.05, 2, length.out = floor(100 / 2)))
+
+png("analysis/figures/Bulk/heatmap.png", height = 22, width = 12, units = "in", res = 600, bg = "white")
+pheatmap::pheatmap(mat = mat_sel,
+                   color = colors.use,
+                   border_color = "white",
+                   annotation_col = meta_bulk |> select(Condition),
+                   breaks = my_breaks,
+                   cluster_cols = FALSE,
+                   cluster_rows = TRUE,
+                   show_rownames = FALSE,
+                   treeheight_row = 10,
+                   cellwidth = 8,
+                   cellheight = 2,
+                   scale = "row")
+dev.off()
+
 ```
 
 
