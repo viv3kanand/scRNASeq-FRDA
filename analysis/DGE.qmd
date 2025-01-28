@@ -42,6 +42,8 @@ suppressWarnings(dds <- DESeq2::DESeq(dds,
                               parallel = TRUE, 
                               BPPARAM=BiocParallel::MulticoreParam(20)))
 
+res <- results(dds, name = "Condition_Patient_vs_Control") |> as.data.frame()
+
 
 
 ```
