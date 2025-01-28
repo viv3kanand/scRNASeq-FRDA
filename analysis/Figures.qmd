@@ -248,6 +248,19 @@ p1 + p2 + p3 + p4
 # Volcano plot
 dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
 
+dge_array <- read_tsv("../data/extdata/GSE30933.top.table.tsv")
+dge_array <- read_csv("../data/extdata/array_df.csv") |> 
+  select(Symbol, logFC.patient_vs_control, pp.patient_vs_control) |> 
+  mutate(log2FC = logFC.patient_vs_control / log10(2),
+         pval = 1 - pp.patient_vs_control)
+
+dge_combined <- dge_bulk |> 
+  left_join(y = unique(dge_array[, c("Symbol", "log2FC", "pval")]), by = c("Gene" = "Symbol")) |> 
+  na.omit()
+
+dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
+cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
+
 dge_bulk |> 
   mutate(
     Expression = case_when(
@@ -255,7 +268,7 @@ dge_bulk |>
       log2FoldChange <= -1 & padj <= 0.05 ~ "Downregulated",
       TRUE ~ "Not significant")) |>
   ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
-  geom_point(aes(color = Expression)) +
+  geom_point(aes(color = Expression, alpha = 0.8, size = 2)) +
   ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 10),
                            aes(label = Gene)) +
   scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
@@ -264,7 +277,6 @@ dge_bulk |>
   geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
   geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
   custom_theme()
-
 
 
 # GO/KEGG plot
@@ -281,9 +293,17 @@ ego_bulk@result |>
     ggplot(aes(x = GeneRatio, y = reorder(Description, order),color = -log10(p.adjust), size = Count)) +
     geom_point() + 
     labs(x = "Gene Ratio", y = "Gene Ontology") + 
-    scale_color_gradientn(colours = c('#FFFFFF', '#3288BD'), limit = c(0,8), na.value = "grey") +
+    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,8), na.value = "grey") +
     scale_y_discrete(labels = function(x) stringr::str_to_sentence(x)) +
     custom_theme()
+
+
+# IPA
+
+ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
+
+
+
 ```
 
 
@@ -412,7 +432,7 @@ DGE_PBMC$`CD14 Mono` |>
 
 P4B <- CD14_plot_data |> 
   ggplot(aes(Control, FRDA)) + 
-  geom_point(aes(color = Expression)) + 
+  geom_point(aes(color = Expression, size = 2, alpha = 0.8)) + 
   ggtitle("CD14 Mono") + 
   ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
                                          filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
@@ -421,6 +441,7 @@ P4B <- CD14_plot_data |>
                            max.overlaps = 20, 
                            force = 10) +
   scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
+  guides(alpha = "none", size = "none") +
   custom_theme()
 
 # P4C - pathway analysis (GSEA KEGG, BP)

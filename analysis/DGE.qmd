@@ -84,6 +84,50 @@ write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_res_PBMC.rds"))
 
 ```
 
+
+```{r}
+dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
+
+bulk <- AggregateExpression(seu_PBMC,
+                            return.seurat = TRUE, #aggregated values are placed in the 'counts' layer
+                            assays = "RNA", 
+                            group.by = c("orig.ident", "Condition"))
+
+
+Idents(bulk) <- "Condition"
+
+DGE_bulk <- FindMarkers(bulk, 
+                        ident.1 = "FRDA",
+                        ident.2 = "Control", 
+                        slot = "counts", 
+                        test.use = "DESeq2",
+                        verbose = TRUE) |> 
+  rownames_to_column(var = "gene")
+
+DGE_sc_bulk_combined <- DGE_bulk |>
+  left_join(y = unique(dge_bulk[, c("Gene", "log2FoldChange", "padj")]), by = c("gene" = "Gene")) |> 
+  na.omit()
+
+DGE_sc_bulk_combined_sig <- DGE_sc_bulk_combined |> filter(padj < 0.05 & p_val_adj < 0.05)
+
+write_rds(DGE_bulk, paste0("RData/", Sys.Date(), "_DGE_bulk_all_PBMC.rds"))
+
+write_csv(DGE_bulk, file = paste0("RData/", Sys.Date(), "DGE_bulk_all.csv"))
+write_csv(DGE_sc_bulk_combined, file = paste0("RData/", Sys.Date(), "DGE_bulk_all_combined.csv"))
+
+
+pca_dat <- prcomp(t(as.data.frame(bulk@assays$RNA$counts)), scale = TRUE)
+
+pca_dat |> 
+    augment(bulk@meta.data) |> 
+    ggplot(aes(.fittedPC1, .fittedPC2, color = Condition)) + 
+    geom_point(size = 1.5) +
+    scale_color_manual(
+        values = c(FRDA = "#D55E00", Control = "#0072B2")
+    )
+
+```
+
 ### CAD vs NCAD (PBMC)
 
 ```{r}
@@ -104,7 +148,7 @@ bulk_CAD_C <- lapply(
                               verbose = TRUE) |> 
       rownames_to_column(var = "gene") |> 
       left_join(y = unique(annotations[, c("gene_name", "description")]),
-               by = c("gene" = "gene_name"))
+            by = c("gene" = "gene_name"))
     
     return(de_markers)
 })
