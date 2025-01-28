@@ -44,7 +44,12 @@ suppressWarnings(dds <- DESeq2::DESeq(dds,
 
 res <- results(dds, name = "Condition_Patient_vs_Control") |> as.data.frame()
 
+vsd <- vst(dds, blind=FALSE)
 
+mm <- model.matrix(~Condition, meta_bulk)
+assay(vsd) <- limma::removeBatchEffect(assay(vsd), batch=meta_bulk$Batch, design=mm)
+
+plotPCA(vsd, intgroup = c("Condition"))
 
 ```
 
