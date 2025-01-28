@@ -313,6 +313,19 @@ ipa_bulk |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
+ipa_bulk |> 
+    head(20) |> 
+    mutate(order = Logpval, .by = Pathways,
+           Count = str_count(Molecules, ",") + 1) |> 
+    ggplot(aes(x = Logpval, y = reorder(Pathways, order), color = Count, size = Count)) +
+    geom_point() + 
+    labs(x = "-log10(pvalue)", y = "Pathways") + 
+    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,64), na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    guides(size = "none") +
+    custom_theme()
+
+
 
 ```
 
