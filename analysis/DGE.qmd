@@ -49,7 +49,7 @@ vsd <- vst(dds, blind=FALSE)
 mm <- model.matrix(~Condition, meta_bulk)
 assay(vsd) <- limma::removeBatchEffect(assay(vsd), batch=meta_bulk$Batch, design=mm)
 
-plotPCA(vsd, intgroup = c("Condition"))
+write_rds(vsd, file = paste0("RData/Bulk/", Sys.Date(), "_vsd.rds"))
 
 ```
 
