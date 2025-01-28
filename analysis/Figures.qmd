@@ -325,7 +325,22 @@ ipa_bulk |>
     guides(size = "none") +
     custom_theme()
 
-
+ipa_bulk |> 
+    filter(!Zscore %in% c("#NUM!", 0)) |> 
+    head(20) |> 
+    mutate(Zscore = as.double(Zscore),
+           pvalue = 10^-Logpval,
+           Count = str_count(Molecules, ",") + 1,
+           Enrichment = case_when(
+               Zscore > 0 ~ "Enriched",
+               Zscore < 0 ~ "Depleted"),
+           order = Zscore, .by = Pathways) |> 
+    ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
+    geom_bar(aes(x = Zscore), stat = "identity") + 
+    labs(x = "z-score", y = "Pathways") + 
+    scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    custom_theme()
 
 ```
 
