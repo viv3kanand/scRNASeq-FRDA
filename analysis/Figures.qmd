@@ -302,6 +302,16 @@ ego_bulk@result |>
 
 ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
 
+ipa_bulk |> 
+    head(20) |> 
+    mutate(order = Ratio, .by = Pathways,
+           Count = str_count(Molecules, ",") + 1) |> 
+    ggplot(aes(x = Ratio, y = reorder(Pathways, order), color = Logpval, size = Count)) +
+    geom_point() + 
+    labs(x = "Gene Ratio", y = "Pathways") + 
+    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,27), na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    custom_theme()
 
 
 ```
