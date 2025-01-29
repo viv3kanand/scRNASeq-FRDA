@@ -244,6 +244,8 @@ p1 + p2 + p3 + p4
 
 <!-- Panel 1: Bulk RNAseq: PCA plot, Volcano plot, GO/KEGG plot, Heatmap of immune system/neutrophil related genes -->
 
+<!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
+
 ```{r}
 # Volcano plot
 dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
@@ -261,7 +263,7 @@ dge_combined <- dge_bulk |>
 dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
 cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
 
-dge_bulk |> 
+P1 <- dge_bulk |> 
   mutate(
     Expression = case_when(
       log2FoldChange >= 1 & padj <= 0.05 ~ "Upregulated",
@@ -269,13 +271,14 @@ dge_bulk |>
       TRUE ~ "Not significant")) |>
   ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
   geom_point(aes(color = Expression, alpha = 0.8, size = 2)) +
-  ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 10),
+  ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 20),
                            aes(label = Gene)) +
   scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
   scale_x_continuous(name = "Log2 Fold Change") +
   scale_y_continuous(name = "-Log10 padj") +
   geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
   geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
+  guides(alpha = "none") + 
   custom_theme()
 
 
@@ -302,7 +305,7 @@ ego_bulk@result |>
 
 ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
 
-ipa_bulk |> 
+P2 <- ipa_bulk |> 
     head(20) |> 
     mutate(order = Ratio, .by = Pathways,
            Count = str_count(Molecules, ",") + 1) |> 
@@ -313,7 +316,7 @@ ipa_bulk |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
-ipa_bulk |> 
+P2 <- ipa_bulk |> 
     head(20) |> 
     mutate(order = Logpval, .by = Pathways,
            Count = str_count(Molecules, ",") + 1) |> 
@@ -325,7 +328,7 @@ ipa_bulk |>
     guides(size = "none") +
     custom_theme()
 
-ipa_bulk |> 
+P2 <- ipa_bulk |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
     mutate(Zscore = as.double(Zscore),
@@ -357,25 +360,29 @@ colors.use <- grDevices::colorRampPalette(colors = c("#D53E4F","#FFFFFF", "#3288
 my_breaks <- c(seq(-2, 0, length.out = ceiling(100 / 2) + 1),
                seq(0.05, 2, length.out = floor(100 / 2)))
 
-png("analysis/figures/Bulk/heatmap.png", height = 22, width = 12, units = "in", res = 600, bg = "white")
-pheatmap::pheatmap(mat = mat_sel,
-                   color = colors.use,
-                   border_color = "white",
-                   annotation_col = meta_bulk |> select(Condition),
-                   breaks = my_breaks,
-                   cluster_cols = FALSE,
-                   cluster_rows = TRUE,
-                   show_rownames = FALSE,
-                   treeheight_row = 10,
-                   cellwidth = 8,
-                   cellheight = 2,
-                   scale = "row")
-dev.off()
+ann_colors = list(Condition = c(Control = "#3288BD", Patient = "#D53E4F"))
+
+P3 <- ggplotify::as.ggplot(
+    pheatmap::pheatmap(mat = mat_sel,
+                       annotation_col = meta_bulk |> select(Condition),
+                       annotation_colors = ann_colors,
+                       color = colors.use,
+                       border_color = "white",
+                       breaks = my_breaks,
+                       cluster_cols = FALSE,
+                       cluster_rows = TRUE,
+                       show_rownames = FALSE,
+                       show_colnames = FALSE,
+                       treeheight_row = 10,
+                       cellwidth = 5,
+                       scale = "row"))
+
+
 
 ```
 
 
-<!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
+
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
 
 ```{r}
