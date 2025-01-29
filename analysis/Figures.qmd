@@ -400,7 +400,13 @@ P6 <- ipa_m3 |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
+P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
 
+P4_P5_P6 <- cowplot::plot_grid(P4, P5, P6, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.5,0.5,1))
+
+cowplot::plot_grid(P1_P2, P3, P4_P5_P6, ncol = 1, labels = c("", "C", ""))
+
+ggsave("analysis/figures/Bulk/panel.png", width = 20, height = 15, dpi = 600, bg = "white")
 
 ```
 
