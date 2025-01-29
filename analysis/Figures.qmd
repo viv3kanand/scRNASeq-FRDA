@@ -402,9 +402,15 @@ P6 <- ipa_m3 |>
 
 P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
 
-P4_P5_P6 <- cowplot::plot_grid(P4, P5, P6, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.5,0.5,1))
+P4_P5_P6 <- cowplot::plot_grid(P4, P5, P6, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.5, 0.5, 1))
 
 cowplot::plot_grid(P1_P2, P3, P4_P5_P6, ncol = 1, labels = c("", "C", ""))
+
+P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
+P4_P5 <- cowplot::plot_grid(P4, P5, nrow = 1, labels = c("D", "E"), rel_widths = c(1, 1))
+P4_P5_P6 <- cowplot::plot_grid(P4_P5, P6, ncol = 1, labels = c("", "G"), rel_heights = c(0.7, 1))
+P3_P4_P5_P6 <- cowplot::plot_grid(P3, P4_P5_P6, nrow = 1, labels = c("C", ""))
+cowplot::plot_grid(P1_P2, P3_P4_P5_P6, ncol = 1)
 
 ggsave("analysis/figures/Bulk/panel.png", width = 20, height = 15, dpi = 600, bg = "white")
 
