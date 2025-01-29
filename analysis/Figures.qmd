@@ -377,6 +377,10 @@ P3 <- ggplotify::as.ggplot(
                        cellwidth = 5,
                        scale = "row"))
 
+P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.png")
+
+P5 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/module_bulk.png")
+
 
 
 ```
