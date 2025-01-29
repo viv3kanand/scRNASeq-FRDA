@@ -381,6 +381,25 @@ P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.pn
 
 P5 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/module_bulk.png")
 
+ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
+
+P6 <- ipa_m3 |> 
+    filter(!Zscore %in% c("#NUM!", 0)) |> 
+    head(20) |> 
+    mutate(Zscore = as.double(Zscore),
+           pvalue = 10^-Logpval,
+           Count = str_count(Molecules, ",") + 1,
+           Enrichment = case_when(
+               Zscore > 0 ~ "Enriched",
+               Zscore < 0 ~ "Depleted"),
+           order = Zscore, .by = Pathways) |> 
+    ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
+    geom_bar(aes(x = Zscore), stat = "identity") + 
+    labs(x = "z-score", y = "Pathways", alpha = "-Log10(pvalue)") + 
+    scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    custom_theme()
+
 
 
 ```
