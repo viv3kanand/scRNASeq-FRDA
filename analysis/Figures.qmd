@@ -458,18 +458,43 @@ h3 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
+ha <- HeatmapAnnotation(df = meta_bulk |> select(Condition), 
+                        col = list(
+                          Condition = c("Control" = "#3288BD", "Patient" = "#D53E4F")),
+                        annotation_name_side = "left",
+                        show_legend = FALSE)
+
 col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
 
-ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
+h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
+                        top_annotation = ha, 
+                        cluster_columns = FALSE,
                         col = col_fun,
-                        column_km = 2,
                         row_km = 2, 
                         show_row_names = TRUE,
                         show_column_names = FALSE,
                         width = unit(5, "cm"),
                         rect_gp = gpar(col = "white", lwd = 0.1),
-                        show_heatmap_legend = TRUE,
+                        show_heatmap_legend = FALSE,
                         name = "Scaled\nnormalized\nexpression")
+
+lgd1 <- Legend(col_fun = col_fun, title = "Scaled\nnormalized\nexpression")
+
+lgd2 <- Legend(labels = c("Control", "Patient"), 
+               legend_gp = gpar(fill = c("#3288BD", "#D53E4F")), 
+               title = "Condition")
+
+pd = packLegend(lgd1, lgd2)
+
+legend_heatmap <- grid.grabExpr(draw(pd))
+
+h_list <- cowplot::plot_grid(plot_list$heatmap$iPSC,
+                             plot_list$heatmap$NSC,
+                             grid.grabExpr(draw(h3)),
+                             legend_heatmap,
+                             align = "hv",
+                             nrow = 1,
+                             rel_widths = c(3, 0.4))
 
 
 P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.png")
