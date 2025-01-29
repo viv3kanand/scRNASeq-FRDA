@@ -416,6 +416,34 @@ h1 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
+ha <- HeatmapAnnotation(df = meta_bulk |> select(Condition), 
+                        col = list(
+                          Condition = c("Control" = "#3288BD", "Patient" = "#D53E4F")),
+                        annotation_name_side = "left",
+                        show_legend = FALSE)
+
+col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
+
+h1 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))), 
+                        top_annotation = ha, 
+                        cluster_columns = FALSE,
+                        col = col_fun,
+                        row_km = 2, 
+                        show_row_names = TRUE,
+                        show_column_names = FALSE,
+                        width = unit(5, "cm"),
+                        rect_gp = gpar(col = "white", lwd = 0.1),
+                        show_heatmap_legend = FALSE,
+                        name = "Scaled\nnormalized\nexpression")
+
+lgd1 <- Legend(col_fun = col_fun, title = "Scaled\nnormalized\nexpression")
+
+lgd2 <- Legend(labels = c("Control", "Patient"), 
+               legend_gp = gpar(fill = c("#3288BD", "#D53E4F")), 
+               title = "Condition")
+
+
+
 ipa_genes2 <- str_split(ipa_bulk[6,]$Molecules, ",")[[1]]
 
 mat_ipa2 <- assay(vsd) |>
@@ -437,6 +465,19 @@ h2 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
+h2 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))), 
+                        top_annotation = ha, 
+                        cluster_columns = FALSE,
+                        col = col_fun,
+                        row_km = 2, 
+                        show_row_names = TRUE,
+                        show_column_names = FALSE,
+                        width = unit(5, "cm"),
+                        rect_gp = gpar(col = "white", lwd = 0.1),
+                        show_heatmap_legend = FALSE,
+                        name = "Scaled\nnormalized\nexpression")
+
+
 ipa_genes3 <- str_split(ipa_bulk[10,]$Molecules, ",")[[1]]
 
 mat_ipa3 <- assay(vsd) |>
@@ -457,14 +498,6 @@ h3 <- ggplotify::as.ggplot(
                        treeheight_row = 10,
                        cellwidth = 3,
                        scale = "row"))
-
-ha <- HeatmapAnnotation(df = meta_bulk |> select(Condition), 
-                        col = list(
-                          Condition = c("Control" = "#3288BD", "Patient" = "#D53E4F")),
-                        annotation_name_side = "left",
-                        show_legend = FALSE)
-
-col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
 
 h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
                         top_annotation = ha, 
