@@ -458,6 +458,20 @@ h3 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
+col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
+
+ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
+                        col = col_fun,
+                        column_km = 2,
+                        row_km = 2, 
+                        show_row_names = TRUE,
+                        show_column_names = FALSE,
+                        width = unit(5, "cm"),
+                        rect_gp = gpar(col = "white", lwd = 0.1),
+                        show_heatmap_legend = TRUE,
+                        name = "Scaled\nnormalized\nexpression")
+
+
 P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.png")
 
 P5 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/module_bulk.png")
