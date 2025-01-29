@@ -362,6 +362,7 @@ my_breaks <- c(seq(-2, 0, length.out = ceiling(100 / 2) + 1),
 
 ann_colors = list(Condition = c(Control = "#3288BD", Patient = "#D53E4F"))
 
+# vertical heatmap
 P3 <- ggplotify::as.ggplot(
     pheatmap::pheatmap(mat = mat_sel,
                        annotation_col = meta_bulk |> select(Condition),
@@ -374,8 +375,45 @@ P3 <- ggplotify::as.ggplot(
                        show_rownames = FALSE,
                        show_colnames = FALSE,
                        treeheight_row = 10,
-                       cellwidth = 5,
+                       cellwidth = 3,
                        scale = "row"))
+
+# horizontal heatmap
+P3 <- ggplotify::as.ggplot(
+    pheatmap::pheatmap(mat = t(mat_sel),
+                       annotation_col = meta_bulk |> select(Condition),
+                       annotation_colors = ann_colors,
+                       color = colors.use,
+                       border_color = "white",
+                       breaks = my_breaks,
+                       cluster_cols = TRUE,
+                       cluster_rows = FALSE,
+                       show_rownames = FALSE,
+                       show_colnames = FALSE,
+                       treeheight_row = 5,
+                       cellwidth = 10,
+                       scale = "column"))
+
+
+ipa_genes1 <- str_split(ipa_bulk[1,]$Molecules, ",")[[1]]
+
+mat_ipa1 <- assay(vsd) |>
+  as.data.frame() |> 
+  filter(row.names(assay(vsd)) %in% ipa_genes1)
+
+ipa_genes2 <- str_split(ipa_bulk[6,]$Molecules, ",")[[1]]
+
+mat_ipa2 <- assay(vsd) |>
+  as.data.frame() |> 
+  filter(row.names(assay(vsd)) %in% ipa_genes2)
+
+ipa_genes3 <- str_split(ipa_bulk[10,]$Molecules, ",")[[1]]
+
+mat_ipa3 <- assay(vsd) |>
+  as.data.frame() |> 
+  filter(row.names(assay(vsd)) %in% ipa_genes3)
+
+
 
 P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.png")
 
@@ -415,7 +453,6 @@ cowplot::plot_grid(P1_P2, P3_P4_P5_P6, ncol = 1)
 ggsave("analysis/figures/Bulk/panel.png", width = 20, height = 15, dpi = 600, bg = "white")
 
 ```
-
 
 
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
