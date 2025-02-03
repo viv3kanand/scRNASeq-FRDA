@@ -426,6 +426,7 @@ col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
 
 h1 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))), 
                         top_annotation = ha, 
+                        column_title = "Neutrophil Degranulation",
                         cluster_columns = FALSE,
                         col = col_fun,
                         row_km = 2, 
@@ -466,7 +467,8 @@ h2 <- ggplotify::as.ggplot(
                        scale = "row"))
 
 h2 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))), 
-                        top_annotation = ha, 
+                        top_annotation = ha,
+                        column_title = "IL10 signalling",
                         cluster_columns = FALSE,
                         col = col_fun,
                         row_km = 2, 
@@ -501,6 +503,7 @@ h3 <- ggplotify::as.ggplot(
 
 h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
                         top_annotation = ha, 
+                        column_title = "NETOSIS",
                         cluster_columns = FALSE,
                         col = col_fun,
                         row_km = 2, 
@@ -521,8 +524,8 @@ pd = packLegend(lgd1, lgd2)
 
 legend_heatmap <- grid.grabExpr(draw(pd))
 
-h_list <- cowplot::plot_grid(plot_list$heatmap$iPSC,
-                             plot_list$heatmap$NSC,
+h_list <- cowplot::plot_grid(grid.grabExpr(draw(h1)),
+                             grid.grabExpr(draw(h2)),
                              grid.grabExpr(draw(h3)),
                              legend_heatmap,
                              align = "hv",
@@ -530,13 +533,18 @@ h_list <- cowplot::plot_grid(plot_list$heatmap$iPSC,
                              rel_widths = c(3, 0.4))
 
 
-P4 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/tom_plot.png")
+# WGCNA
 
-P5 <- cowplot::ggdraw() + cowplot::draw_image("analysis/figures/Bulk/module_bulk.png")
+
+P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-B-TOM-Dendrogram-25x9.png")
+
+P2B <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
+
+P2C <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
 
-P6 <- ipa_m3 |> 
+P2D <- ipa_m3 |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
     mutate(Zscore = as.double(Zscore),
@@ -552,6 +560,15 @@ P6 <- ipa_m3 |>
     scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
+
+P2AB <- cowplot::plot_grid(P2A, P2B, ncol = 1, rel_heights = c(0.4, 1.1))
+
+P2AC <- cowplot::plot_grid(P2A, P2C, ncol = 1, rel_heights = c(0.4, 1))
+
+cowplot::plot_grid(P2AC, P2B, nrow = 1, rel_widths = c(0.8, 1))
+
+P2ABC <- cowplot::plot_grid(P2AB, P2C, nrow = 1, rel_widths = c(1, 0.6))
+
 
 P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
 
