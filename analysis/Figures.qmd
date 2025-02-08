@@ -114,35 +114,33 @@ source("../scripts/helper_scripts.R")
 ```{r}
 # Theme elements
 font <- "Helvetica"
-text_size <- 15
+text_size <- 6
 line_size <- 0.5
 
 # Figure elements
 res <- 300
-full_width <- 10
+full_width <- 8.5
 full_height <- 13
 meas_units <- "in"
 output_filetype <- "png"
 fig_lab_size <- 9
 fig_lab_pos_x <- 0
 fig_lab_pos_y <- 1
-label_type <- "AUTO"
 
 custom_theme <- function(){
   theme_classic() +
     theme(text = element_text(family = font,
                               size = text_size),
           line = element_line(linewidth = line_size),
-          legend.title = element_text(size = rel(1.5)),
-          
-          axis.title = element_text(size = rel(1.5)),
+          legend.title = element_text(size = rel(1.25)),
+          axis.title = element_text(size = rel(1.25)),
           axis.text = element_text(size = rel(1.15)),
           plot.title = element_text(size = rel(1.5),
                                     hjust = 0.5),
           panel.grid = element_blank(),
           plot.background = element_rect(fill = "white"),
           legend.position = "right",
-          legend.text=element_text(size = rel(1.2)))
+          legend.text=element_text(size = rel(1.15)))
 }
 
 empty_axis <- function(){
@@ -263,22 +261,22 @@ dge_combined <- dge_bulk |>
 dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
 cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
 
-P1 <- dge_bulk |> 
+P1A <- dge_bulk |> 
   mutate(
     Expression = case_when(
       log2FoldChange >= 1 & padj <= 0.05 ~ "Upregulated",
       log2FoldChange <= -1 & padj <= 0.05 ~ "Downregulated",
       TRUE ~ "Not significant")) |>
   ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
-  geom_point(aes(color = Expression, alpha = 0.8, size = 2)) +
+  geom_point(aes(color = Expression, alpha = 0.8)) +
   ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 20),
-                           aes(label = Gene)) +
+                           aes(label = Gene), size = 2) +
   scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
   scale_x_continuous(name = "Log2 Fold Change") +
   scale_y_continuous(name = "-Log10 padj") +
   geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
   geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
-  guides(alpha = "none") + 
+  guides(alpha = "none", size = "none") + 
   custom_theme()
 
 
@@ -328,7 +326,7 @@ P2 <- ipa_bulk |>
     guides(size = "none") +
     custom_theme()
 
-P2 <- ipa_bulk |> 
+P1B <- ipa_bulk |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
     mutate(Zscore = as.double(Zscore),
@@ -340,10 +338,22 @@ P2 <- ipa_bulk |>
            order = Zscore, .by = Pathways) |> 
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
-    labs(x = "z-score", y = "Pathways", alpha = "-Log10(pvalue)") + 
+    labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
     scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
+
+
+P1AB <- cowplot::plot_grid(P1A, P1B, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
+
+ggsave(filename = "figures/Bulk/fig1AB.png", 
+       plot = P1AB,
+       units = "in", 
+       width = 8.5,
+       height = 13/4,
+       dpi = 600)
+
+
 
 # Heatmap top genes
 
@@ -433,7 +443,7 @@ h1 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))),
                         show_row_names = TRUE,
                         show_column_names = FALSE,
                         width = unit(5, "cm"),
-                        rect_gp = gpar(col = "white", lwd = 0.1),
+                        rect_gp = gpar(col = "white", lwd = 0.5),
                         show_heatmap_legend = FALSE,
                         name = "Scaled\nnormalized\nexpression")
 
@@ -475,7 +485,7 @@ h2 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))),
                         show_row_names = TRUE,
                         show_column_names = FALSE,
                         width = unit(5, "cm"),
-                        rect_gp = gpar(col = "white", lwd = 0.1),
+                        rect_gp = gpar(col = "white", lwd = 0.5),
                         show_heatmap_legend = FALSE,
                         name = "Scaled\nnormalized\nexpression")
 
@@ -510,14 +520,14 @@ h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))),
                         show_row_names = TRUE,
                         show_column_names = FALSE,
                         width = unit(5, "cm"),
-                        rect_gp = gpar(col = "white", lwd = 0.1),
-                        show_heatmap_legend = FALSE,
+                        rect_gp = gpar(col = "white", lwd = 0.5),
+                        show_heatmap_legend = TRUE,
                         name = "Scaled\nnormalized\nexpression")
 
 lgd1 <- Legend(col_fun = col_fun, title = "Scaled\nnormalized\nexpression")
 
-lgd2 <- Legend(labels = c("Control", "Patient"), 
-               legend_gp = gpar(fill = c("#3288BD", "#D53E4F")), 
+lgd2 <- Legend(labels = c("Patient", "Control"), 
+               legend_gp = gpar(fill = c("#D53E4F", "#3288BD")), 
                title = "Condition")
 
 pd = packLegend(lgd1, lgd2)
@@ -526,25 +536,37 @@ legend_heatmap <- grid.grabExpr(draw(pd))
 
 h_list <- cowplot::plot_grid(grid.grabExpr(draw(h1)),
                              grid.grabExpr(draw(h2)),
-                             grid.grabExpr(draw(h3)),
                              legend_heatmap,
                              align = "hv",
                              nrow = 1,
                              rel_widths = c(3, 0.4))
 
+layout <- c(
+    area(t = 1, l = 1, b = 1, r = 3),
+    area(t = 1, l = 2, b = 1, r = 4),
+    area(t = 1, l = 3, b = 1, r = 4)
+)
+
+h_list <- (ggplotify::as.ggplot(h1) | ggplotify::as.ggplot(h2) | ggplotify::as.ggplot(legend_heatmap)) + 
+  plot_layout(design = layout)
+
+
+
+
+
 
 # WGCNA
 
 
-P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-B-TOM-Dendrogram-25x9.png")
+# P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-B-TOM-Dendrogram-25x9.png")
 
-P2B <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
+P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
 
-P2C <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
+P2B <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
 
-P2D <- ipa_m3 |> 
+P2C <- ipa_m3 |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
     mutate(Zscore = as.double(Zscore),
@@ -561,7 +583,7 @@ P2D <- ipa_m3 |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
-P2AB <- cowplot::plot_grid(P2A, P2B, ncol = 1, rel_heights = c(0.4, 1.1))
+P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, rel_widths = c(1, 0.8))
 
 P2AC <- cowplot::plot_grid(P2A, P2C, ncol = 1, rel_heights = c(0.4, 1))
 
@@ -576,13 +598,15 @@ P4_P5_P6 <- cowplot::plot_grid(P4, P5, P6, nrow = 1, labels = c("D", "E", "F"), 
 
 cowplot::plot_grid(P1_P2, P3, P4_P5_P6, ncol = 1, labels = c("", "C", ""))
 
-P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
+
+
 P4_P5 <- cowplot::plot_grid(P4, P5, nrow = 1, labels = c("D", "E"), rel_widths = c(1, 1))
 P4_P5_P6 <- cowplot::plot_grid(P4_P5, P6, ncol = 1, labels = c("", "G"), rel_heights = c(0.7, 1))
 P3_P4_P5_P6 <- cowplot::plot_grid(P3, P4_P5_P6, nrow = 1, labels = c("C", ""))
 cowplot::plot_grid(P1_P2, P3_P4_P5_P6, ncol = 1)
 
 ggsave("analysis/figures/Bulk/panel.png", width = 20, height = 15, dpi = 600, bg = "white")
+
 
 ```
 
