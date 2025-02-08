@@ -410,22 +410,6 @@ mat_ipa1 <- assay(vsd) |>
   as.data.frame() |> 
   filter(row.names(assay(vsd)) %in% ipa_genes1)
 
-h1 <- ggplotify::as.ggplot(
-    pheatmap::pheatmap(mat = mat_ipa1, 
-                       main = "Neutrophil Degranulation",
-                       annotation_col = meta_bulk |> select(Condition),
-                       annotation_colors = ann_colors,
-                       color = colors.use,
-                       border_color = "white",
-                       breaks = my_breaks,
-                       cluster_cols = FALSE,
-                       cluster_rows = TRUE,
-                       show_rownames = TRUE,
-                       show_colnames = FALSE,
-                       treeheight_row = 10,
-                       cellwidth = 3,
-                       scale = "row"))
-
 ha <- HeatmapAnnotation(df = meta_bulk |> select(Condition), 
                         col = list(
                           Condition = c("Control" = "#3288BD", "Patient" = "#D53E4F")),
