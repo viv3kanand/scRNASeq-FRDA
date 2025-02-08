@@ -370,7 +370,7 @@ colors.use <- grDevices::colorRampPalette(colors = c("#D53E4F","#FFFFFF", "#3288
 my_breaks <- c(seq(-2, 0, length.out = ceiling(100 / 2) + 1),
                seq(0.05, 2, length.out = floor(100 / 2)))
 
-ann_colors = list(Condition = c(Control = "#3288BD", Patient = "#D53E4F"))
+ann_colors = list(Condition = c(Patient = "#D53E4F", Control = "#3288BD"))
 
 # vertical heatmap
 P3 <- ggplotify::as.ggplot(
@@ -401,7 +401,6 @@ P3 <- ggplotify::as.ggplot(
                        show_rownames = FALSE,
                        show_colnames = FALSE,
                        treeheight_row = 5,
-                       cellwidth = 10,
                        scale = "column"))
 
 
@@ -412,7 +411,8 @@ mat_ipa1 <- assay(vsd) |>
   filter(row.names(assay(vsd)) %in% ipa_genes1)
 
 h1 <- ggplotify::as.ggplot(
-    pheatmap::pheatmap(mat = mat_ipa1,
+    pheatmap::pheatmap(mat = mat_ipa1, 
+                       main = "Neutrophil Degranulation",
                        annotation_col = meta_bulk |> select(Condition),
                        annotation_colors = ann_colors,
                        color = colors.use,
@@ -434,7 +434,8 @@ ha <- HeatmapAnnotation(df = meta_bulk |> select(Condition),
 
 col_fun = circlize::colorRamp2(c(-2, 0, 2), c("#3288BD", "white", "#D53E4F"))
 
-h1 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))), 
+h1 <- ggplotify::as.ggplot(
+  ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))), 
                         top_annotation = ha, 
                         column_title = "Neutrophil Degranulation",
                         cluster_columns = FALSE,
@@ -442,10 +443,11 @@ h1 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa1)))),
                         row_km = 2, 
                         show_row_names = TRUE,
                         show_column_names = FALSE,
+                        row_names_gp = grid::gpar(fontsize = 8),
                         width = unit(5, "cm"),
                         rect_gp = gpar(col = "white", lwd = 0.5),
                         show_heatmap_legend = FALSE,
-                        name = "Scaled\nnormalized\nexpression")
+                        name = "Scaled\nnormalized\nexpression"))
 
 lgd1 <- Legend(col_fun = col_fun, title = "Scaled\nnormalized\nexpression")
 
@@ -476,7 +478,8 @@ h2 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
-h2 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))), 
+h2 <- ggplotify::as.ggplot(
+  ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))), 
                         top_annotation = ha,
                         column_title = "IL10 signalling",
                         cluster_columns = FALSE,
@@ -484,10 +487,11 @@ h2 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa2)))),
                         row_km = 2, 
                         show_row_names = TRUE,
                         show_column_names = FALSE,
+                        row_names_gp = grid::gpar(fontsize = 8),
                         width = unit(5, "cm"),
                         rect_gp = gpar(col = "white", lwd = 0.5),
                         show_heatmap_legend = FALSE,
-                        name = "Scaled\nnormalized\nexpression")
+                        name = "Scaled\nnormalized\nexpression"))
 
 
 ipa_genes3 <- str_split(ipa_bulk[10,]$Molecules, ",")[[1]]
@@ -511,7 +515,8 @@ h3 <- ggplotify::as.ggplot(
                        cellwidth = 3,
                        scale = "row"))
 
-h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
+h3 <- ggplotify::as.ggplot(
+  ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))), 
                         top_annotation = ha, 
                         column_title = "NETOSIS",
                         cluster_columns = FALSE,
@@ -519,10 +524,11 @@ h3 <- ComplexHeatmap::Heatmap(t(scale(t(as.matrix(mat_ipa3)))),
                         row_km = 2, 
                         show_row_names = TRUE,
                         show_column_names = FALSE,
+                        row_names_gp = grid::gpar(fontsize = 8),
                         width = unit(5, "cm"),
                         rect_gp = gpar(col = "white", lwd = 0.5),
-                        show_heatmap_legend = TRUE,
-                        name = "Scaled\nnormalized\nexpression")
+                        show_heatmap_legend = FALSE,
+                        name = "Scaled\nnormalized\nexpression"))
 
 lgd1 <- Legend(col_fun = col_fun, title = "Scaled\nnormalized\nexpression")
 
@@ -541,15 +547,17 @@ h_list <- cowplot::plot_grid(grid.grabExpr(draw(h1)),
                              nrow = 1,
                              rel_widths = c(3, 0.4))
 
-layout <- c(
-    area(t = 1, l = 1, b = 1, r = 3),
-    area(t = 1, l = 2, b = 1, r = 4),
-    area(t = 1, l = 3, b = 1, r = 4)
-)
+P1CD <- cowplot::plot_grid(h1, h2, legend_heatmap, nrow = 1, rel_widths = c(1, 0.8, 0.3), labels = c("C", "D", ""))
 
-h_list <- (ggplotify::as.ggplot(h1) | ggplotify::as.ggplot(h2) | ggplotify::as.ggplot(legend_heatmap)) + 
-  plot_layout(design = layout)
+ggsave(filename = "figures/Bulk/fig1CD.png", 
+       plot = P1CD,
+       units = "in", 
+       width = 8.5,
+       dpi = 600,
+       bg = "white")
 
+fig1AB <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/fig1AB.png")
+fig1CD <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/fig1CD.png")
 
 
 
@@ -582,6 +590,15 @@ P2C <- ipa_m3 |>
     scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
+
+ggsave(filename = "figures/Bulk/fig2C.png", 
+       plot = P2C,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/4,
+       dpi = 600,
+       bg = "white")
+
 
 P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, rel_widths = c(1, 0.8))
 
