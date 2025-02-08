@@ -556,13 +556,6 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
        dpi = 600,
        bg = "white")
 
-fig1AB <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/fig1AB.png")
-fig1CD <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/fig1CD.png")
-
-
-
-
-
 # WGCNA
 
 
@@ -599,30 +592,6 @@ ggsave(filename = "figures/Bulk/fig2C.png",
        dpi = 600,
        bg = "white")
 
-
-P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, rel_widths = c(1, 0.8))
-
-P2AC <- cowplot::plot_grid(P2A, P2C, ncol = 1, rel_heights = c(0.4, 1))
-
-cowplot::plot_grid(P2AC, P2B, nrow = 1, rel_widths = c(0.8, 1))
-
-P2ABC <- cowplot::plot_grid(P2AB, P2C, nrow = 1, rel_widths = c(1, 0.6))
-
-
-P1_P2 <- cowplot::plot_grid(P1, P2, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
-
-P4_P5_P6 <- cowplot::plot_grid(P4, P5, P6, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.5, 0.5, 1))
-
-cowplot::plot_grid(P1_P2, P3, P4_P5_P6, ncol = 1, labels = c("", "C", ""))
-
-
-
-P4_P5 <- cowplot::plot_grid(P4, P5, nrow = 1, labels = c("D", "E"), rel_widths = c(1, 1))
-P4_P5_P6 <- cowplot::plot_grid(P4_P5, P6, ncol = 1, labels = c("", "G"), rel_heights = c(0.7, 1))
-P3_P4_P5_P6 <- cowplot::plot_grid(P3, P4_P5_P6, nrow = 1, labels = c("C", ""))
-cowplot::plot_grid(P1_P2, P3_P4_P5_P6, ncol = 1)
-
-ggsave("analysis/figures/Bulk/panel.png", width = 20, height = 15, dpi = 600, bg = "white")
 
 
 ```
