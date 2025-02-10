@@ -592,28 +592,44 @@ P3A <- DimPlot(seu_PBMC,
                group.by = c("cell_type"), 
                pt.size = 0.5,
                label = TRUE, 
-               label.size = 5,
+               label.size = 2,
                raster = FALSE,
                cols = umap_col) & 
   labs(title = NULL, x = "UMAP1", y = "UMAP2") &
-  NoLegend() &
   custom_theme() +
-  empty_axis()
+  empty_axis() &
+  NoLegend()
   
 
 # Figure 3B - Marker genes - Dot plot
 
 markers_PBMC <- c("CD34", "TNFRSF17", "LEF1", "MKI67", "TOP2A", "CLEC4C", "NRP1", "KLRB1", "PTGDS", "FCER1A", "CLEC10A", "TNFRSF13B", "TRDC", "FCGR3A", "MS4A7", "PPBP", "CD8A", "CD79A", "MS4A1", "CCR7", "CCR4", "NKG7", "GNLY", "NCAM1", "CD14", "LYZ")
 
-P3B <- DotPlot(seu_PBMC, features = markers_PBMC) + 
+P3B <- DotPlot(seu_PBMC, features = markers_PBMC, dot.scale = 3) + 
   scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
   RotatedAxis() +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
+P3AB <- cowplot::plot_grid(P3A, P3B, nrow = 1, rel_widths = c(0.8, 1.2), labels = c("A", "B"))
+
+ggsave(filename = "figures/PBMC/fig3AB.png", 
+       plot = P3AB,
+       units = "in", 
+       width = 8.5,
+       height = 13/4,
+       dpi = 600,
+       bg = "white")
+
+
 # Figure 3C - Cell proportion
 
 dcats_df <- run_dcats(seu_PBMC)
+
+anno_df <- dcats_df[dcats_df$LRT_pvals < 0.05,] |> 
+    mutate(start = c(0.75, 8.75, 11.75, 13.75), 
+           end = c(1.25, 9.25, 12.25, 14.25),
+           y = c(75, 75, 70, 75))
 
 P3C <- seu_PBMC@meta.data |> 
   count(cell_type, Condition) |> 
@@ -636,6 +652,27 @@ P3C <- seu_PBMC@meta.data |>
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         legend.text = element_text(size=rel(1.15)))
+
+
+seu_PBMC@meta.data |> 
+    count(cell_type, Condition) |> 
+    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
+    group_by(cell_type) |> 
+    mutate(prop = n / sum(n)) |> 
+    ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
+    geom_col(position = position_dodge()) +
+    geom_text(aes(cell_type, label = round(100 * prop)),
+              position = position_dodge(.9), vjust = -.2) +
+    geom_signif(annotations = formatC(anno_df$LRT_pvals, digits = 2),
+                xmin = anno_df$start, 
+                xmax = anno_df$end,
+                y_position = anno_df$y) +
+    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    labs(x = "Cell type", y = "Relative abundance (%)") +
+    custom_theme() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          legend.text = element_text(size=rel(1.15)))
+
 
 # Figure 4C - DEG-upset plot (all cell types)
 
