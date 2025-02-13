@@ -697,6 +697,10 @@ lt = list(a = sample(letters, 5),
           c = sample(letters, 15))
 m1 = make_comb_mat(lt)
 
+UpSet(m1, 
+      top_annotation = upset_top_annotation(m1, add_numbers = TRUE), 
+      right_annotation = upset_right_annotation(m1, add_numbers = TRUE))
+
 
 
 
