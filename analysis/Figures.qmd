@@ -689,11 +689,30 @@ ggsave(filename = "figures/PBMC/fig3C.png",
        bg = "white")
 
 # Figure 4C - DEG-upset plot (all cell types)
+
+
 DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
 
 DGE_pbmc_filt <- lapply(DGE_pbmc, function(df){
   df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05)
 })
+
+summary_df <- lapply(names(DGE_pbmc_filt), function(cell_type) {
+  df <- DGE_pbmc_filt[[cell_type]]
+  up <- nrow(filter(df, avg_log2FC > 1 & p_val_adj < 0.05))
+  down <- nrow(filter(df, avg_log2FC < -1 & p_val_adj < 0.05))
+  data.frame(
+    CellType = cell_type,
+    Upregulated = up,
+    Downregulated = down
+  )
+}) |> 
+  bind_rows() |> 
+  pivot_longer(cols = c(Upregulated, Downregulated), 
+               names_to = "Regulation", 
+               values_to = "Count")
+
+
 
 
 
