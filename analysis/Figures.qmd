@@ -703,6 +703,12 @@ UpSet(m1,
 
 
 
+DGE_PBMC_filt <- lapply(DGE_PBMC, function(df){
+  df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05) |> pull(gene)
+})
+
+m = make_comb_mat(DGE_PBMC_filt, top_n_sets = 5)
+UpSet(m)
 
 
 
