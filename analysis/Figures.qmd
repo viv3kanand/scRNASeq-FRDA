@@ -692,6 +692,15 @@ ggsave(filename = "figures/PBMC/fig3C.png",
 DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
 
 
+lt = list(a = sample(letters, 5),
+          b = sample(letters, 10),
+          c = sample(letters, 15))
+m1 = make_comb_mat(lt)
+
+
+
+
+
 
 
 ```
