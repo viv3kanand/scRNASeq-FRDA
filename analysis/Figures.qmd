@@ -689,14 +689,12 @@ ggsave(filename = "figures/PBMC/fig3C.png",
        bg = "white")
 
 # Figure 4C - DEG-upset plot (all cell types)
-DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
+DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
 
-DGE_PBMC_filt <- lapply(DGE_PBMC, function(df){
-  df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05) |> pull(gene)
+DGE_pbmc_filt <- lapply(DGE_pbmc, function(df){
+  df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05)
 })
 
-m = make_comb_mat(DGE_PBMC_filt, top_n_sets = 5)
-UpSet(m)
 
 
 
