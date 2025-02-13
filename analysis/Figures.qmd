@@ -633,7 +633,7 @@ dcats_df <- read_rds("RData/2025-02-13_dcats-df.rds")
 anno_df <- dcats_df[dcats_df$LRT_pvals < 0.05,] |> 
     mutate(start = c(0.75, 8.75, 11.75, 13.75), 
            end = c(1.25, 9.25, 12.25, 14.25),
-           y = c(75, 75, 70, 75))
+           y = c(72, 72, 70, 70))
 
 # P3C <- seu_PBMC@meta.data |> 
 #   count(cell_type, Condition) |> 
@@ -665,7 +665,7 @@ P3C <- seu_meta |>
     group_by(cell_type) |> 
     mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
-    geom_col(position = position_dodge(), alpha = 0.8) +
+    geom_col(position = position_dodge(), width = 0.9) +
     geom_text(aes(cell_type, label = round(100 * prop)),
               position = position_dodge(.9), vjust = -.2, size = 2) +
     geom_signif(annotations = formatC(anno_df$LRT_pvals, digits = 2),
@@ -674,7 +674,7 @@ P3C <- seu_meta |>
                 y_position = anno_df$y,
                 textsize = 2, size = 0.2) +
     scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
-    labs(x = "Cell type", y = "Relative abundance (%)") +
+    labs(x = "", y = "Relative abundance (%)") +
     custom_theme() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
           legend.text = element_text(size=rel(1.15)))
@@ -713,10 +713,44 @@ summary_df <- lapply(names(DGE_pbmc_filt), function(cell_type) {
                values_to = "Count")
 
 
+P3D <- summary_df |> 
+  mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
+  ggplot(aes(x = CellType, y = Count, fill = Regulation)) +
+  ggchicklet::geom_chicklet(width = 0.75) +
+  scale_y_continuous(position = "right") +
+  scale_fill_manual(
+    name = NULL,
+    values = c(
+      "Downregulated" = "#D53E4F",
+      "Upregulated" = "#3288BD"
+      ),
+    breaks = rev(setdiff(unique(summary_df$Regulation), "Regulation"))
+    ) +
+  guides(
+    fill = guide_legend(nrow = 1)
+    ) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  coord_flip() +
+  theme_ipsum_rc(grid="X", base_family = "Helvetica", base_size = 6) +
+  theme(legend.position = "top")
 
+ggsave(filename = "figures/PBMC/fig3D.png", 
+       plot = P3D,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/4,
+       dpi = 600,
+       bg = "white")
 
+P3CD <- cowplot::plot_grid(P3C, P3D, nrow = 1, align = "h", rel_widths = c(1, 0.6))
 
-
+ggsave(filename = "figures/PBMC/fig3CD.png", 
+       plot = P3CD,
+       units = "in", 
+       width = 8.5,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
 
 ```
 
