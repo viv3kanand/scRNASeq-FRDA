@@ -624,49 +624,55 @@ ggsave(filename = "figures/PBMC/fig3AB.png",
 
 # Figure 3C - Cell proportion
 
-dcats_df <- run_dcats(seu_PBMC)
+# dcats_df <- run_dcats(seu_PBMC)
+# write_rds(dcats_df, paste0("RData/", Sys.Date(),"_dcats-df.rds"))
+
+dcats_df <- read_rds("RData/2025-02-13_dcats-df.rds")
+
 
 anno_df <- dcats_df[dcats_df$LRT_pvals < 0.05,] |> 
     mutate(start = c(0.75, 8.75, 11.75, 13.75), 
            end = c(1.25, 9.25, 12.25, 14.25),
            y = c(75, 75, 70, 75))
 
-P3C <- seu_PBMC@meta.data |> 
-  count(cell_type, Condition) |> 
-  mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
-  group_by(cell_type) |> 
-  mutate(prop = n / sum(n),
-         stars = case_when(
-           dcats < 0.001 ~ "***",
-           dcats < 0.01 ~ "**",
-           dcats < 0.05 ~ "*",
-           TRUE ~ "")) |> 
-  ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
-  geom_col(position = position_dodge()) +
-  geom_text(aes(cell_type, label = round(100 * prop)),
-            position = position_dodge(.9), vjust = -.2) +
-  geom_text(aes(label = stars), 
-            position = position_dodge(.9), vjust = -1.5) +
-  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
-  labs(x = "Cell type", y = "Relative abundance (%)") +
-  custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        legend.text = element_text(size=rel(1.15)))
+# P3C <- seu_PBMC@meta.data |> 
+#   count(cell_type, Condition) |> 
+#   mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
+#   group_by(cell_type) |> 
+#   mutate(prop = n / sum(n),
+#          stars = case_when(
+#            dcats < 0.001 ~ "***",
+#            dcats < 0.01 ~ "**",
+#            dcats < 0.05 ~ "*",
+#            TRUE ~ "")) |> 
+#   ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
+#   geom_col(position = position_dodge()) +
+#   geom_text(aes(cell_type, label = round(100 * prop)),
+#             position = position_dodge(.9), vjust = -.2) +
+#   geom_text(aes(label = stars), 
+#             position = position_dodge(.9), vjust = -1.5) +
+#   scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+#   labs(x = "Cell type", y = "Relative abundance (%)") +
+#   custom_theme() +
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+#         legend.text = element_text(size=rel(1.15)))
 
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
 
-seu_PBMC@meta.data |> 
+P3C <- seu_meta |> 
     count(cell_type, Condition) |> 
     mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
     group_by(cell_type) |> 
     mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
-    geom_col(position = position_dodge()) +
+    geom_col(position = position_dodge(), alpha = 0.8) +
     geom_text(aes(cell_type, label = round(100 * prop)),
-              position = position_dodge(.9), vjust = -.2) +
+              position = position_dodge(.9), vjust = -.2, size = 2) +
     geom_signif(annotations = formatC(anno_df$LRT_pvals, digits = 2),
                 xmin = anno_df$start, 
                 xmax = anno_df$end,
-                y_position = anno_df$y) +
+                y_position = anno_df$y,
+                textsize = 2, size = 0.2) +
     scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
     labs(x = "Cell type", y = "Relative abundance (%)") +
     custom_theme() +
@@ -674,7 +680,17 @@ seu_PBMC@meta.data |>
           legend.text = element_text(size=rel(1.15)))
 
 
+ggsave(filename = "figures/PBMC/fig3C.png", 
+       plot = P3C,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/4,
+       dpi = 600,
+       bg = "white")
+
 # Figure 4C - DEG-upset plot (all cell types)
+DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
+
 
 
 
