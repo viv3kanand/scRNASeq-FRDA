@@ -579,11 +579,20 @@ S1A <- DimPlot(seu_WB,
 
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
-S1B <- DotPlot(seu_WB, features = markers_WB) + 
+S1B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
   scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
   RotatedAxis() +
   custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
+  labs(title = NULL, x = NULL, y = NULL)
+
+ggsave(filename = "figures/WB/fig3C.png", 
+       plot = S1B,
+       units = "in", 
+       width = 8.5/1.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 # Figure 3A - UMAP - PBMC
 
@@ -609,7 +618,17 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC, dot.scale = 3) +
   scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
   RotatedAxis() +
   custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
+  labs(title = NULL, x = NULL, y = NULL)
+
+ggsave(filename = "figures/PBMC/fig3B.png", 
+       plot = P3B,
+       units = "in", 
+       width = 8.5/1.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
 
 P3AB <- cowplot::plot_grid(P3A, P3B, nrow = 1, rel_widths = c(0.8, 1.2), labels = c("A", "B"))
 
@@ -621,6 +640,16 @@ ggsave(filename = "figures/PBMC/fig3AB.png",
        dpi = 600,
        bg = "white")
 
+
+P3B_S1B <- cowplot::plot_grid(P3B, S1B, nrow = 1, align = "v")
+
+ggsave(filename = "figures/PBMC/fig3B_S2B.png", 
+       plot = P3B_S1B,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
 
 # Figure 3C - Cell proportion
 
@@ -677,14 +706,15 @@ P3C <- seu_meta |>
     labs(x = "", y = "Relative abundance (%)") +
     custom_theme() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-          legend.text = element_text(size=rel(1.15)))
+          legend.text = element_text(size=rel(1.15))) +
+    theme(legend.position = "top")
 
 
 ggsave(filename = "figures/PBMC/fig3C.png", 
        plot = P3C,
        units = "in", 
        width = 8.5/2,
-       height = 13/4,
+       height = 13/3,
        dpi = 600,
        bg = "white")
 
@@ -742,7 +772,7 @@ ggsave(filename = "figures/PBMC/fig3D.png",
        dpi = 600,
        bg = "white")
 
-P3CD <- cowplot::plot_grid(P3C, P3D, nrow = 1, align = "h", rel_widths = c(1, 0.6))
+P3CD <- cowplot::plot_grid(P3C, P3D, nrow = 1, rel_widths = c(1, 1), labels = c("C", "D"))
 
 ggsave(filename = "figures/PBMC/fig3CD.png", 
        plot = P3CD,
@@ -758,18 +788,27 @@ ggsave(filename = "figures/PBMC/fig3CD.png",
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), Cell Chat, TF analysis -->
 
 ```{r}
-#  P4A - Imbalance score
+#  P3A - Imbalance score
 
 imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
-P4A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+P3A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   geom_point(size = 2, alpha = 0.8) +
   scale_color_gradientn(colours = palette7) +
   labs(title = NULL, x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
-# P4B - Volcano plot of DEGs
+ggsave(filename = "figures/PBMC/Panel3/figA.png", 
+       plot = P3A,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
+
+# P3B - Volcano plot of DEGs
 
 DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
 
@@ -784,21 +823,32 @@ DGE_PBMC$`CD14 Mono` |>
     merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
 
 
-P4B <- CD14_plot_data |> 
+P3B <- CD14_plot_data |> 
   ggplot(aes(Control, FRDA)) + 
-  geom_point(aes(color = Expression, size = 2, alpha = 0.8)) + 
+  geom_point(aes(color = Expression, alpha = 0.8)) + 
   ggtitle("CD14 Mono") + 
   ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
                                          filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
                                          arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
                            aes(label = gene), 
                            max.overlaps = 20, 
-                           force = 10) +
+                           force = 20, 
+                           segment.size = 0.2,
+                           segment.curvature = -0.1,
+                           size = 2) +
   scale_color_manual(values = c("#3288BD", "grey", "#D53E4F")) +
   guides(alpha = "none", size = "none") +
   custom_theme()
 
-# P4C - pathway analysis (GSEA KEGG, BP)
+ggsave(filename = "figures/PBMC/Panel3/figB.png", 
+       plot = P3B,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
+# P3C - pathway analysis (GSEA KEGG, BP)
 
 files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
 
@@ -828,7 +878,7 @@ do.call("rbind", GSEA_CD14) |>
   scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
   custom_theme()
 
-P4C <- do.call("rbind", GSEA_CD14) |> 
+P3C <- do.call("rbind", GSEA_CD14) |> 
   as_tibble() |>  
   dplyr::select(c(1,5,6,7,8,9)) |>
   dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
@@ -846,7 +896,7 @@ P4C <- do.call("rbind", GSEA_CD14) |>
   scale_color_manual(values = c("#3288BD", "#D53E4F")) +
   custom_theme()
 
-do.call("rbind", GSEA_CD14) |> 
+P3C <- do.call("rbind", GSEA_CD14) |> 
     as_tibble() |>  
     dplyr::select(c(1,5,6,7,8,9)) |>
     dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
@@ -859,12 +909,22 @@ do.call("rbind", GSEA_CD14) |>
                 gsub(ID, pattern = "_", replacement = " "))) |> 
     ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = 1 - p.adjust)) + 
     geom_bar(stat = "identity") + 
-    labs(title = NULL, x = "NES", y = "Gene Ontology") +
+    labs(title = NULL, x = "NES", y = NULL) +
     scale_x_continuous(position="bottom") +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     scale_fill_manual(values = c("Enriched" = "#3288BD", "Depleted" = "#D53E4F"), breaks = c("Enriched", "Depleted")) +
     scale_alpha_continuous(range = c(0.3, 1), guide = "none") +
     custom_theme()
+
+
+ggsave(filename = "figures/PBMC/Panel3/figC.png", 
+       plot = P3C,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
 
 # Cell Chat
 
@@ -916,7 +976,7 @@ apply(seu_PBMC[['tfsulm']]@data[tfs, ], 1, FUN=function(x)sum(is.na(x)))
 # TRRUST analysis
 tf_trrust <- read_csv("../data/TRRUST_CD14.csv")
 
-P4D <- tf_trrust |> 
+P3D <- tf_trrust |> 
     mutate(order = desc(qvalue), .by = TF) |>
     head(20) |> 
     ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
@@ -926,6 +986,14 @@ P4D <- tf_trrust |>
     scale_fill_gradientn(colours = c('#FEE08B', '#D53E4F'), na.value = "grey") +
     custom_theme()
 
+ggsave(filename = "figures/PBMC/Panel3/figD.png", 
+       plot = P3D,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
 ```
 
 
@@ -934,7 +1002,7 @@ P4D <- tf_trrust |>
 ```{r}
 # Il-10 levels in FA vs HC (Module score)
 
-seu_PBMC@meta.data |> 
+seu_meta |> 
     select(orig.ident, Condition, cell_type, 30) |>
     dplyr::filter(cell_type == "CD14 Mono") |> 
     pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
