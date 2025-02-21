@@ -913,7 +913,7 @@ P3C <- do.call("rbind", GSEA_CD14) |>
     scale_x_continuous(position="bottom") +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     scale_fill_manual(values = c("Enriched" = "#3288BD", "Depleted" = "#D53E4F"), breaks = c("Enriched", "Depleted")) +
-    scale_alpha_continuous(range = c(0.3, 1), guide = "none") +
+    # scale_alpha_continuous(range = c(0.3, 1), guide = "none") +
     custom_theme()
 
 
@@ -1002,6 +1002,25 @@ ggsave(filename = "figures/PBMC/Panel3/figD.png",
 ```{r}
 # Il-10 levels in FA vs HC (Module score)
 
+P4A <- seu_meta |> 
+    select(orig.ident, Condition, cell_type, 30) |>
+    dplyr::filter(cell_type == "CD14 Mono") |> 
+    pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
+                 names_to = "source", 
+                 values_to = "score") |> 
+    ggplot(aes(Condition, score, fill = Condition)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+    custom_theme() +
+    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    geom_signif(
+        comparisons = list(c("Control", "FRDA")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+
+
 seu_meta |> 
     select(orig.ident, Condition, cell_type, 30) |>
     dplyr::filter(cell_type == "CD14 Mono") |> 
@@ -1009,9 +1028,12 @@ seu_meta |>
                  names_to = "source", 
                  values_to = "score") |> 
     ggplot(aes(Condition, score)) +
-    geom_boxplot(width = 0.5, outlier.colour = "grey") + 
-    custom_theme() +
-    ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+    ggdist::stat_halfeye(aes(fill = Condition), adjust = .5, width = .4, justification = -.2, .width = 0, point_colour = NA) +
+    geom_boxplot(aes(fill = Condition), width = 0.1, outlier.colour = "grey") + 
+    geom_signif(
+        comparisons = list(c("Control", "FRDA")),
+        map_signif_level = FALSE, textsize = 3
+    )
 
 # IL-10 pathway genes (Reactome) heatmap
 
@@ -1047,16 +1069,20 @@ DoHeatmap(subset(seu_PBMC, subset = cell_type == "CD14 Mono"), features = il10_g
 
 # IL-10 producing cells proportion
 
-seu_PBMC@meta.data |>
-    mutate(il10 = FetchData(seu_PBMC, vars = "IL10")$IL10) |> 
+P4C <- seu_meta |> 
     filter(cell_type == "CD14 Mono") |> 
     dplyr::select(orig.ident, Condition, il10) |> 
     group_by(orig.ident, Condition) |>
     summarise(prop = length(which(il10 > 0))/length(il10)) |> 
-    ggplot(aes(Condition, prop)) +
-    geom_boxplot() + 
+    ggplot(aes(Condition, prop, fill = Condition)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
   custom_theme() +
-    ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+  geom_signif(
+        comparisons = list(c("Control", "FRDA")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
 
 
 ```
