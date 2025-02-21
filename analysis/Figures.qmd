@@ -1010,6 +1010,7 @@ P4A <- seu_meta |>
                  values_to = "score") |> 
     ggplot(aes(Condition, score, fill = Condition)) +
     geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Module Score") +
     custom_theme() +
     scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
     geom_signif(
@@ -1018,6 +1019,13 @@ P4A <- seu_meta |>
     ) &
   NoLegend()
 
+ggsave(filename = "figures/PBMC/Panel4/figA.png", 
+       plot = P4A,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 
 
@@ -1076,6 +1084,7 @@ P4C <- seu_meta |>
     summarise(prop = length(which(il10 > 0))/length(il10)) |> 
     ggplot(aes(Condition, prop, fill = Condition)) +
     geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Proportion") +
   custom_theme() +
   scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
   geom_signif(
@@ -1084,6 +1093,23 @@ P4C <- seu_meta |>
     ) &
   NoLegend()
 
+ggsave(filename = "figures/PBMC/Panel4/figC.png", 
+       plot = P4C,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
+P4AC <- cowplot::plot_grid(P4A, P4C, nrow = 1, align = "h")
+
+ggsave(filename = "figures/PBMC/Panel4/figAC.png", 
+       plot = P4AC,
+       units = "in", 
+       width = 8.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 ```
 
@@ -1148,22 +1174,27 @@ seu_WB@meta.data |>
     geom_boxplot() + 
     stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
 
+
+
 t(as.matrix(seu_WB@assays$module_score@data)) |> 
     as.data.frame() |> 
     dplyr::mutate(cluster = Seurat::Idents(seu_WB),
                   Condition = seu_WB@meta.data$Condition,
-                  ) |> 
+    ) |> 
     tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                         names_to = "source", 
                         values_to = "score") |> 
     filter(cluster == c("Neutrophil")) |> 
     ggplot(aes(Condition, score)) +
-    ggdist::stat_halfeye(aes(fill = Condition), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
-    geom_boxplot(aes(fill = Condition), width = 0.1, outlier.colour = "grey") + 
+    ggdist::stat_halfeye(aes(fill = Condition, alpha = 0.8), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
+    geom_boxplot(aes(fill = Condition, alpha = 0.8), width = 0.1, outlier.colour = "grey") + 
     facet_grid(~source) +
     custom_theme() +
-    scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
-    ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    geom_signif(
+        comparisons = list(c("Control", "Patient")),
+        map_signif_level = FALSE, textsize = 3
+    )
 
 ```
 
