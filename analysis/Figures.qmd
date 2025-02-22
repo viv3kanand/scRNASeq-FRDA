@@ -1176,7 +1176,7 @@ seu_WB@meta.data |>
 
 
 
-t(as.matrix(seu_WB@assays$module_score@data)) |> 
+P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
     as.data.frame() |> 
     dplyr::mutate(cluster = Seurat::Idents(seu_WB),
                   Condition = seu_WB@meta.data$Condition,
@@ -1186,15 +1186,34 @@ t(as.matrix(seu_WB@assays$module_score@data)) |>
                         values_to = "score") |> 
     filter(cluster == c("Neutrophil")) |> 
     ggplot(aes(Condition, score)) +
-    ggdist::stat_halfeye(aes(fill = Condition, alpha = 0.8), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
-    geom_boxplot(aes(fill = Condition, alpha = 0.8), width = 0.1, outlier.colour = "grey") + 
+    ggdist::stat_halfeye(aes(fill = Condition), 
+                         alpha = .8,
+                         adjust = .5, 
+                         width = .8, 
+                         justification = -.2, 
+                         .width = 0, 
+                         point_colour = NA) +
+    geom_boxplot(aes(fill = Condition), 
+                 alpha = .8,
+                 width = 0.1, 
+                 outlier.colour = "grey") + 
+    labs(x = NULL, y = "Module Score") +
     facet_grid(~source) +
     custom_theme() +
     scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
     geom_signif(
         comparisons = list(c("Control", "Patient")),
         map_signif_level = FALSE, textsize = 3
-    )
+    ) &
+    NoLegend()
+
+ggsave(filename = "figures/PBMC/Panel5/figB.png", 
+       plot = P5B,
+       units = "in", 
+       width = 8.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 ```
 
@@ -1225,20 +1244,30 @@ p1 <- CS_CD14$CAD_NCAD$M3 |>
   dplyr::select(c(1:10,13)) |> 
   filter(Description %in% M3) |> 
   mutate(GeneRatio = eval(parse(text = GeneRatio)),
-         ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+         ID = paste0(ONTOLOGY, " : ", stringr::str_to_sentence(Description)),
          order = GeneRatio, .by = ID) |> 
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
-  labs(x = "Gene Ratio", y = "Gene Ontology", title = "Module 3") + 
+  labs(x = "Gene Ratio", y = NULL, title = "Module 3") + 
   scale_color_gradientn(colours = c('#D53E4F', '#FFFFFF'), limit = c(min(CS_CD14$CAD_NCAD$M3$p.adjust), max(CS_CD14$CAD_NCAD$M3$p.adjust)), na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
+
+
+ggsave(filename = "figures/PBMC/Panel6/figA.png", 
+       plot = p1,
+       units = "in", 
+       width = 8.5/1.5,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
+
 
 p2 <- CS_CD14$CAD_NCAD$M9 |> 
   dplyr::select(c(1:10,13)) |> 
   filter(Description %in% M9) |> 
   mutate(GeneRatio = eval(parse(text = GeneRatio)),
-         ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+         ID = paste0(ONTOLOGY, " : ", stringr::str_to_sentence(Description)),
          order = GeneRatio, .by = ID) |> 
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
@@ -1247,11 +1276,19 @@ p2 <- CS_CD14$CAD_NCAD$M9 |>
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   custom_theme()
 
+ggsave(filename = "figures/PBMC/Panel6/figB.png", 
+       plot = p2,
+       units = "in", 
+       width = 8.5/1.5,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
+
 p3 <- CS_CD14$CAD_NCAD$M15 |> 
     dplyr::select(c(1:10,13)) |> 
     filter(Description %in% M15) |> 
     mutate(GeneRatio = eval(parse(text = GeneRatio)),
-           ID = paste0(ONTOLOGY, ":", stringr::str_to_sentence(Description)),
+           ID = paste0(ONTOLOGY, " : ", stringr::str_to_sentence(Description)),
            order = GeneRatio, .by = ID) |> 
     ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
     geom_point() + 
@@ -1260,7 +1297,23 @@ p3 <- CS_CD14$CAD_NCAD$M15 |>
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
+ggsave(filename = "figures/PBMC/Panel6/figC.png", 
+       plot = p3,
+       units = "in", 
+       width = 8.5/1.5,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
+
 wrap_plots(p1,p2,p3)
+
+ggsave(filename = "figures/PBMC/Panel6/figAll.png", 
+       plot = wrap_plots(p1,p2,p3),
+       units = "in", 
+       width = 15,
+       height = 13/2,
+       dpi = 600,
+       bg = "white")
 
 ```
 
