@@ -262,22 +262,26 @@ dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
 cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
 
 P1A <- dge_bulk |> 
-  mutate(
-    Expression = case_when(
-      log2FoldChange >= 1 & padj <= 0.05 ~ "Upregulated",
-      log2FoldChange <= -1 & padj <= 0.05 ~ "Downregulated",
-      TRUE ~ "Not significant")) |>
-  ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
-  geom_point(aes(color = Expression, alpha = 0.8)) +
-  ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 20),
-                           aes(label = Gene), size = 2) +
-  scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
-  scale_x_continuous(name = "Log2 Fold Change") +
-  scale_y_continuous(name = "-Log10 padj") +
-  geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
-  geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
-  guides(alpha = "none", size = "none") + 
-  custom_theme()
+    mutate(
+        Expression = case_when(
+            log2FoldChange >= 1 & padj <= 0.05 ~ "Upregulated",
+            log2FoldChange <= -1 & padj <= 0.05 ~ "Downregulated",
+            TRUE ~ "Not significant")) |>
+    ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
+    geom_point(aes(color = Expression, alpha = 0.8)) +
+    ggrepel::geom_text_repel(data = head(dge_bulk[order(dge_bulk[["padj"]]),], 20),
+                             aes(label = Gene), max.overlaps = 20, 
+                             force = 10, 
+                             segment.size = 0.2,
+                             segment.curvature = -0.5,
+                             size = 2) +
+    scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
+    scale_x_continuous(name = "Log2 Fold Change") +
+    scale_y_continuous(name = "-Log10 padj") +
+    geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
+    geom_vline(xintercept = c(-1, 1), linetype = 2, color = "black") +
+    guides(alpha = "none", size = "none") + 
+    custom_theme()
 
 
 # GO/KEGG plot
@@ -344,13 +348,13 @@ P1B <- ipa_bulk |>
     custom_theme()
 
 
-P1AB <- cowplot::plot_grid(P1A, P1B, rel_widths = c(0.8, 1), align = "h", labels = "AUTO")
+P1AB <- cowplot::plot_grid(P1A, P1B, rel_widths = c(0.8, 1), align = "h")
 
 ggsave(filename = "figures/Bulk/fig1AB.png", 
        plot = P1AB,
        units = "in", 
        width = 8.5,
-       height = 13/4,
+       height = 13/3,
        dpi = 600)
 
 
@@ -690,7 +694,7 @@ seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
 
 P3C <- seu_meta |> 
     count(cell_type, Condition) |> 
-    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
+    # mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
     group_by(cell_type) |> 
     mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
@@ -1185,6 +1189,7 @@ P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |>
                         names_to = "source", 
                         values_to = "score") |> 
     filter(cluster == c("Neutrophil")) |> 
+    mutate(source = str_sub(source, end = -2)) |> 
     ggplot(aes(Condition, score)) +
     ggdist::stat_halfeye(aes(fill = Condition), 
                          alpha = .8,

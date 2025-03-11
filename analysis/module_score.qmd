@@ -27,9 +27,9 @@ require(tidyverse)
 #| echo: false
 #| eval: true
 
-# seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
-# DefaultAssay(seu_PBMC) <- "RNA"
-# Idents(seu_PBMC) <- "cell_type"
+seu_PBMC <- read_rds("../data/2024-11-22_seurat_obj_PBMC.rds")
+DefaultAssay(seu_PBMC) <- "RNA"
+Idents(seu_PBMC) <- "cell_type"
 
 seu_WB <- read_rds("../data/2024-10-17_seurat_obj_WB.rds")
 DefaultAssay(seu_WB) <- "RNA"
@@ -75,8 +75,45 @@ seu_WB@assays$module_score@data <- seu_WB@assays$module_score@scale.data
 ```
 
 
+```{r}
+gene_list <- list("IFN" = IFN)
 
+seu_PBMC <- Seurat::AddModuleScore(seu_PBMC, features = gene_list, name = names(gene_list))
+#   tibble::rownames_to_column("cells") |> 
+#   dplyr::select(c(cells, IFN1)) |> 
+#   tidyr::pivot_longer(cols = IFN1, names_to = "source", values_to = "score") |> 
+#   tidyr::pivot_wider(id_cols = 'source', 
+#                      names_from = 'cells',
+#                      values_from = 'score') |> 
+#   tibble::column_to_rownames("source") |>
+#   Seurat::CreateAssayObject()
+# 
+# DefaultAssay(seu_PBMC) <- "module_score"
+# seu_PBMC <- Seurat::ScaleData(seu_PBMC)
+# seu_PBMC@assays$module_score@data <- seu_PBMC@assays$module_score@scale.data
 
+```
+
+```{r}
+seu_PBMC@meta.data |> 
+    select(orig.ident, Condition2, cell_type, 33) |>
+    dplyr::filter(cell_type == "CD14 Mono" & !is.na(Condition2)) |> 
+    pivot_longer(cols = c(-orig.ident, -Condition2, -cell_type ), 
+                 names_to = "source", 
+                 values_to = "score") |> 
+    ggplot(aes(Condition2, score, fill = Condition2)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+    labs(x = NULL, y = "IFN Module Score") +
+    custom_theme() +
+    scale_fill_manual(values = c("#3288BD", "#D53E4F", "#66C2A5")) +
+    geom_signif(
+        comparisons = list(c("Control", "CAD"),
+                           c("Control", "NCAD"),
+                           c("CAD", "NCAD")),
+        map_signif_level = TRUE, textsize = 3, step_increase = 0.05
+    ) &
+    NoLegend()
+```
 
 
 
