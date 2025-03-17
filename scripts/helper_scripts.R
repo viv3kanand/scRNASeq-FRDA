@@ -50,16 +50,7 @@ font <- "Helvetica"
 text_size <- 6
 line_size <- 0.5
 
-# Figure elements
-res <- 300
-full_width <- 8.5
-full_height <- 13
-meas_units <- "in"
-output_filetype <- "png"
-fig_lab_size <- 9
-fig_lab_pos_x <- 0
-fig_lab_pos_y <- 1
-
+# figure elements
 custom_theme <- function(){
   theme_classic() +
     theme(text = element_text(family = font,
