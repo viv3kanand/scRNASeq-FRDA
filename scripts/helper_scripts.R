@@ -1,3 +1,4 @@
+# empirical filter functions
 emp_fun <- function(obj){
   obj@meta.data[, c("nCount_RNA", "nFeature_RNA")] |> 
     map(log10) |> 
@@ -21,6 +22,7 @@ filterCell <- function(obj){
   return(combined)
 }
 
+# plot functions
 knee_plot <- function(bc_rank) {
   knee_plt <- tibble(rank = bc_rank[["rank"]],
                      total = bc_rank[["total"]]) %>% 
@@ -38,6 +40,7 @@ knee_plot <- function(bc_rank) {
   return(p)
 }
 
+# zscore
 scale_this <- function(x){
   (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
 }
