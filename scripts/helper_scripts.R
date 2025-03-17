@@ -22,6 +22,12 @@ filterCell <- function(obj){
   return(combined)
 }
 
+# zscore
+scale_this <- function(x){
+  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+}
+
+
 # plot functions
 knee_plot <- function(bc_rank) {
   knee_plt <- tibble(rank = bc_rank[["rank"]],
@@ -40,10 +46,39 @@ knee_plot <- function(bc_rank) {
   return(p)
 }
 
-# zscore
-scale_this <- function(x){
-  (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+font <- "Helvetica"
+text_size <- 6
+line_size <- 0.5
+
+# Figure elements
+res <- 300
+full_width <- 8.5
+full_height <- 13
+meas_units <- "in"
+output_filetype <- "png"
+fig_lab_size <- 9
+fig_lab_pos_x <- 0
+fig_lab_pos_y <- 1
+
+custom_theme <- function(){
+  theme_classic() +
+    theme(text = element_text(family = font,
+                              size = text_size),
+          line = element_line(linewidth = line_size),
+          legend.title = element_text(size = rel(1.25)),
+          axis.title = element_text(size = rel(1.25)),
+          axis.text = element_text(size = rel(1.15)),
+          plot.title = element_text(size = rel(1.5),
+                                    hjust = 0.5),
+          panel.grid = element_blank(),
+          plot.background = element_rect(fill = "white"),
+          legend.position = "right",
+          legend.text=element_text(size = rel(1.15)))
 }
 
-
-
+empty_axis <- function(){
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+}
