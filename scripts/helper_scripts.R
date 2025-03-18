@@ -30,9 +30,10 @@ scale_this <- function(x){
 
 # plot functions
 knee_plot <- function(bc_rank) {
+  require(DropletUtils)
   knee_plt <- tibble(rank = bc_rank[["rank"]],
-                     total = bc_rank[["total"]]) %>% 
-    distinct() %>% 
+                     total = bc_rank[["total"]]) |> 
+    distinct() |> 
     dplyr::filter(total > 0)
   annot <- tibble(inflection = metadata(bc_rank)[["inflection"]],
                   rank_cutoff = max(bc_rank$rank[bc_rank$total > metadata(bc_rank)[["inflection"]]]))
@@ -50,7 +51,6 @@ font <- "Helvetica"
 text_size <- 6
 line_size <- 0.5
 
-# figure elements
 custom_theme <- function(){
   theme_classic() +
     theme(text = element_text(family = font,
