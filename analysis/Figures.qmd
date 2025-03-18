@@ -191,7 +191,7 @@ ggplot(obj@meta.data, aes(nCount_RNA, nFeature_RNA)) +
     scale_x_log10(guide = "axis_logticks") + scale_y_log10(guide = "axis_logticks") +
     labs(x = "Total UMI counts", y = "Number of genes detected")
     
-    ggsave(paste0("figures/WB/QC/",name,".png"))
+    ggsave(paste0("figures/PBMC/QC/Library saturation/",name,".png"))
 })
 
 ```
@@ -207,6 +207,13 @@ ggplot(obj@meta.data, aes(nCount_RNA, nFeature_RNA)) +
 #| fig-align: center
 
 knee_plot(barcodeRanks(seurat_list$C2_Control[["RNA"]]$counts, lower = 10))
+
+## knee plot for individual samples
+purrr::imap(seurat_list, function(obj, name){
+  knee_plot(barcodeRanks(obj[["RNA"]]$counts, lower = 10))
+  ggsave(paste0("figures/PBMC/QC/Knee/",name,".png"))
+})
+
 
 ```
 
