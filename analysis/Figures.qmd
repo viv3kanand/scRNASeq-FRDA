@@ -228,7 +228,7 @@ ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
 
 
 ```{r}
-p1 <- seurat_obj@meta.data |> 
+p1 <- seu_PBMC@meta.data |> 
     ggplot(aes(color = Condition, x = nFeature_RNA  , fill = Condition)) + 
     geom_density(alpha = 0.2) + 
     scale_x_log10() + 
@@ -236,7 +236,7 @@ p1 <- seurat_obj@meta.data |>
     ylab("Density") +
     geom_vline(xintercept = 500)
 
-p2 <- seurat_obj@meta.data |> 
+p2 <- seu_PBMC@meta.data |> 
     ggplot(aes(color = Condition, x = nCount_RNA , fill = Condition)) + 
     geom_density(alpha = 0.2) + 
     scale_x_log10() + 
@@ -244,16 +244,18 @@ p2 <- seurat_obj@meta.data |>
     ylab("Density") +
     geom_vline(xintercept = 500)
 
-p3 <- seurat_obj@meta.data |> 
+p3 <- seu_PBMC@meta.data |> 
     ggplot(aes(color = Condition, x = percent.mt, fill = Condition)) + 
     geom_density(alpha = 0.2) + 
     #scale_x_log10() + 
     theme_classic() +
     geom_vline(xintercept = c(5, 10))
 
-p4 <- FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") & NoLegend()
+p4 <- FeatureScatter(seu_PBMC, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") & NoLegend()
 
 p1 + p2 + p3 + p4
+
+ggsave("analysis/figures/PBMC/QC/basicQC.png")
 ```
 
 <!-- Todo list -->
