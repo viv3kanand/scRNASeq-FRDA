@@ -8,6 +8,10 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
               inherits(gene_col, "character") &
               inherits(expr_mat_list, "list"))
   
+  if (!requireNamespace("GSVA", quietly = TRUE)) {
+    stop("GSVA package is required but not installed!")
+  }
+  
   kcdf = match.arg(kcdf)
   
   gset_list <- split(gset_df[gene_col], gset_df[group_col])
@@ -19,7 +23,7 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
     rownames(expr_mat) = expr_mat[[1]]
     expr_mat = expr_mat[,-1, drop = FALSE] |> as.matrix()
     
-    gsvapar = gsvaParam(exprData = expr_mat, geneSets = geneset, kcdf = kcdf)
+    gsvapar = gsvaParam(exprData = expr_mat, geneSets = gset_list, kcdf = kcdf)
     res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
     
     resList[[i]] = as.data.frame(t(res))
