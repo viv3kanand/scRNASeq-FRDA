@@ -1,4 +1,4 @@
-applyGSVA = function(geneset, group_col, gene_col, exprmatList, kcdf = c("Gaussian", "Poisson")) {
+applyGSVA = function(geneset, group_col, gene_col, expr_matList, kcdf = c("Gaussian", "Poisson")) {
   require(GSVA)
   require(BiocParallel)
   require(dplyr)
@@ -6,14 +6,14 @@ applyGSVA = function(geneset, group_col, gene_col, exprmatList, kcdf = c("Gaussi
   stopifnot(inherits(geneset, "tbl_df") &
               inherits(group_col, "character") &
               inherits(gene_col, "character") &
-              inherits(exprmaListt, "matrix"))
+              inherits(expr_matList, "list"))
   
   kcdf = match.arg(kcdf)
   
-  for (i in seq_along(exprmatList)) {
-    exprmat = exprmatList[[i]]
+  for (i in seq_along(expr_matList)) {
+    expr_mat = expr_matList[[i]]
     
-    gsvapar = gsvaParam(exprData = exprmat, geneSets = geneset, kcdf = kcdf)
+    gsvapar = gsvaParam(exprData = expr_mat, geneSets = geneset, kcdf = kcdf)
     res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
   }
 }
