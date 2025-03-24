@@ -26,7 +26,7 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
     gsvapar = gsvaParam(exprData = expr_mat, geneSets = gset_list, kcdf = kcdf)
     res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
     
-    resList[[i]] = as.data.frame(t(res))
+    resList[[i]] = as_tibble(t(res))
   }
   return(resList)
 }
