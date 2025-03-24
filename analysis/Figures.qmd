@@ -132,6 +132,7 @@ custom_theme <- function(){
   theme_classic() +
     theme(text = element_text(family = font,
                               size = text_size),
+          strip.text.x = element_text(size = 8),
           line = element_line(linewidth = line_size),
           legend.title = element_text(size = rel(1.25)),
           axis.title = element_text(size = rel(1.25)),
@@ -594,22 +595,36 @@ res_gsva[[1]]$Condition <- colData(vsd)$Condition[match(rownames(res_gsva[[1]]),
 
 p <- res_gsva[[1]] |> 
   pivot_longer(cols = 1:26, names_to = "celltype", values_to = "value") |>
-  filter(celltype %in% c("B cells", "CD8 T cells", "DC", "Monocyte", "Neutrophils", "NK cells", "T cells", "T helper cells")) |> 
-  ggplot(aes(Condition, value)) +
-  geom_boxplot(aes(fill = Condition), alpha = 0.8) +
+  filter(celltype %in% c("B cells", 
+                         "CD8 T cells", 
+                         "DC", "Monocyte", 
+                         "Neutrophils", 
+                         "NK cells", 
+                         "T cells", 
+                         "T helper cells")) |> 
+  ggplot(aes(Condition, value, fill = Condition)) +
+  geom_boxplot(alpha = 0.8, width = 0.5, outlier.colour = "grey") +
   facet_wrap(~celltype) +
   guides(alpha = "none") +
   geom_signif(
     comparisons = list(c("Control", "Patient")),
-    map_signif_level = FALSE, textsize = 3
+    map_signif_level = FALSE, textsize = 2
     ) +
   scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
   labs(x = "", y = "GSVA score") +
   custom_theme() +
-  theme(strip.placement = "outside")
+  theme(strip.placement = "outside") +
+  ylim(NA, 1.2)
 
-shift_legend(p)
+p <- shift_legend(p)
 
+ggsave(filename = "figures/Bulk/GSVA.png", 
+       plot = p,
+       units = "in", 
+       width = 8.5/2,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 ```
 
