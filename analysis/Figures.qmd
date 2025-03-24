@@ -595,15 +595,14 @@ res_gsva[[1]] |>
      ggplot(aes(Condition, value)) +
      geom_boxplot(aes(fill = Condition), alpha = 0.8) +
      facet_wrap(~celltype) +
-     theme_classic() +
      guides(alpha = "none") +
      geom_signif(
          comparisons = list(c("Control", "Patient")),
          map_signif_level = FALSE, textsize = 3
      ) +
   scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
-  
-  labs(x = "", y = "GSVA score")
+  labs(x = "", y = "GSVA score") +
+  custom_theme() & NoLegend()
 
 
 ```
