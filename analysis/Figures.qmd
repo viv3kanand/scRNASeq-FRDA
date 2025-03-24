@@ -603,17 +603,18 @@ p <- res_gsva[[1]] |>
                          "T cells", 
                          "T helper cells")) |> 
   ggplot(aes(Condition, value, fill = Condition)) +
-  geom_boxplot(alpha = 0.8, width = 0.5, outlier.colour = "grey") +
+  geom_boxplot(alpha = 0.8, width = 0.5, outlier.colour = "grey", fatten = 1) +
   facet_wrap(~celltype) +
   guides(alpha = "none") +
   geom_signif(
     comparisons = list(c("Control", "Patient")),
     map_signif_level = FALSE, textsize = 2
     ) +
-  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
   labs(x = "", y = "GSVA score") +
   custom_theme() +
-  theme(strip.placement = "outside") +
+  theme(strip.placement = "outside",
+        axis.text.x = element_blank()) +
   ylim(NA, 1.2)
 
 p <- shift_legend(p)
