@@ -575,6 +575,9 @@ ggsave(filename = "figures/Bulk/fig2C.png",
 
 # GSVA
 
+
+
+
 vst_gsva <- as.data.frame(assay(vsd)) |>
   tibble::rownames_to_column("symbol") |>
   dplyr::distinct(symbol, .keep_all = TRUE) |> 
@@ -582,14 +585,15 @@ vst_gsva <- as.data.frame(assay(vsd)) |>
   relocate(symbol) |> 
   as_tibble()
 
-res_gsva <- applyGSVA(gset_df = genelist, group_col = "cell_type", gene_col = "gene_symbol", expr_mat_list = list(vst_gsva), kcdf = "Gaussian")
+res_gsva <- applyGSVA(gset_df = gset_celltype, group_col = "cell_type", gene_col = "symbol", expr_mat_list = list(vst_gsva), kcdf = "Gaussian")
 
 res_gsva[[1]]$Condition <- colData(vsd)$Condition[match(rownames(res_gsva[[1]]), rownames(colData(vsd)))]
 
 res_gsva[[1]] |> 
-     pivot_longer(cols = 1:26, names_to = "celltype", values_to = "value") |>
+    pivot_longer(cols = 1:26, names_to = "celltype", values_to = "value") |>
+    filter(celltype %in% c("B cells", "CD8 T cells", "Cytotoxic cells", "DC", "Monocyte", "Neutrophils", "NK cells", "T cells", "T helper cells")) |> 
      ggplot(aes(Condition, value)) +
-     geom_boxplot(aes(fill = Condition, alpha = 0.2)) +
+     geom_boxplot(aes(fill = Condition), alpha = 0.8) +
      facet_wrap(~celltype) +
      theme_classic() +
      guides(alpha = "none") +
@@ -597,8 +601,22 @@ res_gsva[[1]] |>
          comparisons = list(c("Control", "Patient")),
          map_signif_level = FALSE, textsize = 3
      ) +
+  scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+  
   labs(x = "", y = "GSVA score")
 
+
+
+require(xCell2)
+
+data(ImmGenData.xCell2Ref, package = "xCell2")
+# data(mix_demo, package = "xCell2")
+
+vst_mat <- vst_gsva |> tibble::column_to_rownames("symbol") |> as.matrix()
+
+xcell2_res <- xCell2::xCell2Analysis(
+  mix = vst_mat,
+  xcell2object = ImmGenData.xCell2Ref, BPPARAM = MulticoreParam(workers = 40))
 
 ```
 
