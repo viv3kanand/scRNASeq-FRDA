@@ -606,18 +606,6 @@ res_gsva[[1]] |>
   labs(x = "", y = "GSVA score")
 
 
-
-require(xCell2)
-
-data(ImmGenData.xCell2Ref, package = "xCell2")
-# data(mix_demo, package = "xCell2")
-
-vst_mat <- vst_gsva |> tibble::column_to_rownames("symbol") |> as.matrix()
-
-xcell2_res <- xCell2::xCell2Analysis(
-  mix = vst_mat,
-  xcell2object = ImmGenData.xCell2Ref, BPPARAM = MulticoreParam(workers = 40))
-
 ```
 
 
