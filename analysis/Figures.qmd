@@ -573,6 +573,18 @@ ggsave(filename = "figures/Bulk/fig2C.png",
 
 
 
+# GSVA
+
+vst_gsva <- as.data.frame(assay(vsd)) |>
+  tibble::rownames_to_column("symbol") |>
+  dplyr::distinct(symbol, .keep_all = TRUE) |> 
+  emove_rownames() |>
+  relocate(symbol) |> 
+  as_tibble()
+
+res_gsva <- applyGSVA(gset_df = genelist, group_col = "cell_type", gene_col = "gene_symbol", expr_mat_list = list(vst_gsva), kcdf = "Gaussian")
+
+
 ```
 
 
