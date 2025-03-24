@@ -106,6 +106,7 @@ Idents(seu_PBMC) <- "cell_type"
 #| eval: true
 
 source("../scripts/helper_scripts.R")
+source("../scripts/gsva.R")
 
 ```
 

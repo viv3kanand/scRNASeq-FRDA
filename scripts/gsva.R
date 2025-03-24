@@ -3,7 +3,7 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
   require(BiocParallel)
   require(dplyr)
   
-  stopifnot(inherits(geneset, "tbl_df") &
+  stopifnot(inherits(gset_df, "tbl_df") &
               inherits(group_col, "character") &
               inherits(gene_col, "character") &
               inherits(expr_mat_list, "list"))
@@ -14,7 +14,7 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
   
   kcdf = match.arg(kcdf)
   
-  gset_list <- split(gset_df[gene_col], gset_df[group_col])
+  gset_list <- split(as.character(gset_df[gene_col]), as.character(gset_df[group_col]))
   
   for (i in seq_along(expr_mat_list)) {
     expr_mat = expr_mat_list[[i]]
@@ -26,7 +26,7 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
     gsvapar = gsvaParam(exprData = expr_mat, geneSets = gset_list, kcdf = kcdf)
     res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
     
-    resList[[i]] = as_tibble(t(res))
+    resList[[i]] = as.data.frame(t(res))
   }
   return(resList)
 }
