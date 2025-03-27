@@ -310,25 +310,6 @@ P1A <- dge_bulk |>
     custom_theme()
 
 
-# GO/KEGG plot
-
-ego_bulk <- read_rds("RData/ego_bulk.rds")
-
-go_list <- c("cytokine-mediated signaling pathway", "response to lipopolysaccharide", "response to molecule of bacterial origin", "response to chemokine", "chemokine-mediated signaling pathway", "neutrophil migration", "cell chemotaxis", "myeloid leukocyte migration", "extracellular matrix organization", "neutrophil chemotaxis", "leukocyte mediated immunity", "cellular response to interleukin-1", "regulation of leukocyte activation", "neutrophil mediated cytotoxicity", "monocyte chemotaxis", "neutrophil mediated immunity", "regulation of interleukin-8 production", "type II interferon production", "regulation of neuroinflammatory response", "activation of immune response", "regulation of inflammatory response", "regulation of innate immune response", "regulation of nervous system development")
-
-ego_bulk@result |> 
-    filter(Description %in% go_list) |> 
-    dplyr::select(c(1:10,13)) |> 
-    mutate(GeneRatio = eval(parse(text = GeneRatio)),
-           order = GeneRatio, .by = Description) |> 
-    ggplot(aes(x = GeneRatio, y = reorder(Description, order),color = -log10(p.adjust), size = Count)) +
-    geom_point() + 
-    labs(x = "Gene Ratio", y = "Gene Ontology") + 
-    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,8), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_to_sentence(x)) +
-    custom_theme()
-
-
 # IPA
 
 ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
@@ -372,18 +353,6 @@ P1B <- ipa_bulk |>
     scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
-
-
-P1AB <- cowplot::plot_grid(P1A, P1B, rel_widths = c(0.8, 1), align = "h")
-
-ggsave(filename = "figures/Bulk/fig1AB.png", 
-       plot = P1AB,
-       units = "in", 
-       width = 8.5,
-       height = 13/3,
-       dpi = 600)
-
-
 
 
 # GSVA
@@ -439,6 +408,8 @@ ggsave(filename = "figures/Panel1/P1_top.png",
        height = 8.5/2,
        dpi = 600,
        bg = "white")
+
+
 
 
 
