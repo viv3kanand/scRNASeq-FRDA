@@ -689,6 +689,11 @@ seu_WB@meta.data |>
     mutate(prop = n / sum(n)) -> dcats_df
 
 
+dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "Patient", 0, dcats_df$prop), FUN = sum)
+
+
+
+
 ```
 
 
