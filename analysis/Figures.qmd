@@ -133,7 +133,7 @@ custom_theme <- function(){
   theme_classic() +
     theme(text = element_text(family = font,
                               size = text_size),
-          strip.text.x = element_text(size = 8),
+          strip.text.x = element_text(size = 10),
           line = element_line(linewidth = line_size),
           legend.title = element_text(size = rel(1.25)),
           axis.title = element_text(size = rel(1.25)),
@@ -410,6 +410,7 @@ ggsave(filename = "figures/Panel1/P1_top.png",
        bg = "white")
 
 
+# WGCNA
 
 P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
 
@@ -622,7 +623,7 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
        dpi = 600,
        bg = "white")
 
-# WGCNA
+
 
 
 # P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-B-TOM-Dendrogram-25x9.png")
@@ -633,6 +634,26 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 
 
 ```
+
+<!--Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1-->
+
+```{r}
+P2A <- DimPlot(seu_WB, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 1, 
+               label = TRUE, 
+               label.size = 5,
+               cols = umap_col) & 
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  NoLegend() &
+  custom_theme() +
+  empty_axis() +
+  NoLegend()
+
+
+```
+
 
 
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
