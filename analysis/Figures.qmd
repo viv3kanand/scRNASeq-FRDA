@@ -790,12 +790,15 @@ P3C <- seu_meta |>
 
 seu_meta |> 
     count(cell_type, Condition) |> 
-    # mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
-    group_by(cell_type) |> 
-    mutate(prop = n / sum(n)) |> 
+    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2),
+           stars = case_when(
+           dcats < 0.001 ~ "***",
+           dcats < 0.01 ~ "**",
+           dcats < 0.05 ~ "*",
+           TRUE ~ "")) |>
     ggplot(aes(x = cell_type, y = n, fill = Condition)) +
-    #geom_col(position = position_dodge(), width = 0.9, alpha = 0.8, color = "black") +
-    geom_bar(position = "fill", stat = "identity") +
+    geom_col(position = "fill", width = 0.9) +
+    geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
     scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     labs(x = "", y = "Relative abundance (%)") +
     custom_theme() +
