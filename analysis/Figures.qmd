@@ -301,7 +301,7 @@ P1A <- dge_bulk |>
                              segment.size = 0.2,
                              segment.curvature = -0.5,
                              size = 2) +
-    scale_color_manual(values = c("#D53E4F", "grey", "#3288BD")) +
+    scale_color_manual(values = c("#CB477A", "grey", "#469FBF")) +
     scale_x_continuous(name = "Log2 Fold Change") +
     scale_y_continuous(name = "-Log10 padj") +
     geom_hline(yintercept = -log10(0.05), linetype = 2, color = "black") +
@@ -350,7 +350,7 @@ P1B <- ipa_bulk |>
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
     labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
@@ -388,7 +388,7 @@ P1C <- res_gsva[[1]] |>
     comparisons = list(c("Control", "Patient")),
     map_signif_level = FALSE, textsize = 2
     ) +
-  scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+  scale_fill_manual(values = c("#469FBF", "#CB477A")) +
   labs(x = "", y = "GSVA score") +
   custom_theme() +
   theme(strip.placement = "outside",
@@ -398,19 +398,16 @@ P1C <- res_gsva[[1]] |>
 P1C <- shift_legend(P1C)
 
 
-P1top <- cowplot::plot_grid(P1A, P1B, P1C, rel_widths = c(0.8, 1, 1), nrow = 1, align = "h", labels = "auto")
+P1_top <- cowplot::plot_grid(P1A, P1B, P1C, rel_widths = c(0.8, 1, 1), nrow = 1, align = "h", labels = "auto")
 
 
 ggsave(filename = "figures/Panel1/P1_top.png", 
-       plot = P1top,
+       plot = P1_top,
        units = "in", 
        width = 13,
        height = 8.5/2,
        dpi = 600,
        bg = "white")
-
-
-
 
 
 
@@ -579,7 +576,7 @@ P2B <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
 
-P2C <- ipa_m3 |> 
+P1F <- ipa_m3 |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
     mutate(Zscore = as.double(Zscore),
@@ -592,22 +589,38 @@ P2C <- ipa_m3 |>
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
     labs(x = "z-score", y = "Pathways", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#D53E4F", "#3288BD")) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
-ggsave(filename = "figures/Bulk/fig2C.png", 
-       plot = P2C,
+ggsave(filename = "figures/Panel1/P1F.png", 
+       plot = P1F,
        units = "in", 
-       width = 8.5/2,
-       height = 13/4,
+       width = 13/3,
+       height = 8.5/3,
        dpi = 600,
        bg = "white")
 
 
+P1_bottom <- cowplot::plot_grid(NULL, NULL, P1F, labels = c("D", "E", "F"), nrow = 1)
 
+ggsave(filename = "figures/Panel1/P1_bottom.png", 
+       plot = P1_bottom,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
 
+P1_final <- cowplot::plot_grid(P1_top, P1_bottom, nrow = 2)
 
+ggsave(filename = "figures/Panel1/P1_final.png", 
+       plot = P1_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
+       dpi = 600,
+       bg = "white")
 
 
 ```
