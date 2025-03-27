@@ -638,6 +638,8 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 <!--Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1-->
 
 ```{r}
+# UMAP
+
 P2A <- DimPlot(seu_WB, 
                reduction = "umap.harmony", 
                group.by = c("cell_type"), 
@@ -651,6 +653,7 @@ P2A <- DimPlot(seu_WB,
   empty_axis() +
   NoLegend()
 
+# Markers
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
 P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
@@ -670,8 +673,20 @@ ggsave(filename = "figures/Panel2/P2_top.png",
        dpi = 600,
        bg = "white")
 
+# DCATS
 
+dcats_WB <- run_dcats(seu_WB)
 
+seu_WB@meta.data |> 
+    count(cell_type, Condition) |> 
+    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2),
+           stars = case_when(
+               dcats < 0.001 ~ "***",
+               dcats < 0.01 ~ "**",
+               dcats < 0.05 ~ "*",
+               TRUE ~ "")) |> 
+    group_by(cell_type) |> 
+    mutate(prop = n / sum(n)) -> dcats_df
 
 
 ```
