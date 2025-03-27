@@ -32,7 +32,8 @@ require(Seurat)
 require(DropletUtils)
 require(tidyverse)
 require(ggpointdensity)
-# require(scico)
+require(ggsignif)
+require(scico)
 
 ```
 
@@ -592,7 +593,6 @@ res_gsva[[1]]$Condition <- colData(vsd)$Condition[match(rownames(res_gsva[[1]]),
 
 
 
-
 p <- res_gsva[[1]] |> 
   pivot_longer(cols = 1:26, names_to = "celltype", values_to = "value") |>
   filter(celltype %in% c("B cells", 
@@ -773,7 +773,7 @@ P3C <- seu_meta |>
     group_by(cell_type) |> 
     mutate(prop = n / sum(n)) |> 
     ggplot(aes(x = cell_type, y = prop * 100, fill = Condition)) +
-    geom_col(position = position_dodge(), width = 0.9) +
+    geom_col(position = position_dodge(), width = 0.9, alpha = 0.8) +
     geom_text(aes(cell_type, label = round(100 * prop)),
               position = position_dodge(.9), vjust = -.2, size = 2) +
     geom_signif(annotations = formatC(anno_df$LRT_pvals, digits = 2),
@@ -782,6 +782,21 @@ P3C <- seu_meta |>
                 y_position = anno_df$y,
                 textsize = 2, size = 0.2) +
     scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    labs(x = "", y = "Relative abundance (%)") +
+    custom_theme() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          legend.text = element_text(size=rel(1.15))) +
+    theme(legend.position = "top")
+
+seu_meta |> 
+    count(cell_type, Condition) |> 
+    # mutate(dcats = rep(dcats_df$LRT_pvals, each = 2)) |> 
+    group_by(cell_type) |> 
+    mutate(prop = n / sum(n)) |> 
+    ggplot(aes(x = cell_type, y = n, fill = Condition)) +
+    #geom_col(position = position_dodge(), width = 0.9, alpha = 0.8, color = "black") +
+    geom_bar(position = "fill", stat = "identity") +
+    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     labs(x = "", y = "Relative abundance (%)") +
     custom_theme() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
