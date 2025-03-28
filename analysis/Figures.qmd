@@ -663,12 +663,12 @@ P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
   labs(title = NULL, x = NULL, y = NULL)
 
-P2_top <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(0.6, 1), axis = "b", align = "hv")
+P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(1, 1), axis = "b", align = "hv")
 
-ggsave(filename = "figures/Panel2/P2_top.png", 
-       plot = P2_top,
+ggsave(filename = "figures/Panel2/P2AB.png", 
+       plot = P2AB,
        units = "in", 
-       width = 13/2,
+       width = 13/1.5,
        height = 8.5/2,
        dpi = 600,
        bg = "white")
@@ -691,8 +691,131 @@ seu_WB@meta.data |>
 
 dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "Patient", 0, dcats_df$prop), FUN = sum)
 
+P2C <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
+  geom_col(position = "fill", width = 0.9) +
+  geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
+  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "", y = "Relative abundance (%)") +
+  custom_theme() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.text = element_text(size=rel(1.15))) +
+  theme(legend.position = "top")
 
 
+ggsave(filename = "figures/Panel2/P2C.png", 
+       plot = P2C,
+       units = "in", 
+       width = 13/4,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+
+```
+
+
+<!-- Panel 3: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores, Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
+
+
+```{r}
+# Metascape results
+
+
+# IFN pathway gene heatmap/scores
+
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, IFN1) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, IFN1)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+# Neutrophil degranulation pathway genes heatmap/ pathway scores
+
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, NEUD) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, NEUD)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+# TF-STAT1 signaling
+
+t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                Condition = seu_WB@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  filter(source == "STAT1" & cluster == c("Neutrophil")) |> 
+  ggplot(aes(Condition, score)) +
+  # stat_dots(aes(fill = cluster), side = "left", justification = 1.05) +
+  ggdist::stat_halfeye(aes(fill = cluster), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
+  geom_boxplot(aes(fill = cluster), width = 0.1, outlier.colour = "grey") + 
+  facet_grid(~cluster) +
+  theme_ggdist(base_size=18, base_family="Helvetica") +
+  theme(text = element_text(size=18),
+        axis.text.x = element_text(angle=0, hjust=.5, vjust = 0.5, color = "black"),
+        axis.text.y = element_text(color = "black"),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        legend.position="none") +
+  scale_fill_met_d(palette_name = "Egypt") +
+  ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+
+# PRR pathway score
+
+seu_WB@meta.data |> 
+    select(orig.ident, Condition, cell_type, RIG1) |>
+    filter(cell_type == "Neutrophil") |> 
+    ggplot(aes(Condition, RIG1)) +
+    geom_boxplot() + 
+    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
+
+
+
+P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
+    as.data.frame() |> 
+    dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                  Condition = seu_WB@meta.data$Condition,
+    ) |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                        names_to = "source", 
+                        values_to = "score") |> 
+    filter(cluster == c("Neutrophil")) |> 
+    mutate(source = str_sub(source, end = -2)) |> 
+    ggplot(aes(Condition, score)) +
+    ggdist::stat_halfeye(aes(fill = Condition), 
+                         alpha = .8,
+                         adjust = .5, 
+                         width = .8, 
+                         justification = -.2, 
+                         .width = 0, 
+                         point_colour = NA) +
+    geom_boxplot(aes(fill = Condition), 
+                 alpha = .8,
+                 width = 0.1, 
+                 outlier.colour = "grey") + 
+    labs(x = NULL, y = "Module Score") +
+    facet_grid(~source) +
+    custom_theme() +
+    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    geom_signif(
+        comparisons = list(c("Control", "Patient")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+    NoLegend()
+
+ggsave(filename = "figures/PBMC/Panel5/figB.png", 
+       plot = P5B,
+       units = "in", 
+       width = 8.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 ```
 
@@ -1287,109 +1410,7 @@ ggsave(filename = "figures/PBMC/Panel4/figAC.png",
 ```
 
 
-<!-- Panel 6: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores, Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
 
-
-```{r}
-# Metascape results
-
-
-# IFN pathway gene heatmap/scores
-
-seu_WB@meta.data |> 
-    select(orig.ident, Condition, cell_type, IFN1) |>
-    filter(cell_type == "Neutrophil") |> 
-    ggplot(aes(Condition, IFN1)) +
-    geom_boxplot() + 
-    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
-
-# Neutrophil degranulation pathway genes heatmap/ pathway scores
-
-seu_WB@meta.data |> 
-    select(orig.ident, Condition, cell_type, NEUD) |>
-    filter(cell_type == "Neutrophil") |> 
-    ggplot(aes(Condition, NEUD)) +
-    geom_boxplot() + 
-    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
-
-# TF-STAT1 signaling
-
-t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
-  as.data.frame() |> 
-  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
-                Condition = seu_WB@meta.data$Condition) |> 
-  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
-                      names_to = "source", 
-                      values_to = "score") |> 
-  filter(source == "STAT1" & cluster == c("Neutrophil")) |> 
-  ggplot(aes(Condition, score)) +
-  # stat_dots(aes(fill = cluster), side = "left", justification = 1.05) +
-  ggdist::stat_halfeye(aes(fill = cluster), adjust = .5, width = .7, justification = -.2, .width = 0, point_colour = NA) +
-  geom_boxplot(aes(fill = cluster), width = 0.1, outlier.colour = "grey") + 
-  facet_grid(~cluster) +
-  theme_ggdist(base_size=18, base_family="Helvetica") +
-  theme(text = element_text(size=18),
-        axis.text.x = element_text(angle=0, hjust=.5, vjust = 0.5, color = "black"),
-        axis.text.y = element_text(color = "black"),
-        plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5),
-        legend.position="none") +
-  scale_fill_met_d(palette_name = "Egypt") +
-  ggpubr::stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
-
-
-# PRR pathway score
-
-seu_WB@meta.data |> 
-    select(orig.ident, Condition, cell_type, RIG1) |>
-    filter(cell_type == "Neutrophil") |> 
-    ggplot(aes(Condition, RIG1)) +
-    geom_boxplot() + 
-    stat_compare_means(aes(label = paste0("p = ", after_stat(p.format))))
-
-
-
-P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
-    as.data.frame() |> 
-    dplyr::mutate(cluster = Seurat::Idents(seu_WB),
-                  Condition = seu_WB@meta.data$Condition,
-    ) |> 
-    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
-                        names_to = "source", 
-                        values_to = "score") |> 
-    filter(cluster == c("Neutrophil")) |> 
-    mutate(source = str_sub(source, end = -2)) |> 
-    ggplot(aes(Condition, score)) +
-    ggdist::stat_halfeye(aes(fill = Condition), 
-                         alpha = .8,
-                         adjust = .5, 
-                         width = .8, 
-                         justification = -.2, 
-                         .width = 0, 
-                         point_colour = NA) +
-    geom_boxplot(aes(fill = Condition), 
-                 alpha = .8,
-                 width = 0.1, 
-                 outlier.colour = "grey") + 
-    labs(x = NULL, y = "Module Score") +
-    facet_grid(~source) +
-    custom_theme() +
-    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
-    geom_signif(
-        comparisons = list(c("Control", "Patient")),
-        map_signif_level = FALSE, textsize = 3
-    ) &
-    NoLegend()
-
-ggsave(filename = "figures/PBMC/Panel5/figB.png", 
-       plot = P5B,
-       units = "in", 
-       width = 8.5,
-       height = 13/3,
-       dpi = 600,
-       bg = "white")
-
-```
 
 
 <!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; CS-score, Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
