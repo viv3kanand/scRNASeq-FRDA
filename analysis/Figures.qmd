@@ -651,10 +651,6 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 
 
 
-
-
-
-
 ```
 
 <!--Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1-->
@@ -720,8 +716,7 @@ P2C <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "Relative abundance (%)") +
   custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        legend.text = element_text(size=rel(1.15))) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   theme(legend.position = "top")
 
 
