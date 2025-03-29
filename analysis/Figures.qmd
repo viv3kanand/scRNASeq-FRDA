@@ -386,7 +386,7 @@ P1C <- res_gsva[[1]] |>
   guides(alpha = "none") +
   geom_signif(
     comparisons = list(c("Control", "Patient")),
-    map_signif_level = FALSE, textsize = 2
+    map_signif_level = TRUE, textsize = 2
     ) +
   scale_fill_manual(values = c("#469FBF", "#CB477A")) +
   labs(x = "", y = "GSVA score") +
@@ -412,7 +412,9 @@ ggsave(filename = "figures/Panel1/P1_top.png",
 
 # WGCNA
 
-# P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
+P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
+
+# P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
 
 wgcna_bulk <- read.csv("RData/09-wgcna-me-eg.csv", header = TRUE)
 names(wgcna_bulk) <- c("condition", "MEs", "value")
@@ -427,17 +429,18 @@ wgcna_test <- wgcna_bulk |>
   filter(p.adj.signif != "ns")
 
 
-P1D <- wgcna_bulk |> filter(MEs %in% wgcna_test$MEs) |>
-  ggpubr::ggboxplot(x = "condition", y = "value", fill = "condition", facet.by = "MEs") + 
+P1E <- wgcna_bulk |> filter(MEs %in% wgcna_test$MEs) |>
+  ggpubr::ggboxplot(x = "condition", y = "value", fill = "condition", facet.by = "MEs", width = 0.5, size = 0.3) + 
   ggpubr::stat_pvalue_manual(wgcna_test) +
   scale_fill_manual(values = alpha(c("#469FBF", "#CB477A"), 0.8)) +
   labs(x = "", y = "Module Eigengene", fill = "Condition") +
   custom_theme() +
   theme(strip.placement = "outside", axis.text.x = element_blank())
 
-P1D <- shift_legend(P1D)
+P1E <- shift_legend(P1E)
 
-P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
+
+# Module 3 IPA
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
 
@@ -646,8 +649,6 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 
 
 
-
-# P2A <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-B-TOM-Dendrogram-25x9.png")
 
 
 
