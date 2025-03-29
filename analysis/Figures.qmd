@@ -993,7 +993,14 @@ P3F <- reducedDims(sce_cd14)$UMAP |>
             color = "black", 
             linewidth = 1)
 
-
+P3G <- colData(sce_cd14)[,c(1,2,3,7,8)] |>
+  as.data.frame() |> 
+  ggplot(aes(Lineage1, fill = Condition)) + 
+  geom_density(alpha = 0.5) +
+  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
+  labs(x = "Pseudotime", y = "Density") + 
+  xlim(c(0, 20)) +
+  custom_theme()
 
 
 
