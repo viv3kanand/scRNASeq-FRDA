@@ -962,6 +962,21 @@ P3D <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
         legend.text = element_text(size=rel(1.15))) +
   theme(legend.position = "top")
 
+
+# Imbalance
+
+imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
+
+P3E <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+  geom_point(size = 2, alpha = 0.8) +
+  scale_color_gradientn(colours = c("#5E4FA2", "#5575B0", "#469FBF", "#3CB49F", "#ABDDA4", "#FFFF33")) +
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") +
+  custom_theme() +
+  empty_axis()
+
+
+# Trajectory
+
 ```
 
 
