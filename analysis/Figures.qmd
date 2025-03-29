@@ -107,6 +107,7 @@ Idents(seu_PBMC) <- "cell_type"
 #| eval: true
 
 source("../scripts/helper_scripts.R")
+source("../scripts/dcats.R")
 source("../scripts/gsva.R")
 
 ```
@@ -268,7 +269,7 @@ ggsave("analysis/figures/PBMC/QC/basicQC.png")
 <!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
 
 
-<!-- panel 1: Bulk - Volcano, IPA, GSVA, WGCNA Module Pathway -->
+### panel 1: Bulk - Volcano, IPA, GSVA, WGCNA Module Pathway
 
 ```{r}
 # Volcano plot
@@ -653,7 +654,7 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 
 ```
 
-<!--Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1-->
+### Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1
 
 ```{r}
 # UMAP
@@ -672,6 +673,7 @@ P2A <- DimPlot(seu_WB,
   NoLegend()
 
 # Markers
+
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
 P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
@@ -681,7 +683,7 @@ P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
   labs(title = NULL, x = NULL, y = NULL)
 
-P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(1, 1), axis = "b", align = "hv")
+P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(0.7, 1), axis = "b", align = "hv")
 
 ggsave(filename = "figures/Panel2/P2AB.png", 
        plot = P2AB,
@@ -729,7 +731,41 @@ ggsave(filename = "figures/Panel2/P2C.png",
        bg = "white")
 
 
+### TRRUST
 
+tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
+
+P2D <- tf_NEU |> 
+  mutate(order = desc(qvalue), .by = TF) |>
+  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+  geom_bar(aes(fill = genes), stat = "identity") +
+  xlab("-log10(p-adjust)") +
+  ylab("Top TFs") +
+  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
+  custom_theme()
+
+P2CD <- cowplot::plot_grid(P2C, P2D, nrow = 1, labels = c("C", "D"), rel_widths = c(1, 0.6), axis = "b", align = "hv")
+
+P2_top <- cowplot::plot_grid(P2AB, P2CD, nrow = 1, rel_widths = c(1, 0.8), axis = "b", align = "hv")
+
+ggsave(filename = "figures/Panel2/P2_top.png", 
+       plot = P2_top,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+# Pathways
+
+
+
+#IFN-RIG1 
+
+
+
+
+#TF-STAT1
 ```
 
 
