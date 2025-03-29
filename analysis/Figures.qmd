@@ -416,6 +416,37 @@ P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A
 
 P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
 
+wgcna_bulk <- read.csv("RData/09-wgcna-me-eg.csv", header = TRUE)
+names(wgcna_bulk) <- c("condition", "MEs", "value")
+
+wgcna_pval <- read.csv("RData/09-wgcna-me-eg.csv")
+
+wgcna_bulk$MEs <- as.factor(wgcna_bulk$MEs)
+
+wgcna_test <- wgcna_bulk |> 
+  dplyr::group_by(MEs) |> 
+  rstatix::wilcox_test(value ~ condition) |> 
+  rstatix::adjust_pvalue(method = "bonferroni") |> 
+  rstatix::add_significance() |> 
+  add_xy_position(x = "condition") |> 
+  filter(p.adj.signif != "ns")
+
+wgcna_bulk |> 
+  filter(MEs %in% wgcna_test$MEs) |> 
+  ggplot(aes(condition, value, fill = condition)) +
+  geom_boxplot(alpha = 0.8, width = 0.5, outlier.colour = "grey", fatten = 1) +
+  facet_wrap(~MEs) +
+  guides(alpha = "none") +
+  geom_signif(
+        comparisons = list(c("Control", "Patient")),
+        map_signif_level = FALSE, textsize = 2
+    ) +
+  scale_fill_manual(values = c("#469FBF", "#CB477A")) +
+  labs(x = "", y = "Module Eigengene") +
+  custom_theme() +
+  theme(strip.placement = "outside",
+        axis.text.x = element_blank()) +
+  ylim(NA, 0.8)
 
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
@@ -679,7 +710,7 @@ dcats_WB <- run_dcats(seu_WB)
 
 seu_WB@meta.data |> 
     count(cell_type, Condition) |> 
-    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2),
+    mutate(dcats = rep(dcats_WB$LRT_pvals, each = 2),
            stars = case_when(
                dcats < 0.001 ~ "***",
                dcats < 0.01 ~ "**",
@@ -785,7 +816,7 @@ P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |>
     tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                         names_to = "source", 
                         values_to = "score") |> 
-    filter(cluster == c("Neutrophil")) |> 
+    filter(cluster == "Neutrophil" & !source == "NEU2") |> 
     mutate(source = str_sub(source, end = -2)) |> 
     ggplot(aes(Condition, score)) +
     ggdist::stat_halfeye(aes(fill = Condition), 
@@ -802,7 +833,7 @@ P5B <- t(as.matrix(seu_WB@assays$module_score@data)) |>
     labs(x = NULL, y = "Module Score") +
     facet_grid(~source) +
     custom_theme() +
-    scale_fill_manual(values = c("#3288BD", "#D53E4F")) +
+    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     geom_signif(
         comparisons = list(c("Control", "Patient")),
         map_signif_level = FALSE, textsize = 3
@@ -926,10 +957,10 @@ ggsave(filename = "figures/PBMC/fig3B_S2B.png",
 # dcats_df <- run_dcats(seu_PBMC)
 # write_rds(dcats_df, paste0("RData/", Sys.Date(),"_dcats-df.rds"))
 
-dcats_df <- read_rds("RData/2025-02-13_dcats-df.rds")
+dcats_PBMC <- read_rds("RData/2025-02-13_dcats-df.rds")
 
 
-anno_df <- dcats_df[dcats_df$LRT_pvals < 0.05,] |> 
+anno_df <- dcats_PBMC[dcats_PBMC$LRT_pvals < 0.05,] |> 
     mutate(start = c(0.75, 8.75, 11.75, 13.75), 
            end = c(1.25, 9.25, 12.25, 14.25),
            y = c(72, 72, 70, 70))
@@ -983,18 +1014,18 @@ P3C <- seu_meta |>
 
 seu_meta |> 
     count(cell_type, Condition) |> 
-    mutate(dcats = rep(dcats_df$LRT_pvals, each = 2),
+    mutate(dcats = rep(dcats_PBMC$LRT_pvals, each = 2),
            stars = case_when(
                dcats < 0.001 ~ "***",
                dcats < 0.01 ~ "**",
                dcats < 0.05 ~ "*",
                TRUE ~ "")) |> 
     group_by(cell_type) |> 
-    mutate(prop = n / sum(n)) -> dcats_plot
+    mutate(prop = n / sum(n)) -> dcats_df
 
-dcats_plot$cell_type <- reorder(dcats_plot$cell_type, ifelse(!dcats_plot$Condition %in% "FRDA", 0, dcats_plot$prop), FUN = sum)
+dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "FRDA", 0, dcats_df$prop), FUN = sum)
 
-ggplot(dcats_plot, aes(x = cell_type, y = n, fill = Condition)) +
+ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
     geom_col(position = "fill", width = 0.9) +
     geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
     scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
