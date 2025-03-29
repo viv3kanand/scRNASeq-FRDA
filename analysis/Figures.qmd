@@ -801,7 +801,7 @@ P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |>
 
 DefaultAssay(seu_WB) <- "tfsulm"
 
-P3G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
+P2G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
   as.data.frame() |> 
   dplyr::mutate(cluster = Seurat::Idents(seu_WB),
                 Condition = seu_WB@meta.data$Condition) |> 
@@ -831,7 +831,7 @@ P3G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |>
     ) &
   NoLegend()
 
-P2_bottom <- cowplot::plot_grid(NULL, P2F, P3G, nrow = 1, labels = c("E", "F", "G"), rel_widths = c(1, 1), axis = "b", align = "hv")
+P2_bottom <- cowplot::plot_grid(NULL, P2F, P2G, nrow = 1, labels = c("E", "F", "G"), rel_widths = c(1, 1), axis = "b", align = "hv")
 
 ggsave(filename = "figures/Panel2/P2_bottom.png", 
        plot = P2_bottom,
@@ -931,6 +931,17 @@ P3C <- summary_df |>
         panel.grid.major.y = element_blank())
 
 
+
+P3_top <- cowplot::plot_grid(P3A, P3B, P3C, nrow = 1, labels = "AUTO", rel_widths = c(0.8, 1, 0.8), axis = "b", align = "hv")
+
+ggsave(filename = "figures/Panel3/P3_top.png", 
+       plot = P3_top,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
 # DCATS - PBMC
 
 # dcats_df <- run_dcats(seu_PBMC)
@@ -1015,6 +1026,17 @@ ggsave(filename = "figures/Panel3/P3_bottom.png",
        units = "in", 
        width = 13,
        height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+
+P3_final <- cowplot::plot_grid(P3_top, P3_bottom, ncol = 1)
+
+ggsave(filename = "figures/Panel3/P3_final.png", 
+       plot = P3_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
        dpi = 600,
        bg = "white")
 
@@ -1238,6 +1260,27 @@ P5_top <- cowplot::plot_grid(P5A, P5B, nrow = 1, labels = "AUTO", axis = "bt", a
 
 
 
+# CAD NCAD - IL10
+
+cad_ncad <- subset(x = seu_PBMC, subset = Condition2 %in% c("CAD", "NCAD"), idents = "CD14 Mono")
+
+P5C <- cad_ncad@meta.data |>
+  mutate(il10 = FetchData(cad_ncad, vars = "IL10")$IL10) |> 
+  filter(cell_type == "CD14 Mono") |> 
+  dplyr::select(orig.ident, Condition2, il10) |> 
+  group_by(orig.ident, Condition2) |> 
+  summarise(prop = length(which(il10 > 0))/length(il10)) |> 
+  ggplot(aes(Condition2, prop, fill = Condition2)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Proportion") +
+  custom_theme() +
+  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
+  geom_signif(
+        comparisons = list(c("CAD", "NCAD")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
 
 
 # Clinical NLR
@@ -1258,11 +1301,15 @@ P5D <- clin_nlr |>
   NoLegend()
 
 
-ggsave(filename = "figures/Panel4/P4_top.png", 
-       plot = P4_top,
+P5_bottom <- cowplot::plot_grid(P5C, P5D, nrow = 1, labels = c("C", "D"), axis = "bt", align = "h")
+
+P5_final <- cowplot::plot_grid(P5_top, P5_bottom, ncol = 1)
+
+ggsave(filename = "figures/Panel5/P5_final.png", 
+       plot = P5_final,
        units = "in", 
-       width = 13,
-       height = 8.5/2,
+       width = 8.5,
+       height = 8.5,
        dpi = 600,
        bg = "white")
 
