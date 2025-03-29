@@ -34,6 +34,7 @@ require(tidyverse)
 require(ggpointdensity)
 require(ggsignif)
 require(scico)
+require(slingshot)
 
 ```
 
@@ -969,13 +970,32 @@ imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
 P3E <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   geom_point(size = 2, alpha = 0.8) +
-  scale_color_gradientn(colours = c("#5E4FA2", "#5575B0", "#469FBF", "#3CB49F", "#ABDDA4", "#FFFF33")) +
+  scale_color_gradientn(colours = c("#9E0142", "#D53E4F", "#CB477A", "#F46D43", "#FDAE61", "#FFFF33", "#ABDDA4", "#3CB49F", "#469FBF", "#5575B0", "#5E4FA2")) +
   labs(title = NULL, x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
 
 # Trajectory
+
+sce_cd14 <- read_rds("RData/trajectory/slingshot_cd14.rds")
+
+P3F <- reducedDims(sce_cd14)$UMAP |> 
+  as.data.frame() |> 
+  ggplot(aes(x = umapharmony_1, y = umapharmony_2, color = sce_cd14$slingPseudotime_1)) +
+  geom_point() +
+  scale_color_gradientn(colours = c("#9E0142", "#D53E4F", "#CB477A", "#F46D43", "#FDAE61", "#FFFF33", "#ABDDA4", "#3CB49F", "#469FBF", "#5575B0", "#5E4FA2")) +
+  custom_theme() +
+  labs(x = "UMAP1", y = "UMAP2") +
+  theme(legend.position = "none") +
+  geom_path(data = as.data.frame(SlingshotDataSet(sce_cd14)@curves[[1]]$s), 
+            aes(x = umapharmony_1, y = umapharmony_2), 
+            color = "black", 
+            linewidth = 1)
+
+
+
+
 
 ```
 
