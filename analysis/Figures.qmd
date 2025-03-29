@@ -1020,6 +1020,46 @@ ggsave(filename = "figures/Panel3/P3_bottom.png",
 
 ```
 
+### Panel 4 - CD14 Monocytes: 
+
+```{r}
+# CD14 Monocyte expression
+
+DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
+
+avg.cd14.mono <- read_rds("RData/avg.cd14.mono.rds")
+
+DGE_PBMC$`CD14 Mono` |> 
+    mutate(
+        Expression = case_when(
+            avg_log2FC >= 1 & p_val_adj <= 0.01 ~ "Upregulated",
+            avg_log2FC <= -1 & p_val_adj <= 0.01 ~ "Downregulated",
+            TRUE ~ "Not significant")) |>
+    merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
+
+
+P4A <- CD14_plot_data |> 
+  ggplot(aes(Control, FRDA)) + 
+  geom_point(aes(color = Expression, alpha = 0.8)) + 
+  ggtitle("CD14 Mono") + 
+  ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
+                                         filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
+                                         arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
+                           aes(label = gene), 
+                           max.overlaps = 20, 
+                           force = 20, 
+                           segment.size = 0.2,
+                           segment.curvature = -0.1,
+                           size = 2) +
+  scale_color_manual(values = c("#469FBF", "grey", "#CB477A")) +
+  guides(alpha = "none", size = "none") +
+  custom_theme()
+
+
+
+
+```
+
 
 
 
