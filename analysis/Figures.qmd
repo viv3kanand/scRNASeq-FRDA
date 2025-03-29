@@ -729,6 +729,7 @@ ggsave(filename = "figures/Panel2/P2C.png",
        bg = "white")
 
 
+
 ```
 
 
@@ -1034,7 +1035,7 @@ ggsave(filename = "figures/PBMC/fig3C.png",
 # Figure 4C - DEG-upset plot (all cell types)
 
 
-DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_res_1.rds")
+DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
 
 DGE_pbmc_filt <- lapply(DGE_pbmc, function(df){
   df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05)
