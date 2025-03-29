@@ -1175,9 +1175,99 @@ ggsave(filename = "figures/Panel4/P4_final.png",
        bg = "white")
 ```
 
-### Panel 5 - CAD vs NCAD
+### Panel 5 - CAD vs NCAD : CS-SCORE, 
 
 ```{r}
+# CS-score
+
+files <- c("RData/CSCORE/2024-11-29_coex_CAD_C.xlsx", "RData/CSCORE/2024-11-29_coex_CAD_NCAD.xlsx")
+
+CS_CD14 <- lapply(files, function(file){
+  sheets <- openxlsx::getSheetNames(file)
+  lapply(setNames(sheets,sheets), function(sheet){
+    openxlsx::read.xlsx(file, sheet)
+    })
+  })
+
+names(CS_CD14) <- c("CAD_C", "CAD_NCAD")
+
+M3 <- c("inflammatory response", "response to molecule of bacterial origin", "response to cytokine", "response to lipopolysaccharide", "positive regulation of immune system process", "interleukin-1 production", "positive regulation of cytokine production", "cell migration", "cytokine production", "regulation of response to biotic stimulus", "cell activation", "regulation of cell motility", "defense response to symbiont", "cytokine-mediated signaling pathway", "positive regulation of cell population proliferation", "activation of immune response", "interleukin-6 production", "T-helper 1 type immune response", "innate immune response", "immune response-activating signaling pathway", "central nervous system development", "cell chemotaxis", "positive regulation of type II interferon production", "G protein-coupled receptor signaling pathway", "T cell activation", "cell-cell adhesion", "type II interferon production", "lipopolysaccharide-mediated signaling pathway", "interleukin-12 production", "MAPK cascade", "negative regulation of non-canonical NF-kappaB signal transduction", "cell-cell junction organization", "monocyte chemotaxis", "macrophage chemotaxis", "granulocyte chemotaxis")
+
+M9 <- c("granulocyte chemotaxis", "granulocyte migration", "leukocyte chemotaxis", "neutrophil chemotaxis", "neutrophil migration", "leukocyte migration", "innate immune response", "defense response to symbiont", "secretory granule")
+
+M15 <- c("defense response to virus", "response to virus", "defense response to other organism", "interferon-mediated signaling pathway", "response to type I interferon", "innate immune response", "response to cytokine", "regulation of type I interferon production", "type I interferon production", "type I interferon-mediated signaling pathway", "cellular response to type I interferon")
+
+# Module 9
+
+P5A <- CS_CD14$CAD_NCAD$M9 |> 
+  dplyr::select(c(1:10,13)) |> 
+  filter(Description %in% M9) |> 
+  mutate(GeneRatio = eval(parse(text = GeneRatio)),
+         ID = paste0(ONTOLOGY, " : ", stringr::str_to_sentence(Description)),
+         order = GeneRatio, .by = ID) |> 
+  ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
+  geom_point() + 
+  labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
+  scale_color_gradientn(colours = c('#3CB49F', '#FFFFFF'), 
+                        limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), 
+                                  max(CS_CD14$CAD_NCAD$M9$p.adjust)), 
+                        na.value = "grey") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  custom_theme()
+
+# Module 15
+
+P5B <- CS_CD14$CAD_NCAD$M15 |> 
+    dplyr::select(c(1:10,13)) |> 
+    filter(Description %in% M15) |> 
+    mutate(GeneRatio = eval(parse(text = GeneRatio)),
+           ID = paste0(ONTOLOGY, " : ", stringr::str_to_sentence(Description)),
+           order = GeneRatio, .by = ID) |> 
+    ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
+    geom_point() + 
+    labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
+    scale_color_gradientn(colours = c('#3CB49F', '#FFFFFF'), 
+                          limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust),
+                                    max(CS_CD14$CAD_NCAD$M15$p.adjust)), 
+                          na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    custom_theme()
+
+
+P5_top <- cowplot::plot_grid(P5A, P5B, nrow = 1, labels = "AUTO", axis = "bt", align = "h")
+
+
+
+
+
+# Clinical NLR
+
+clin_nlr <- read_csv("../data/clinical_data.csv")
+
+
+P5D <- clin_nlr |> 
+  ggplot(aes(Condition, NLR, fill = Condition)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "Neutrophil to Lymphocyte Ratio") +
+  custom_theme() +
+  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
+  geom_signif(
+        comparisons = list(c("CAD", "Non-CAD")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+ggsave(filename = "figures/Panel4/P4_top.png", 
+       plot = P4_top,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+
+
 
 ```
 
