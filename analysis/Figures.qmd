@@ -412,15 +412,10 @@ ggsave(filename = "figures/Panel1/P1_top.png",
 
 # WGCNA
 
-P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
-
-P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
+# P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
 
 wgcna_bulk <- read.csv("RData/09-wgcna-me-eg.csv", header = TRUE)
 names(wgcna_bulk) <- c("condition", "MEs", "value")
-
-wgcna_pval <- read.csv("RData/09-wgcna-me-eg.csv")
-
 wgcna_bulk$MEs <- as.factor(wgcna_bulk$MEs)
 
 wgcna_test <- wgcna_bulk |> 
@@ -428,26 +423,21 @@ wgcna_test <- wgcna_bulk |>
   rstatix::wilcox_test(value ~ condition) |> 
   rstatix::adjust_pvalue(method = "bonferroni") |> 
   rstatix::add_significance() |> 
-  add_xy_position(x = "condition") |> 
+  rstatix::add_xy_position(x = "condition") |> 
   filter(p.adj.signif != "ns")
 
-wgcna_bulk |> 
-  filter(MEs %in% wgcna_test$MEs) |> 
-  ggplot(aes(condition, value, fill = condition)) +
-  geom_boxplot(alpha = 0.8, width = 0.5, outlier.colour = "grey", fatten = 1) +
-  facet_wrap(~MEs) +
-  guides(alpha = "none") +
-  geom_signif(
-        comparisons = list(c("Control", "Patient")),
-        map_signif_level = FALSE, textsize = 2
-    ) +
-  scale_fill_manual(values = c("#469FBF", "#CB477A")) +
-  labs(x = "", y = "Module Eigengene") +
-  custom_theme() +
-  theme(strip.placement = "outside",
-        axis.text.x = element_blank()) +
-  ylim(NA, 0.8)
 
+P1D <- wgcna_bulk |> filter(MEs %in% wgcna_test$MEs) |>
+  ggpubr::ggboxplot(x = "condition", y = "value", fill = "condition", facet.by = "MEs") + 
+  ggpubr::stat_pvalue_manual(wgcna_test) +
+  scale_fill_manual(values = alpha(c("#469FBF", "#CB477A"), 0.8)) +
+  labs(x = "", y = "Module Eigengene", fill = "Condition") +
+  custom_theme() +
+  theme(strip.placement = "outside", axis.text.x = element_blank())
+
+P1D <- shift_legend(P1D)
+
+P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
 
 ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
 
