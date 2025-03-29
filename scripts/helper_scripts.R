@@ -80,6 +80,7 @@ custom_theme <- function(){
           legend.title = element_text(size = rel(1.25)),
           axis.title = element_text(size = rel(1.25)),
           axis.text = element_text(size = rel(1.15)),
+          strip.text.x = element_text(size = 10),
           plot.title = element_text(size = rel(1.5),
                                     hjust = 0.5),
           panel.grid = element_blank(),

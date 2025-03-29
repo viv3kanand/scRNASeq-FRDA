@@ -677,7 +677,7 @@ P2A <- DimPlot(seu_WB,
 markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
 
 P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
-  scale_colour_gradient2(low = "#3288BD", mid = 'white', high = "#D53E4F") +
+  scale_colour_gradient2(low = "#3CB49F", mid = 'white', high = "#5575B0") +
   RotatedAxis() +
   custom_theme() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
@@ -685,13 +685,13 @@ P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) +
 
 P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(0.7, 1), axis = "b", align = "hv")
 
-ggsave(filename = "figures/Panel2/P2AB.png", 
-       plot = P2AB,
-       units = "in", 
-       width = 13/1.5,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
+# ggsave(filename = "figures/Panel2/P2AB.png", 
+#        plot = P2AB,
+#        units = "in", 
+#        width = 13/1.5,
+#        height = 8.5/2,
+#        dpi = 600,
+#        bg = "white")
 
 # DCATS
 
@@ -722,13 +722,13 @@ P2C <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
   theme(legend.position = "top")
 
 
-ggsave(filename = "figures/Panel2/P2C.png", 
-       plot = P2C,
-       units = "in", 
-       width = 13/4,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
+# ggsave(filename = "figures/Panel2/P2C.png", 
+#        plot = P2C,
+#        units = "in", 
+#        width = 13/4,
+#        height = 8.5/2,
+#        dpi = 600,
+#        bg = "white")
 
 
 ### TRRUST
@@ -741,7 +741,7 @@ P2D <- tf_NEU |>
   geom_bar(aes(fill = genes), stat = "identity") +
   xlab("-log10(p-adjust)") +
   ylab("Top TFs") +
-  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
+  scale_fill_gradientn(colours = c('#3CB49F', '#5575B0'), na.value = "grey") +
   custom_theme()
 
 P2CD <- cowplot::plot_grid(P2C, P2D, nrow = 1, labels = c("C", "D"), rel_widths = c(1, 0.6), axis = "b", align = "hv")
@@ -762,10 +762,95 @@ ggsave(filename = "figures/Panel2/P2_top.png",
 
 #IFN-RIG1 
 
+DefaultAssay(seu_WB) <- "module_score"
 
+P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                Condition = seu_WB@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  filter(cluster == "Neutrophil" & !source == "NEU2") |> 
+  mutate(source = str_sub(source, end = -2)) |> 
+  ggplot(aes(Condition, score)) +
+  ggdist::stat_halfeye(aes(fill = Condition), 
+                       alpha = .8,
+                       adjust = .5, 
+                       width = .8, 
+                       justification = -.2, 
+                       .width = 0, 
+                       point_colour = NA) +
+  geom_boxplot(aes(fill = Condition), 
+               alpha = .8,
+               width = 0.1, 
+               outlier.colour = "grey") + 
+  labs(x = NULL, y = "Module Score") +
+  facet_grid(~source) +
+  custom_theme() +
+  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  geom_signif(
+    comparisons = list(c("Control", "Patient")),
+    map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
 
 
 #TF-STAT1
+
+DefaultAssay(seu_WB) <- "tfsulm"
+
+P3G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
+  as.data.frame() |> 
+  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+                Condition = seu_WB@meta.data$Condition) |> 
+  tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                      names_to = "source", 
+                      values_to = "score") |> 
+  filter(source == "STAT1" & cluster == c("Neutrophil")) |> 
+  ggplot(aes(Condition, score)) +
+  ggdist::stat_halfeye(aes(fill = Condition), 
+                       alpha = .8,
+                       adjust = .5, 
+                       width = .8, 
+                       justification = -.2, 
+                       .width = 0, 
+                       point_colour = NA) +
+  geom_boxplot(aes(fill = Condition), 
+               alpha = .8,
+               width = 0.1, 
+               outlier.colour = "grey") + 
+  facet_grid(~source) +
+  labs(x = NULL, y = "TF Score") +
+  custom_theme() +
+  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  geom_signif(
+    comparisons = list(c("Control", "Patient")),
+    map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+P2_bottom <- cowplot::plot_grid(NULL, P2F, P3G, nrow = 1, labels = c("E", "F", "G"), rel_widths = c(1, 1), axis = "b", align = "hv")
+
+ggsave(filename = "figures/Panel2/P2_bottom.png", 
+       plot = P2_bottom,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+P2_final <- cowplot::plot_grid(P2_top, P2_bottom, nrow = 2)
+
+ggsave(filename = "figures/Panel2/P2_final.png", 
+       plot = P2_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
+       dpi = 600,
+       bg = "white")
+
+
 ```
 
 
