@@ -1112,9 +1112,11 @@ ggsave(filename = "figures/Panel4/P4_top.png",
        dpi = 600,
        bg = "white")
 
+
+
 # IL10 Module score
 
-P4D <- seu_meta |> 
+P4E <- seu_meta |> 
   select(orig.ident, Condition, cell_type, 30) |>
   dplyr::filter(cell_type == "CD14 Mono") |> 
   pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
@@ -1133,12 +1135,51 @@ P4D <- seu_meta |>
 
 
 
+# IL10 expressing cell proportion
+
+P4F <- seu_meta |> 
+    filter(cell_type == "CD14 Mono") |> 
+    dplyr::select(orig.ident, Condition, il10) |> 
+    group_by(orig.ident, Condition) |>
+    summarise(prop = length(which(il10 > 0))/length(il10)) |> 
+    ggplot(aes(Condition, prop, fill = Condition)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Proportion") +
+  custom_theme() +
+  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
+  geom_signif(
+        comparisons = list(c("Control", "FRDA")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+P4_bottom <- cowplot::plot_grid(NULL, P4E, P4F, labels = c("D", "E", "F"), nrow = 1, axis = "bt", align = "h")
+
+ggsave(filename = "figures/Panel4/P4_bottom.png", 
+       plot = P4_bottom,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
 
 
+P4_final <- cowplot::plot_grid(P4_top, P4_bottom, ncol = 1, axis = "lr", align = "v")
 
+ggsave(filename = "figures/Panel4/P4_final.png", 
+       plot = P4_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
+       dpi = 600,
+       bg = "white")
 ```
 
+### Panel 5 - CAD vs NCAD
 
+```{r}
+
+```
 
 
 <!-- Panel 3: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores, Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
