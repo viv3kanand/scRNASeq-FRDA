@@ -1056,6 +1056,64 @@ P4A <- CD14_plot_data |>
   custom_theme()
 
 
+# CD14 Mono - GSEA
+
+files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
+
+GSEA_CD14 <- lapply(files, function(file){
+  openxlsx::read.xlsx(file, "CD14 Mono")
+})
+
+names(GSEA_CD14) <- c("REACTOME", "BP")
+
+pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY", "GOBP_POSITIVE_REGULATION_OF_LYMPHOCYTE_DIFFERENTIATION", "GOBP_NIK_NF_KAPPAB_SIGNALING", "GOBP_CELLULAR_RESPONSE_TO_MOLECULE_OF_BACTERIAL_ORIGIN", "GOBP_POSITIVE_REGULATION_OF_ADAPTIVE_IMMUNE_RESPONSE", "GOBP_INFLAMMATORY_RESPONSE", "GOBP_CYTOKINE_PRODUCTION", "GOBP_MAPK_CASCADE", "GOBP_CELLULAR_EXTRAVASATION", "GOBP_LEUKOCYTE_TETHERING_OR_ROLLING", "GOBP_REGULATION_OF_MONOCYTE_CHEMOTAXIS", "REACTOME_SIGNALING_BY_INTERLEUKINS", "REACTOME_INNATE_IMMUNE_SYSTEM", "REACTOME_INTERLEUKIN_4_AND_INTERLEUKIN_13_SIGNALING", "REACTOME_NEUTROPHIL_DEGRANULATION", "REACTOME_INTERLEUKIN_10_SIGNALING", "REACTOME_CYTOKINE_SIGNALING_IN_IMMUNE_SYSTEM")
+
+P4B <- do.call("rbind", GSEA_CD14) |> 
+  as_tibble() |>  
+  dplyr::select(c(1,5,6,7,8,9)) |>
+  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
+                order = NES, .by = ID) |> 
+  dplyr::filter(ID %in% pathway_list) |> 
+  dplyr::mutate(
+    ID = paste0(
+      str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
+      stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
+        gsub(ID, pattern = "_", replacement = " "))) |> 
+  ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = -log10(p.adjust))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = NULL, x = "NES", y = NULL) +
+  scale_x_continuous(position="bottom") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  scale_fill_manual(values = c("Enriched" = "#5575B0", "Depleted" = "#3CB49F"), breaks = c("Enriched", "Depleted")) +
+  custom_theme()
+
+
+# TRRUST - CD14
+
+tf_cd14 <- read_csv("../data/TRRUST_CD14.csv")
+
+P4C <- tf_cd14 |> 
+  mutate(order = desc(qvalue), .by = TF) |>
+  head(20) |> 
+  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+  geom_bar(aes(fill = genes), stat = "identity") +
+  xlab("-log10(p-adjust)") +
+  ylab("Top 20 TF") +
+  scale_fill_gradientn(colours = c('#5575B0', '#3CB49F'), na.value = "grey") +
+  custom_theme()
+
+P4_top <- cowplot::plot_grid(P4A, P4B, P4C, nrow = 1, labels = "AUTO", axis = "bt", align = "h")
+
+ggsave(filename = "figures/Panel4/P4_top.png", 
+       plot = P4_top,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+
+
 
 
 ```
