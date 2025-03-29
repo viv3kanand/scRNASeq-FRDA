@@ -1112,6 +1112,26 @@ ggsave(filename = "figures/Panel4/P4_top.png",
        dpi = 600,
        bg = "white")
 
+# IL10 Module score
+
+P4D <- seu_meta |> 
+  select(orig.ident, Condition, cell_type, 30) |>
+  dplyr::filter(cell_type == "CD14 Mono") |> 
+  pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
+               names_to = "source", 
+               values_to = "score") |> 
+  ggplot(aes(Condition, score, fill = Condition)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Module Score") +
+  custom_theme() +
+  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
+  geom_signif(
+    comparisons = list(c("Control", "FRDA")),
+    map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
 
 
 
