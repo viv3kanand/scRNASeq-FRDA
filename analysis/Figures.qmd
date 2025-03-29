@@ -884,7 +884,7 @@ P3B <- DotPlot(seu_PBMC, features = markers_PBMC, dot.scale = 3) +
   labs(title = NULL, x = NULL, y = NULL)
 
 
-# DEG
+# DEG - Bar plot
 
 DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
 
@@ -906,7 +906,6 @@ summary_df <- lapply(names(DGE_pbmc_filt), function(cell_type) {
   pivot_longer(cols = c(Upregulated, Downregulated), 
                names_to = "Regulation", 
                values_to = "Count")
-
 
 P3C <- summary_df |> 
   mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
@@ -931,6 +930,37 @@ P3C <- summary_df |>
         panel.grid.major.y = element_blank())
 
 
+# DCATS - PBMC
+
+# dcats_df <- run_dcats(seu_PBMC)
+# write_rds(dcats_df, paste0("RData/", Sys.Date(),"_dcats-df.rds"))
+
+dcats_PBMC <- read_rds("RData/2025-02-13_dcats-df.rds")
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
+
+seu_meta |> 
+    count(cell_type, Condition) |> 
+    mutate(dcats = rep(dcats_PBMC$LRT_pvals, each = 2),
+           stars = case_when(
+               dcats < 0.001 ~ "***",
+               dcats < 0.01 ~ "**",
+               dcats < 0.05 ~ "*",
+               TRUE ~ "")) |> 
+    group_by(cell_type) |> 
+    mutate(prop = n / sum(n)) -> dcats_df
+
+dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "FRDA", 0, dcats_df$prop), FUN = sum)
+
+P3D <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
+  geom_col(position = "fill", width = 0.9) +
+  geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
+  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "", y = "Relative abundance (%)") +
+  custom_theme() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.text = element_text(size=rel(1.15))) +
+  theme(legend.position = "top")
 
 ```
 
