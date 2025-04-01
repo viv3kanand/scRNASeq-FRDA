@@ -359,6 +359,8 @@ P1B <- ipa_bulk |>
 
 # GSVA
 vsd <- read_rds("RData/Bulk/2025-01-28_vsd.rds")
+gset_list <- read_rds("RData/gsva/gset_list.rda")
+
 
 vst_gsva <- as.data.frame(assay(vsd)) |>
   tibble::rownames_to_column("symbol") |>
@@ -367,7 +369,7 @@ vst_gsva <- as.data.frame(assay(vsd)) |>
   relocate(symbol) |> 
   as_tibble()
 
-res_gsva <- applyGSVA(gset_df = gset_celltype, group_col = "cell_type", gene_col = "symbol", expr_mat_list = list(vst_gsva), kcdf = "Gaussian")
+res_gsva <- applyGSVA(gset_df = gset_list, group_col = "cell_type", gene_col = "symbol", expr_mat = vst_gsva)
 
 res_gsva[[1]]$Condition <- colData(vsd)$Condition[match(rownames(res_gsva[[1]]), rownames(colData(vsd)))]
 
