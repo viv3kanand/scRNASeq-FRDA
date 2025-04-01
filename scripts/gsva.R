@@ -16,17 +16,12 @@ applyGSVA = function(gset_df, group_col, gene_col, expr_mat_list, kcdf = c("Gaus
   
   gset_list <- split(as.character(gset_df[gene_col]), as.character(gset_df[group_col]))
   
-  for (i in seq_along(expr_mat_list)) {
-    expr_mat = expr_mat_list[[i]]
-    
-    expr_mat = as.data.frame(expr_mat)
-    rownames(expr_mat) = expr_mat[[1]]
-    expr_mat = expr_mat[,-1, drop = FALSE] |> as.matrix()
-    
-    gsvapar = gsvaParam(exprData = expr_mat, geneSets = gset_list, kcdf = kcdf)
-    res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
-    
-    resList[[i]] = as.data.frame(t(res))
-  }
-  return(resList)
+  expr_mat = vst_gsva |> 
+    tibble::column_to_rownames("symbol") |>
+    as.matrix()
+  
+  gsvapar = gsvaParam(exprData = expr_mat, geneSets = gset_list, kcdf = "Gaussian")
+  res = gsva(gsvapar, verbose = TRUE, BPPARAM = MulticoreParam(workers = 40))
+  
+  return(res)
 }
