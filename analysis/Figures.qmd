@@ -276,35 +276,6 @@ ggsave("analysis/figures/PBMC/QC/basicQC.png")
 # Volcano plot
 dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
 
-dge_array <- read_tsv("../data/extdata/GSE30933.top.table.tsv")
-dge_array <- read_csv("../data/extdata/array_df.csv") |> 
-  select(Symbol, logFC.patient_vs_control, pp.patient_vs_control) |> 
-  mutate(log2FC = logFC.patient_vs_control / log10(2),
-         pval = 1 - pp.patient_vs_control)
-
-dge_combined <- dge_bulk |> 
-  left_join(y = unique(dge_array[, c("Symbol", "log2FC", "pval")]), by = c("Gene" = "Symbol")) |> 
-  na.omit()
-
-dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
-cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
-
-st <- lm(log2FoldChange ~ log2FC, data = dge_combined)
-
-dge_combined |> 
-    mutate(
-        Expression = case_when(
-            log2FoldChange > 0 & log2FC > 0 & padj < 0.05 & pval < 0.05 ~ "Upregulated",
-            log2FoldChange < 0 & log2FC < 0 & padj < 0.05 & pval < 0.05 ~ "Downregulated",
-            TRUE ~ "Not significant")) |> 
-    ggplot(aes(log2FoldChange, log2FC)) +
-    geom_point(aes(color = Expression, alpha = 0.8)) +
-    scale_color_manual(values = c("#CB477A", "grey", "#469FBF")) +
-    geom_hline(yintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
-    geom_vline(xintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
-    guides(alpha = "none", size = "none") + 
-    custom_theme()
-
 P1A <- dge_bulk |> 
     mutate(
         Expression = case_when(
@@ -400,20 +371,15 @@ P1C <- shift_legend(P1C)
 P1_top <- cowplot::plot_grid(P1A, P1B, P1C, rel_widths = c(0.8, 1, 1), nrow = 1, align = "h", labels = "AUTO")
 
 
-# ggsave(filename = "figures/Panel1/P1_top.png", 
-#        plot = P1_top,
-#        units = "in", 
-#        width = 13,
-#        height = 8.5/2,
-#        dpi = 600,
-#        bg = "white")
+
 
 
 # WGCNA
 
 P1D <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-A-TOMplot-30x30.png")
 
-# P1E <- cowplot::ggdraw() + cowplot::draw_image("figures/Bulk/WGCNA/manu-fig-02-C-boxplot-sig-padj-ME.png")
+
+# WGCNA significant modules
 
 wgcna_bulk <- read.csv("RData/09-wgcna-me-eg.csv", header = TRUE)
 names(wgcna_bulk) <- c("condition", "MEs", "value")
@@ -466,13 +432,6 @@ P1F <- ipa_m3 |>
 
 P1_bottom <- cowplot::plot_grid(P1D, P1E, P1F, labels = c("D", "E", "F"), nrow = 1)
 
-# ggsave(filename = "figures/Panel1/P1_bottom.png", 
-#        plot = P1_bottom,
-#        units = "in", 
-#        width = 13,
-#        height = 8.5/2,
-#        dpi = 600,
-#        bg = "white")
 
 P1_final <- cowplot::plot_grid(P1_top, P1_bottom, nrow = 2)
 
@@ -645,6 +604,36 @@ ggsave(filename = "figures/Bulk/fig1CD.png",
 
 
 
+## Correlation analysis
+
+dge_array <- read_tsv("../data/extdata/GSE30933.top.table.tsv")
+dge_array <- read_csv("../data/extdata/array_df.csv") |> 
+  select(Symbol, logFC.patient_vs_control, pp.patient_vs_control) |> 
+  mutate(log2FC = logFC.patient_vs_control / log10(2),
+         pval = 1 - pp.patient_vs_control)
+
+dge_combined <- dge_bulk |> 
+  left_join(y = unique(dge_array[, c("Symbol", "log2FC", "pval")]), by = c("Gene" = "Symbol")) |> 
+  na.omit()
+
+dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
+cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
+
+st <- lm(log2FoldChange ~ log2FC, data = dge_combined)
+
+dge_combined |> 
+    mutate(
+        Expression = case_when(
+            log2FoldChange > 0 & log2FC > 0 & padj < 0.05 & pval < 0.05 ~ "Upregulated",
+            log2FoldChange < 0 & log2FC < 0 & padj < 0.05 & pval < 0.05 ~ "Downregulated",
+            TRUE ~ "Not significant")) |> 
+    ggplot(aes(log2FoldChange, log2FC)) +
+    geom_point(aes(color = Expression, alpha = 0.8)) +
+    scale_color_manual(values = c("#CB477A", "grey", "#469FBF")) +
+    geom_hline(yintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
+    geom_vline(xintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
+    guides(alpha = "none", size = "none") + 
+    custom_theme()
 
 ```
 
