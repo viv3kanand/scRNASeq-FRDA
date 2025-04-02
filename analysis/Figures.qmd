@@ -352,7 +352,7 @@ P1B <- ipa_bulk |>
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
     labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
@@ -369,17 +369,18 @@ vst_gsva <- as.data.frame(assay(vsd)) |>
   relocate(symbol) |> 
   as_tibble()
 
-res_gsva <- applyGSVA(gset_df = gset_list, group_col = "cell_type", gene_col = "symbol", expr_mat = vst_gsva)
+res_gsva <- applyGSVA(gset_df = gset_list, group_col = "cell_type", gene_col = "symbol", expr_mat = vst_gsva) |> t() |> as.data.frame()
 
-res_gsva[[1]]$Condition <- colData(vsd)$Condition[match(rownames(res_gsva[[1]]), rownames(colData(vsd)))]
+res_gsva$Condition <- colData(vsd)$Condition[match(rownames(res_gsva), rownames(colData(vsd)))]
 
 
 
-P1C <- res_gsva[[1]] |> 
-  pivot_longer(cols = 1:26, names_to = "celltype", values_to = "value") |>
+P1C <- res_gsva |> 
+  pivot_longer(cols = 1:27, names_to = "celltype", values_to = "value") |>
   filter(celltype %in% c("B cells", 
                          "CD8 T cells", 
-                         "DC", "Monocyte", 
+                         "DC", 
+                         "Monocytes", 
                          "Neutrophils", 
                          "NK cells", 
                          "T cells", 
@@ -392,7 +393,7 @@ P1C <- res_gsva[[1]] |>
     comparisons = list(c("Control", "Patient")),
     map_signif_level = TRUE, textsize = 2
     ) +
-  scale_fill_manual(values = c("#469FBF", "#CB477A")) +
+  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
   labs(x = "", y = "GSVA score") +
   custom_theme() +
   theme(strip.placement = "outside",
