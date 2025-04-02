@@ -289,6 +289,10 @@ dge_combined <- dge_bulk |>
 dge_combined_sig <- dge_combined |> filter(padj < 0.05 & pval < 0.05)
 cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
 
+st <- lm(log2FoldChange ~ log2FC, data = dge_combined)
+
+
+
 P1A <- dge_bulk |> 
     mutate(
         Expression = case_when(
