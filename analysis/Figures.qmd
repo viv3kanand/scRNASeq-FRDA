@@ -316,29 +316,6 @@ P1A <- dge_bulk |>
 
 ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
 
-P2 <- ipa_bulk |> 
-    head(20) |> 
-    mutate(order = Ratio, .by = Pathways,
-           Count = str_count(Molecules, ",") + 1) |> 
-    ggplot(aes(x = Ratio, y = reorder(Pathways, order), color = Logpval, size = Count)) +
-    geom_point() + 
-    labs(x = "Gene Ratio", y = "Pathways") + 
-    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,27), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-    custom_theme()
-
-P2 <- ipa_bulk |> 
-    head(20) |> 
-    mutate(order = Logpval, .by = Pathways,
-           Count = str_count(Molecules, ",") + 1) |> 
-    ggplot(aes(x = Logpval, y = reorder(Pathways, order), color = Count, size = Count)) +
-    geom_point() + 
-    labs(x = "-log10(pvalue)", y = "Pathways") + 
-    scale_color_gradientn(colours = c('#FFFFFF', '#D53E4F'), limit = c(0,64), na.value = "grey") +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-    guides(size = "none") +
-    custom_theme()
-
 P1B <- ipa_bulk |> 
     filter(!Zscore %in% c("#NUM!", 0)) |> 
     head(20) |> 
