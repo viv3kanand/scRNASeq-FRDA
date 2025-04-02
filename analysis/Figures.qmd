@@ -291,7 +291,19 @@ cor.test(dge_combined_sig$log2FoldChange, dge_combined_sig$log2FC)
 
 st <- lm(log2FoldChange ~ log2FC, data = dge_combined)
 
-
+dge_combined |> 
+    mutate(
+        Expression = case_when(
+            log2FoldChange > 0 & log2FC > 0 & padj < 0.05 & pval < 0.05 ~ "Upregulated",
+            log2FoldChange < 0 & log2FC < 0 & padj < 0.05 & pval < 0.05 ~ "Downregulated",
+            TRUE ~ "Not significant")) |> 
+    ggplot(aes(log2FoldChange, log2FC)) +
+    geom_point(aes(color = Expression, alpha = 0.8)) +
+    scale_color_manual(values = c("#CB477A", "grey", "#469FBF")) +
+    geom_hline(yintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
+    geom_vline(xintercept = c(-0.5, 0.5), linetype = 2, color = "black") +
+    guides(alpha = "none", size = "none") + 
+    custom_theme()
 
 P1A <- dge_bulk |> 
     mutate(
