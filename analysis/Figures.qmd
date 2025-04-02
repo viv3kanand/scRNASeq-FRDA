@@ -353,10 +353,7 @@ P1B <- ipa_bulk |>
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
     labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c(
-      "Enriched" = "#3CB49F", 
-      "Depleted" = "#5575B0"
-      )) +
+    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
@@ -441,7 +438,7 @@ wgcna_test <- wgcna_bulk |>
 P1E <- wgcna_bulk |> filter(MEs %in% wgcna_test$MEs) |>
   ggpubr::ggboxplot(x = "condition", y = "value", fill = "condition", facet.by = "MEs", width = 0.5, size = 0.3) + 
   ggpubr::stat_pvalue_manual(wgcna_test) +
-  scale_fill_manual(values = alpha(c("#469FBF", "#CB477A"), 0.8)) +
+  scale_fill_manual(values = alpha(c("#3CB49F", "#5575B0"), 0.8)) +
   labs(x = "", y = "Module Eigengene", fill = "Condition") +
   custom_theme() +
   theme(strip.placement = "outside", axis.text.x = element_blank())
@@ -462,11 +459,12 @@ P1F <- ipa_m3 |>
            Enrichment = case_when(
                Zscore > 0 ~ "Enriched",
                Zscore < 0 ~ "Depleted"),
+           Enrichment = factor(Enrichment, levels = c("Enriched", "Depleted")),
            order = Zscore, .by = Pathways) |> 
     ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
-    labs(x = "z-score", y = "Pathways", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    labs(x = "z-score", y = NULL, alpha = "-Log10(pvalue)") + 
+    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
