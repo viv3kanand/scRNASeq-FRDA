@@ -810,7 +810,7 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 
 
-### Panel 3: scRNA-Seq - PBMC - DCATS, TF, Pathways, IFN-RIG1, TF-STAT1
+### Panel 3: scRNA-Seq - PBMC - DCATS, Trajectory, CD14 Mono, GSEA, TF
 
 ```{r}
 # DCATS - PBMC
@@ -835,7 +835,7 @@ seu_meta |>
 dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "FRDA", 0, dcats_df$prop), FUN = sum)
 
 P3A <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
-  geom_col(position = "fill", width = 0.9) +
+  geom_col(position = "fill", width = 0.9, alpha = 0.8) +
   geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
   scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
   scale_y_continuous(labels = scales::percent) +
@@ -899,11 +899,109 @@ ggsave(filename = "figures/Panel3/P3_top.png",
        bg = "white")
 
 
+# CD14 Monocyte expression
 
+DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
+
+avg.cd14.mono <- read_rds("RData/avg.cd14.mono.rds")
+
+DGE_PBMC$`CD14 Mono` |> 
+    mutate(
+        Expression = case_when(
+            avg_log2FC >= 1 & p_val_adj <= 0.01 ~ "Upregulated",
+            avg_log2FC <= -1 & p_val_adj <= 0.01 ~ "Downregulated",
+            TRUE ~ "Not significant")) |>
+    merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
+
+
+P3E <- CD14_plot_data |> 
+  ggplot(aes(Control, FRDA)) + 
+  geom_point(aes(color = Expression, alpha = 0.8)) + 
+  ggtitle("CD14 Mono") + 
+  ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
+                                         filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
+                                         arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
+                           aes(label = gene), 
+                           max.overlaps = 20, 
+                           force = 20, 
+                           segment.size = 0.2,
+                           segment.curvature = -0.1,
+                           size = 2) +
+  scale_color_manual(values = c("#469FBF", "grey", "#CB477A")) +
+  guides(alpha = "none", size = "none") +
+  custom_theme()
+
+
+# CD14 Mono - GSEA
+
+files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
+
+GSEA_CD14 <- lapply(files, function(file){
+  openxlsx::read.xlsx(file, "CD14 Mono")
+})
+
+names(GSEA_CD14) <- c("REACTOME", "BP")
+
+pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY", "GOBP_POSITIVE_REGULATION_OF_LYMPHOCYTE_DIFFERENTIATION", "GOBP_NIK_NF_KAPPAB_SIGNALING", "GOBP_CELLULAR_RESPONSE_TO_MOLECULE_OF_BACTERIAL_ORIGIN", "GOBP_POSITIVE_REGULATION_OF_ADAPTIVE_IMMUNE_RESPONSE", "GOBP_INFLAMMATORY_RESPONSE", "GOBP_CYTOKINE_PRODUCTION", "GOBP_MAPK_CASCADE", "GOBP_CELLULAR_EXTRAVASATION", "GOBP_LEUKOCYTE_TETHERING_OR_ROLLING", "GOBP_REGULATION_OF_MONOCYTE_CHEMOTAXIS", "REACTOME_SIGNALING_BY_INTERLEUKINS", "REACTOME_INNATE_IMMUNE_SYSTEM", "REACTOME_INTERLEUKIN_4_AND_INTERLEUKIN_13_SIGNALING", "REACTOME_NEUTROPHIL_DEGRANULATION", "REACTOME_INTERLEUKIN_10_SIGNALING", "REACTOME_CYTOKINE_SIGNALING_IN_IMMUNE_SYSTEM")
+
+P3F <- do.call("rbind", GSEA_CD14) |> 
+  as_tibble() |>  
+  dplyr::select(c(1,5,6,7,8,9)) |>
+  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
+                order = NES, .by = ID) |> 
+  dplyr::filter(ID %in% pathway_list) |> 
+  dplyr::mutate(
+    ID = paste0(
+      str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
+      stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
+        gsub(ID, pattern = "_", replacement = " "))) |> 
+  ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = -log10(p.adjust))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = NULL, x = "NES", y = NULL) +
+  scale_x_continuous(position="bottom") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  scale_fill_manual(values = c("Enriched" = "#CB477A", "Depleted" = "#469FBF"), breaks = c("Enriched", "Depleted")) +
+  custom_theme()
+
+
+# TRRUST - CD14
+
+tf_cd14 <- read_csv("../data/TRRUST_CD14.csv")
+
+P3G <- tf_cd14 |> 
+  mutate(order = desc(qvalue), .by = TF) |>
+  head(20) |> 
+  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+  geom_bar(aes(fill = genes), stat = "identity") +
+  xlab("-log10(p-adjust)") +
+  ylab("Top 20 TF") +
+  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
+  custom_theme()
+
+P3_bottom <- cowplot::plot_grid(P3E, P3F, P3G, nrow = 1, labels = c("E", "F", "G"), axis = "bt", align = "h")
+
+ggsave(filename = "figures/Panel3/P3_bottom.png", 
+       plot = P3_bottom,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
+
+P3_final <- cowplot::plot_grid(P3_top, P3_bottom, ncol = 1, align = "hv")
+
+ggsave(filename = "figures/Panel3/P3_final.png", 
+       plot = P3_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
+       dpi = 600,
+       bg = "white")
 
 
 ```
 
+### Panel 4: Pathways, IFN-RIG1, TF-STAT1
 
 ```{r}
 ### TRRUST
@@ -1033,94 +1131,10 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 ### Panel 4 - CD14 Monocytes: 
 
 ```{r}
-# CD14 Monocyte expression
-
-DGE_PBMC <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
-
-avg.cd14.mono <- read_rds("RData/avg.cd14.mono.rds")
-
-DGE_PBMC$`CD14 Mono` |> 
-    mutate(
-        Expression = case_when(
-            avg_log2FC >= 1 & p_val_adj <= 0.01 ~ "Upregulated",
-            avg_log2FC <= -1 & p_val_adj <= 0.01 ~ "Downregulated",
-            TRUE ~ "Not significant")) |>
-    merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
 
 
-P4A <- CD14_plot_data |> 
-  ggplot(aes(Control, FRDA)) + 
-  geom_point(aes(color = Expression, alpha = 0.8)) + 
-  ggtitle("CD14 Mono") + 
-  ggrepel::geom_text_repel(data = head(CD14_plot_data |> 
-                                         filter(abs(avg_log2FC) > 2 & p_val_adj < 0.01 & !is.na(description)) |>
-                                         arrange(p_val_adj, desc(abs(avg_log2FC))), 20), 
-                           aes(label = gene), 
-                           max.overlaps = 20, 
-                           force = 20, 
-                           segment.size = 0.2,
-                           segment.curvature = -0.1,
-                           size = 2) +
-  scale_color_manual(values = c("#469FBF", "grey", "#CB477A")) +
-  guides(alpha = "none", size = "none") +
-  custom_theme()
 
 
-# CD14 Mono - GSEA
-
-files <- c("RData/gsea/2024-09-26_GSEA_REACTOME.xlsx", "RData/gsea/2024-09-26_GSEA_BP.xlsx")
-
-GSEA_CD14 <- lapply(files, function(file){
-  openxlsx::read.xlsx(file, "CD14 Mono")
-})
-
-names(GSEA_CD14) <- c("REACTOME", "BP")
-
-pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY", "GOBP_POSITIVE_REGULATION_OF_LYMPHOCYTE_DIFFERENTIATION", "GOBP_NIK_NF_KAPPAB_SIGNALING", "GOBP_CELLULAR_RESPONSE_TO_MOLECULE_OF_BACTERIAL_ORIGIN", "GOBP_POSITIVE_REGULATION_OF_ADAPTIVE_IMMUNE_RESPONSE", "GOBP_INFLAMMATORY_RESPONSE", "GOBP_CYTOKINE_PRODUCTION", "GOBP_MAPK_CASCADE", "GOBP_CELLULAR_EXTRAVASATION", "GOBP_LEUKOCYTE_TETHERING_OR_ROLLING", "GOBP_REGULATION_OF_MONOCYTE_CHEMOTAXIS", "REACTOME_SIGNALING_BY_INTERLEUKINS", "REACTOME_INNATE_IMMUNE_SYSTEM", "REACTOME_INTERLEUKIN_4_AND_INTERLEUKIN_13_SIGNALING", "REACTOME_NEUTROPHIL_DEGRANULATION", "REACTOME_INTERLEUKIN_10_SIGNALING", "REACTOME_CYTOKINE_SIGNALING_IN_IMMUNE_SYSTEM")
-
-P4B <- do.call("rbind", GSEA_CD14) |> 
-  as_tibble() |>  
-  dplyr::select(c(1,5,6,7,8,9)) |>
-  dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
-                order = NES, .by = ID) |> 
-  dplyr::filter(ID %in% pathway_list) |> 
-  dplyr::mutate(
-    ID = paste0(
-      str_split_fixed(ID, pattern = "_", n = 2)[,1], ": ", 
-      stringr::str_to_sentence(str_split_fixed(ID, pattern = "_", n = 2)[,2]) |> 
-        gsub(ID, pattern = "_", replacement = " "))) |> 
-  ggplot(aes(x = NES, y = reorder(ID, order), fill = Enrichment, alpha = -log10(p.adjust))) + 
-  geom_bar(stat = "identity") + 
-  labs(title = NULL, x = "NES", y = NULL) +
-  scale_x_continuous(position="bottom") +
-  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-  scale_fill_manual(values = c("Enriched" = "#5575B0", "Depleted" = "#3CB49F"), breaks = c("Enriched", "Depleted")) +
-  custom_theme()
-
-
-# TRRUST - CD14
-
-tf_cd14 <- read_csv("../data/TRRUST_CD14.csv")
-
-P4C <- tf_cd14 |> 
-  mutate(order = desc(qvalue), .by = TF) |>
-  head(20) |> 
-  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
-  geom_bar(aes(fill = genes), stat = "identity") +
-  xlab("-log10(p-adjust)") +
-  ylab("Top 20 TF") +
-  scale_fill_gradientn(colours = c('#5575B0', '#3CB49F'), na.value = "grey") +
-  custom_theme()
-
-P4_top <- cowplot::plot_grid(P4A, P4B, P4C, nrow = 1, labels = "AUTO", axis = "bt", align = "h")
-
-ggsave(filename = "figures/Panel4/P4_top.png", 
-       plot = P4_top,
-       units = "in", 
-       width = 13,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
 
 
 
