@@ -707,8 +707,10 @@ P2C <- summary_df_pbmc |>
   labs(x = NULL, y = NULL, fill = NULL) +
   coord_flip() +
   theme_minimal() +
-  theme(legend.position = "top",
-        panel.grid.major.y = element_blank())
+  theme(legend.position = "bottom",
+        panel.grid.major.y = element_blank(),
+        text = element_text(family = "Helvetica",
+                              size = 8))
 
 
 
@@ -782,8 +784,10 @@ P2F <- summary_df_wb |>
   labs(x = NULL, y = NULL, fill = NULL) +
   coord_flip() +
   theme_minimal() +
-  theme(legend.position = "top",
-        panel.grid.major.y = element_blank())
+  theme(legend.position = "bottom",
+        panel.grid.major.y = element_blank(),
+        text = element_text(family = "Helvetica",
+                              size = 8))
 
 
 P2_left <- cowplot::plot_grid(P2A, P2D, ncol = 1, labels = c("A", "D"), axis = "b", align = "hv")
