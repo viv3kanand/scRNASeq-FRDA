@@ -789,11 +789,17 @@ P2F <- summary_df_wb |>
 
 P2_top <- cowplot::plot_grid(P2A, P2B, P2C, nrow = 1, labels = "AUTO", rel_widths = c(0.8, 1, 0.8), axis = "b", align = "hv")
 
+P2_left <- cowplot::plot_grid(P2A, P2D, ncol = 1, labels = c("A", "D"), axis = "b", align = "hv")
+
+P2_mid <- cowplot::plot_grid(P2B, P2E, ncol = 1, labels = c("B", "E"), axis = "b", align = "hv")
+
+P2_right <- cowplot::plot_grid(P2C, P2F, ncol = 1, labels = c("C", "F"), axis = "b", align = "hv")
+
 
 P2_bottom <- cowplot::plot_grid(P2D, P2E, P2F, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.8, 1, 1), axis = "b", align = "hv")
 
 
-P2_final <- cowplot::plot_grid(P2_top, P2_bottom, nrow = 2)
+P2_final <- cowplot::plot_grid(P2_left, P2_mid, P2_right, nrow = 1, rel_widths = c(0.8, 1, 0.8))
 
 ggsave(filename = "figures/Panel2/P2_final.png", 
        plot = P2_final,
