@@ -743,6 +743,50 @@ P2E <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) +
   labs(title = NULL, x = NULL, y = NULL)
 
 
+# DEG - Bar plot - WB
+
+DGE_wb <- read_rds("RData/2024-09-26_DGE_sc_WB.rds")
+
+DGE_wb_filt <- lapply(DGE_wb, function(df){
+  df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05)
+})
+
+summary_df_wb <- lapply(names(DGE_wb_filt), function(cell_type) {
+  df <- DGE_wb_filt[[cell_type]]
+  up <- nrow(filter(df, avg_log2FC > 1 & p_val_adj < 0.05))
+  down <- nrow(filter(df, avg_log2FC < -1 & p_val_adj < 0.05))
+  data.frame(
+    CellType = cell_type,
+    Upregulated = up,
+    Downregulated = down
+  )
+}) |> 
+  bind_rows() |> 
+  pivot_longer(cols = c(Upregulated, Downregulated), 
+               names_to = "Regulation", 
+               values_to = "Count")
+
+P2C <- summary_df_wb |> 
+  mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
+  ggplot(aes(x = CellType, y = Count, fill = Regulation)) +
+  ggchicklet::geom_chicklet(width = 0.75) +
+  scale_y_continuous(position = "right") +
+  scale_fill_manual(
+    name = NULL,
+    values = c(
+      "Upregulated" = "#3CB49F",
+      "Downregulated" = "#5575B0"
+      ),
+    breaks = rev(setdiff(unique(summary_df_wb$Regulation), "Regulation"))
+    ) +
+  guides(
+    fill = guide_legend(nrow = 1)
+    ) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top",
+        panel.grid.major.y = element_blank())
 ```
 
 
