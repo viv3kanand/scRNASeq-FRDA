@@ -688,7 +688,7 @@ summary_df_pbmc <- lapply(names(DGE_pbmc_filt), function(cell_type) {
                names_to = "Regulation", 
                values_to = "Count")
 
-P2C <- summary_df |> 
+P2C <- summary_df_pbmc |> 
   mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
   ggplot(aes(x = CellType, y = Count, fill = Regulation)) +
   ggchicklet::geom_chicklet(width = 0.75) +
@@ -699,7 +699,7 @@ P2C <- summary_df |>
       "Upregulated" = "#3CB49F",
       "Downregulated" = "#5575B0"
       ),
-    breaks = rev(setdiff(unique(summary_df$Regulation), "Regulation"))
+    breaks = rev(setdiff(unique(summary_df_pbmc$Regulation), "Regulation"))
     ) +
   guides(
     fill = guide_legend(nrow = 1)
@@ -709,10 +709,6 @@ P2C <- summary_df |>
   theme_minimal() +
   theme(legend.position = "top",
         panel.grid.major.y = element_blank())
-
-
-P3_top <- cowplot::plot_grid(P3A, P3B, P3C, nrow = 1, labels = "AUTO", rel_widths = c(0.8, 1, 0.8), axis = "b", align = "hv")
-
 
 
 
@@ -766,7 +762,8 @@ summary_df_wb <- lapply(names(DGE_wb_filt), function(cell_type) {
                names_to = "Regulation", 
                values_to = "Count")
 
-P2C <- summary_df_wb |> 
+P2F <- summary_df_wb |> 
+  filter(!CellType == "Plasma cells") |> 
   mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
   ggplot(aes(x = CellType, y = Count, fill = Regulation)) +
   ggchicklet::geom_chicklet(width = 0.75) +
@@ -787,6 +784,25 @@ P2C <- summary_df_wb |>
   theme_minimal() +
   theme(legend.position = "top",
         panel.grid.major.y = element_blank())
+
+
+
+P2_top <- cowplot::plot_grid(P2A, P2B, P2C, nrow = 1, labels = "AUTO", rel_widths = c(0.8, 1, 0.8), axis = "b", align = "hv")
+
+
+P2_bottom <- cowplot::plot_grid(P2D, P2E, P2F, nrow = 1, labels = c("D", "E", "F"), rel_widths = c(0.8, 1, 1), axis = "b", align = "hv")
+
+
+P2_final <- cowplot::plot_grid(P2_top, P2_bottom, nrow = 2)
+
+ggsave(filename = "figures/Panel2/P2_final.png", 
+       plot = P2_final,
+       units = "in", 
+       width = 13,
+       height = 8.5,
+       dpi = 600,
+       bg = "white")
+
 ```
 
 
