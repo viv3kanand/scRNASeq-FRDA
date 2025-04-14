@@ -82,7 +82,7 @@ avg.cd14.mono$gene <- rownames(avg.cd14.mono)
 write_rds(avg.cd14.mono, "RData/avg.cd14.mono.rds")
 ```
 
-## Load data
+### Load data
 
 ```{r}
 #| label: load data
@@ -633,6 +633,118 @@ dge_combined |>
     custom_theme()
 
 ```
+
+
+### Panel 2: scRNA-Seq - PBMC & WB summary
+
+```{r}
+# UMAP - PBMC
+
+P2A <- DimPlot(seu_PBMC, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 0.5,
+               label = TRUE, 
+               label.size = 2,
+               raster = FALSE,
+               cols = umap_col) & 
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  custom_theme() +
+  empty_axis() &
+  NoLegend()
+
+# Markers - PBMC
+
+markers_PBMC <- c("CD34", "TNFRSF17", "LEF1", "MKI67", "TOP2A", "CLEC4C", "NRP1", "KLRB1", "PTGDS", "FCER1A", "CLEC10A", "TNFRSF13B", "TRDC", "FCGR3A", "MS4A7", "PPBP", "CD8A", "CD79A", "MS4A1", "CCR7", "CCR4", "NKG7", "GNLY", "NCAM1", "CD14", "LYZ")
+
+P2B <- DotPlot(seu_PBMC, features = markers_PBMC, dot.scale = 3) + 
+  scale_colour_gradient2(low = "#3CB49F", mid = 'white', high = "#5575B0") +
+  RotatedAxis() +
+  custom_theme() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
+  labs(title = NULL, x = NULL, y = NULL)
+
+
+# DEG - Bar plot - PBMC
+
+DGE_pbmc <- read_rds("RData/2024-09-26_DGE_sc_pbmc.rds")
+
+DGE_pbmc_filt <- lapply(DGE_pbmc, function(df){
+  df |> filter(abs(avg_log2FC) > 1 & p_val_adj < 0.05)
+})
+
+summary_df_pbmc <- lapply(names(DGE_pbmc_filt), function(cell_type) {
+  df <- DGE_pbmc_filt[[cell_type]]
+  up <- nrow(filter(df, avg_log2FC > 1 & p_val_adj < 0.05))
+  down <- nrow(filter(df, avg_log2FC < -1 & p_val_adj < 0.05))
+  data.frame(
+    CellType = cell_type,
+    Upregulated = up,
+    Downregulated = down
+  )
+}) |> 
+  bind_rows() |> 
+  pivot_longer(cols = c(Upregulated, Downregulated), 
+               names_to = "Regulation", 
+               values_to = "Count")
+
+P2C <- summary_df |> 
+  mutate(CellType = fct_reorder(CellType, Count, sum, .desc=FALSE)) |> 
+  ggplot(aes(x = CellType, y = Count, fill = Regulation)) +
+  ggchicklet::geom_chicklet(width = 0.75) +
+  scale_y_continuous(position = "right") +
+  scale_fill_manual(
+    name = NULL,
+    values = c(
+      "Upregulated" = "#3CB49F",
+      "Downregulated" = "#5575B0"
+      ),
+    breaks = rev(setdiff(unique(summary_df$Regulation), "Regulation"))
+    ) +
+  guides(
+    fill = guide_legend(nrow = 1)
+    ) +
+  labs(x = NULL, y = NULL, fill = NULL) +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top",
+        panel.grid.major.y = element_blank())
+
+
+P3_top <- cowplot::plot_grid(P3A, P3B, P3C, nrow = 1, labels = "AUTO", rel_widths = c(0.8, 1, 0.8), axis = "b", align = "hv")
+
+
+
+
+# UMAP - WB
+
+P2D <- DimPlot(seu_WB, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 0.5, 
+               label = TRUE, 
+               label.size = 2,
+               cols = umap_col) & 
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  NoLegend() &
+  custom_theme() +
+  empty_axis() +
+  NoLegend()
+
+# Markers - WB
+
+markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
+
+P2E <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
+  scale_colour_gradient2(low = "#3CB49F", mid = 'white', high = "#5575B0") +
+  RotatedAxis() +
+  custom_theme() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
+  labs(title = NULL, x = NULL, y = NULL)
+
+
+```
+
 
 
 ### Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1
