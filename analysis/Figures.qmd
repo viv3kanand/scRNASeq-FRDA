@@ -305,22 +305,23 @@ P1A <- dge_bulk |>
 ipa_bulk <- read_csv("../data/Bulk/IPA.csv")
 
 P1B <- ipa_bulk |> 
-    filter(!Zscore %in% c("#NUM!", 0)) |> 
-    head(20) |> 
-    mutate(Zscore = as.double(Zscore),
-           pvalue = 10^-Logpval,
-           Count = str_count(Molecules, ",") + 1,
-           Enrichment = case_when(
-               Zscore > 0 ~ "Enriched",
-               Zscore < 0 ~ "Depleted"),
-           Enrichment = factor(Enrichment, levels = c("Enriched", "Depleted")),
-           order = Zscore, .by = Pathways) |> 
-    ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
-    geom_bar(aes(x = Zscore), stat = "identity") + 
-    labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
-    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-    custom_theme()
+  filter(!Zscore %in% c("#NUM!", 0)) |> 
+  mutate(Zscore = as.double(Zscore),
+         pvalue = 10^-Logpval,
+         Count = str_count(Molecules, ",") + 1,
+         Enrichment = case_when(
+           Zscore > 0 ~ "Enriched",
+           Zscore < 0 ~ "Depleted"),
+         Enrichment = factor(Enrichment, levels = c("Enriched", "Depleted")),
+         order = Zscore, .by = Pathways) |> 
+  filter(abs(Zscore) > 2) |> 
+  head(20) |>
+  ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
+  geom_bar(aes(x = Zscore), stat = "identity") + 
+  labs(x = "z-score", y = "", alpha = "-Log10(pvalue)") + 
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+  custom_theme()
 
 
 # GSVA
@@ -357,7 +358,7 @@ P1C <- res_gsva |>
   facet_wrap(~celltype) +
   guides(alpha = "none") +
   ggpubr::stat_pvalue_manual(res_gsva_test, label = "p.adj", size = 2) +
-  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
   labs(x = "", y = "GSVA score") +
   custom_theme() +
   theme(strip.placement = "outside",
@@ -393,7 +394,7 @@ P1E <- wgcna_bulk |> filter(MEs %in% wgcna_test$MEs) |>
   geom_boxplot(aes(condition, value, fill = condition), width = 0.5, alpha = 0.8) +
   ggpubr::stat_pvalue_manual(wgcna_test, label = "p.adj", size = 2, y.position = 0.5) +
   facet_wrap(~MEs) + 
-  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
   labs(x = "", y = "Module Eigengene", fill = "Condition") +
   custom_theme() +
   theme(strip.placement = "outside", axis.text.x = element_blank())
@@ -403,23 +404,24 @@ P1E <- shift_legend(P1E)
 
 # Module 3 IPA
 
-ipa_m3 <- read_csv("../data/Bulk/IPA_M3.csv")
+ipa_m3 <- read_csv("../data/Bulk/IPA_M3_0.5FC.csv")
 
 P1F <- ipa_m3 |> 
-    filter(!Zscore %in% c("#NUM!", 0)) |> 
-    head(20) |> 
-    mutate(Zscore = as.double(Zscore),
-           pvalue = 10^-Logpval,
-           Count = str_count(Molecules, ",") + 1,
-           Enrichment = case_when(
-               Zscore > 0 ~ "Enriched",
-               Zscore < 0 ~ "Depleted"),
-           Enrichment = factor(Enrichment, levels = c("Enriched", "Depleted")),
-           order = Zscore, .by = Pathways) |> 
-    ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
+  filter(!Zscore %in% c("#NUM!", 0)) |> 
+  mutate(Zscore = as.double(Zscore),
+         pvalue = 10^-Logpval,
+         Count = str_count(Molecules, ",") + 1,
+         Enrichment = case_when(
+           Zscore > 0 ~ "Enriched",
+           Zscore < 0 ~ "Depleted"),
+         Enrichment = factor(Enrichment, levels = c("Enriched", "Depleted")),
+         order = Zscore, .by = Pathways) |> 
+  filter(abs(Zscore) > 2) |> 
+  head(20) |>
+  ggplot(aes(x = Zscore, y = reorder(Pathways, order), fill = Enrichment, alpha = Logpval)) +
     geom_bar(aes(x = Zscore), stat = "identity") + 
     labs(x = "z-score", y = NULL, alpha = "-Log10(pvalue)") + 
-    scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
     scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
     custom_theme()
 
