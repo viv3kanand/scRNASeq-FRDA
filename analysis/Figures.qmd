@@ -100,7 +100,7 @@ Idents(seu_PBMC) <- "cell_type"
 
 ```
 
-## Helper scripts
+### Helper scripts
 
 ```{r}
 #| label: source helper scripts
@@ -170,7 +170,7 @@ palette7 <- RColorBrewer::brewer.pal(11,'Spectral')
 
 ```
 
-## QC
+### QC
 
 ### Library saturation
 
@@ -635,7 +635,7 @@ dge_combined |>
 ```
 
 
-### Panel 2: scRNA-Seq - PBMC & WB summary
+### Panel 2: scRNA-Seq summary - PBMC & WB 
 
 ```{r}
 # UMAP - PBMC
@@ -810,52 +810,20 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 
 
-### Panel 2: scRNA-Seq - WB : UMAP, Marker, DCATS, TF, Pathways, IFN-RIG1, TF-STAT1
+### Panel 3: scRNA-Seq - PBMC - DCATS, TF, Pathways, IFN-RIG1, TF-STAT1
 
 ```{r}
-# UMAP
+# DCATS - PBMC
 
-P2A <- DimPlot(seu_WB, 
-               reduction = "umap.harmony", 
-               group.by = c("cell_type"), 
-               pt.size = 0.5, 
-               label = TRUE, 
-               label.size = 2,
-               cols = umap_col) & 
-  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
-  NoLegend() &
-  custom_theme() +
-  empty_axis() +
-  NoLegend()
+# dcats_df <- run_dcats(seu_PBMC)
+# write_rds(dcats_df, paste0("RData/", Sys.Date(),"_dcats-df.rds"))
 
-# Markers
+dcats_PBMC <- read_rds("RData/2025-02-13_dcats-df.rds")
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
 
-markers_WB <- c("MKI67", "TOP2A", "CLEC4C", "NRP1", "FCER1A", "CLEC10A", "LYZ", "PPBP", "FCGR3A", "TNFRSF13B", "JCHAIN", "CD14", "KLRB1", "CD8A", "CD8B", "NKG7", "GNLY", "NCAM1", "CD79A", "MS4A1", "CD4", "CCR7", "ALPL", "MME")
-
-P2B <- DotPlot(seu_WB, features = markers_WB, dot.scale = 3) + 
-  scale_colour_gradient2(low = "#3CB49F", mid = 'white', high = "#5575B0") +
-  RotatedAxis() +
-  custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) &
-  labs(title = NULL, x = NULL, y = NULL)
-
-P2AB <- cowplot::plot_grid(P2A, P2B, nrow = 1, labels = "AUTO", rel_widths = c(0.7, 1), axis = "b", align = "hv")
-
-# ggsave(filename = "figures/Panel2/P2AB.png", 
-#        plot = P2AB,
-#        units = "in", 
-#        width = 13/1.5,
-#        height = 8.5/2,
-#        dpi = 600,
-#        bg = "white")
-
-# DCATS
-
-dcats_WB <- run_dcats(seu_WB)
-
-seu_WB@meta.data |> 
+seu_meta |> 
     count(cell_type, Condition) |> 
-    mutate(dcats = rep(dcats_WB$LRT_pvals, each = 2),
+    mutate(dcats = rep(dcats_PBMC$LRT_pvals, each = 2),
            stars = case_when(
                dcats < 0.001 ~ "***",
                dcats < 0.01 ~ "**",
@@ -864,29 +832,27 @@ seu_WB@meta.data |>
     group_by(cell_type) |> 
     mutate(prop = n / sum(n)) -> dcats_df
 
+dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "FRDA", 0, dcats_df$prop), FUN = sum)
 
-dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "Patient", 0, dcats_df$prop), FUN = sum)
-
-P2C <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
+P3A <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
   geom_col(position = "fill", width = 0.9) +
   geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
   scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "Relative abundance (%)") +
   custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.text = element_text(size=rel(1.15))) +
   theme(legend.position = "top")
 
 
-# ggsave(filename = "figures/Panel2/P2C.png", 
-#        plot = P2C,
-#        units = "in", 
-#        width = 13/4,
-#        height = 8.5/2,
-#        dpi = 600,
-#        bg = "white")
 
 
+
+```
+
+
+```{r}
 ### TRRUST
 
 tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
@@ -1097,37 +1063,7 @@ ggsave(filename = "figures/Panel3/P3_top.png",
        dpi = 600,
        bg = "white")
 
-# DCATS - PBMC
 
-# dcats_df <- run_dcats(seu_PBMC)
-# write_rds(dcats_df, paste0("RData/", Sys.Date(),"_dcats-df.rds"))
-
-dcats_PBMC <- read_rds("RData/2025-02-13_dcats-df.rds")
-seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
-
-seu_meta |> 
-    count(cell_type, Condition) |> 
-    mutate(dcats = rep(dcats_PBMC$LRT_pvals, each = 2),
-           stars = case_when(
-               dcats < 0.001 ~ "***",
-               dcats < 0.01 ~ "**",
-               dcats < 0.05 ~ "*",
-               TRUE ~ "")) |> 
-    group_by(cell_type) |> 
-    mutate(prop = n / sum(n)) -> dcats_df
-
-dcats_df$cell_type <- reorder(dcats_df$cell_type, ifelse(!dcats_df$Condition %in% "FRDA", 0, dcats_df$prop), FUN = sum)
-
-P3D <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
-  geom_col(position = "fill", width = 0.9) +
-  geom_text(aes(y = 1, label = stars, group = cell_type), color = "black") +
-  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "", y = "Relative abundance (%)") +
-  custom_theme() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        legend.text = element_text(size=rel(1.15))) +
-  theme(legend.position = "top")
 
 
 # Imbalance
