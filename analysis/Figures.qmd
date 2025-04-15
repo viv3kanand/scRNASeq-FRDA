@@ -18,7 +18,6 @@ renv::install("paletteer")
 
 ```
 
-
 ## Load libraries
 
 ```{r}
@@ -222,7 +221,6 @@ purrr::imap(seurat_list, function(obj, name){
 
 ```
 
-
 ```{r}
 ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
   geom_pointdensity() +
@@ -230,7 +228,6 @@ ggplot(seurat_obj@meta.data, aes(nCount_RNA, percent.mt)) +
   labs(x = "Total UMI counts", y = "Percentage mitochondrial")
 
 ```
-
 
 ```{r}
 p1 <- seu_PBMC@meta.data |> 
@@ -268,7 +265,6 @@ ggsave("analysis/figures/PBMC/QC/basicQC.png")
 <!-- Panel 1: Bulk RNAseq: PCA plot, Volcano plot, GO/KEGG plot, Heatmap of immune system/neutrophil related genes -->
 
 <!-- Panel 2: WGCNA- bulk, IPA module 3: Tom plot, heatmap, Module eigenvector plot with significance, Module 3 IPA Top 20 pathway plot  -->
-
 
 ### Panel 1: Bulk - Volcano, IPA, GSVA, WGCNA Module Pathway
 
@@ -440,7 +436,6 @@ ggsave(filename = "figures/Panel1/P1_final.png",
        dpi = 600,
        bg = "white")
 ```
-
 
 ### Heatmaps
 
@@ -634,8 +629,7 @@ dge_combined |>
 
 ```
 
-
-### Panel 2: scRNA-Seq summary - PBMC & WB 
+### Panel 2: scRNA-Seq summary - PBMC & WB
 
 ```{r}
 # UMAP - PBMC
@@ -807,8 +801,6 @@ ggsave(filename = "figures/Panel2/P2_final.png",
        bg = "white")
 
 ```
-
-
 
 ### Panel 3: scRNA-Seq - PBMC - DCATS, Trajectory, CD14 Mono, GSEA, TF
 
@@ -1054,11 +1046,13 @@ ggsave(filename = "figures/Panel3/P3_final.png",
 ```{r}
 wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv", row.names = 1)
 
-Heatmap(wb_top_pval,cluster_rows = FALSE, cluster_columns = FALSE,
-        col= c("grey", "#FEE08B","#CB477A"),
+Heatmap(as.matrix(wb_top_pval), cluster_rows = TRUE, cluster_columns = TRUE,
+        col= c("#FEE08B","#CB477A"),
         heatmap_legend_param = list(direction = "horizontal",
-                                        title = "-Log10Pval",
-                                    nrow = 1))
+                                    title = "-log10(pval)",
+                                    nrow = 1),
+        width = unit(9, "cm"),
+        height = unit(15, "cm"))
 
 ### TRRUST
 
@@ -1182,9 +1176,7 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 ```
 
-
-
-### Panel 4 - CD14 Monocytes: 
+### Panel 4 - CD14 Monocytes:
 
 ```{r}
 
@@ -1255,7 +1247,7 @@ ggsave(filename = "figures/Panel4/P4_final.png",
        bg = "white")
 ```
 
-### Panel 5 - CAD vs NCAD : CS-SCORE, 
+### Panel 5 - CAD vs NCAD : CS-SCORE,
 
 ```{r}
 # CS-score
@@ -1376,9 +1368,7 @@ ggsave(filename = "figures/Panel5/P5_final.png",
 
 ```
 
-
 <!-- Panel 3: Neutrophils-IFN signaling: Metascape results, IFN pathway gene heatmap/scores, Neutrophil degranulation pathway genes heatmap/ pathway scores, TF-STAT1 signaling, PRR pathway score -->
-
 
 ```{r}
 # Metascape results
@@ -1480,7 +1470,6 @@ ggsave(filename = "figures/PBMC/Panel5/figB.png",
        bg = "white")
 
 ```
-
 
 <!-- Panel 3: scRNAseq- PBMC (WB data in supplementary)- UMAPs, marker dot plot, DCAT proportions, DEG-upset plot (all cell types) -->
 
@@ -1741,7 +1730,6 @@ ggsave(filename = "figures/PBMC/fig3CD.png",
 
 ```
 
-
 <!-- Panel 4: CD14 monocytes-immunomodulation: imbalance score, Volcano plot of DEGs, pathway analysis (GSEA KEGG, BP), Cell Chat, TF analysis -->
 
 ```{r}
@@ -1953,7 +1941,6 @@ ggsave(filename = "figures/PBMC/Panel3/figD.png",
 
 ```
 
-
 <!-- Panel 5: IL-10 producing monocytes: Il-10 levels in FA vs HC, IL-10 pathway genes (Reactome) heatmap, IL-10 producing cells proportion -->
 
 ```{r}
@@ -2070,10 +2057,6 @@ ggsave(filename = "figures/PBMC/Panel4/figAC.png",
 
 ```
 
-
-
-
-
 <!-- Panel 7: Monocyte IL-10- Neutrophil IFN axis associated with cardiomyopathy: WGCNA (bulk)- cardiac hypertrophy/ IL-10 signaling genes; CS-score, Il-10 levels in CAD vs NCAD, NLR ratio in CAD vs NCAD, Neutrophil genes- KLF2- cardiomyopathy -->
 
 ```{r}
@@ -2172,24 +2155,3 @@ ggsave(filename = "figures/PBMC/Panel6/figAll.png",
        bg = "white")
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
