@@ -1046,13 +1046,20 @@ ggsave(filename = "figures/Panel3/P3_final.png",
 ```{r}
 wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv", row.names = 1)
 
-Heatmap(as.matrix(wb_top_pval), cluster_rows = TRUE, cluster_columns = TRUE,
-        col= c("#FEE08B","#CB477A"),
-        heatmap_legend_param = list(direction = "horizontal",
-                                    title = "-log10(pval)",
-                                    nrow = 1),
-        width = unit(9, "cm"),
-        height = unit(15, "cm"))
+col_fun = colorRamp2(c(0, 2, 20),
+                     c("grey", "#FEE08B", "#CB477A"))
+
+P4A <- ggplotify::as.ggplot(Heatmap(as.matrix(wb_top_pval), 
+                                    cluster_rows = TRUE, 
+                                    cluster_columns = TRUE,
+                                    col = col_fun,
+                                    row_names_side = "left",
+                                    row_dend_side = "right",
+                                    heatmap_legend_param = list(col_fun = col_fun, 
+                                                                title = "-log10(pval)",
+                                                                at = c(0, 2, 5, 10, 20)),
+                                    width = unit(9, "cm"),
+                                    height = unit(15, "cm")))
 
 ### TRRUST
 
