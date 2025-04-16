@@ -1041,10 +1041,12 @@ ggsave(filename = "figures/Panel3/P3_final.png",
 
 ```
 
-### Panel 4: Pathways, IFN-RIG1, TF-STAT1
+### Panel 4: Pathways, TF, IFN-RIG1, TF-STAT1
 
 ```{r}
-wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv", row.names = 1)
+# top pathway terms in clusters
+
+wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv")
 
 col_fun = colorRamp2(c(0, 2, 20),
                      c("grey", "#FEE08B", "#CB477A"))
@@ -1059,19 +1061,31 @@ P4A <- ggplotify::as.ggplot(Heatmap(as.matrix(wb_top_pval),
                                                                 title = "-log10(pval)",
                                                                 at = c(0, 2, 5, 10, 20)),
                                     width = unit(9, "cm"),
-                                    height = unit(15, "cm")))
+                                    height = unit(15, "cm"))) +
+  theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
 
-### TRRUST
+
+P4A2 <- wb_top_pval |> 
+  pivot_longer(cols = -Description, 
+               names_to = "cell_type", 
+               values_to = "log10pval") |> 
+  mutate(log10pval = na_if(log10pval, 0)) |> 
+  ggplot(aes(x = cell_type, y = Description, fill = log10pval)) +
+  geom_tile() +
+  scale_fill_gradient(low = "#FEE08B", high = "#CB477A", na.value = "grey")
+
+
+# TRRUST
 
 tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
 
-P2D <- tf_NEU |> 
+P4B <- tf_NEU |> 
   mutate(order = desc(qvalue), .by = TF) |>
   ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
   geom_bar(aes(fill = genes), stat = "identity") +
   xlab("-log10(p-adjust)") +
   ylab("Top TFs") +
-  scale_fill_gradientn(colours = c('#3CB49F', '#5575B0'), na.value = "grey") +
+  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
   custom_theme()
 
 P2CD <- cowplot::plot_grid(P2C, P2D, nrow = 1, labels = c("C", "D"), rel_widths = c(1, 0.6), axis = "b", align = "hv")
@@ -1086,11 +1100,8 @@ ggsave(filename = "figures/Panel2/P2_top.png",
        dpi = 600,
        bg = "white")
 
-# Pathways
 
-
-
-#IFN-RIG1 
+# IFN-RIG1 
 
 DefaultAssay(seu_WB) <- "module_score"
 
