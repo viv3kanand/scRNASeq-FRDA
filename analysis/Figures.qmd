@@ -1072,7 +1072,9 @@ P4A2 <- wb_top_pval |>
   mutate(log10pval = na_if(log10pval, 0)) |> 
   ggplot(aes(x = cell_type, y = Description, fill = log10pval)) +
   geom_tile() +
+  labs(x = NULL, y = NULL) +
   scale_fill_gradient(low = "#FEE08B", high = "#CB477A", na.value = "grey") +
+  scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 
