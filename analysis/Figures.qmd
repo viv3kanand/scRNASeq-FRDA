@@ -56,22 +56,6 @@ Idents(seu_WB) <- "cell_type"
 seu_WB <- JoinLayers(seu_WB)
 
 
-# TF analysis
-
-acts_TF_PBMC <- read_rds("../data/temp/acts_TF_PBMC.rds")
-
-seu_PBMC[['tfsulm']] <- acts_TF_PBMC |> 
-  tidyr::pivot_wider(id_cols = 'source', 
-                     names_from = 'condition',
-                     values_from = 'score') |> 
-  tibble::column_to_rownames('source') |> 
-  Seurat::CreateAssayObject()
-
-DefaultAssay(seu_PBMC) <- "tfsulm"
-
-seu_PBMC <- Seurat::ScaleData(seu_PBMC)
-seu_PBMC@assays$tfsulm@data <- seu_PBMC@assays$tfsulm@scale.data
-
 # Aggregate expression data
 cd14_PBMC <- subset(seu_PBMC, idents = "CD14 Mono")
 Idents(cd14_PBMC) <- "Condition"
@@ -1048,34 +1032,36 @@ ggsave(filename = "figures/Panel3/P3_final.png",
 
 wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv")
 
-col_fun = colorRamp2(c(0, 2, 20),
-                     c("grey", "#FEE08B", "#CB477A"))
+# col_fun = colorRamp2(c(0, 2, 20),
+#                      c("grey", "#FEE08B", "#CB477A"))
+# 
+# P4A <- ggplotify::as.ggplot(Heatmap(as.matrix(wb_top_pval), 
+#                                     cluster_rows = TRUE, 
+#                                     cluster_columns = TRUE,
+#                                     col = col_fun,
+#                                     row_names_side = "left",
+#                                     row_dend_side = "right",
+#                                     heatmap_legend_param = list(col_fun = col_fun, 
+#                                                                 title = "-log10(pval)",
+#                                                                 at = c(0, 2, 5, 10, 20)),
+#                                     width = unit(9, "cm"),
+#                                     height = unit(15, "cm"))) +
+#   theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
 
-P4A <- ggplotify::as.ggplot(Heatmap(as.matrix(wb_top_pval), 
-                                    cluster_rows = TRUE, 
-                                    cluster_columns = TRUE,
-                                    col = col_fun,
-                                    row_names_side = "left",
-                                    row_dend_side = "right",
-                                    heatmap_legend_param = list(col_fun = col_fun, 
-                                                                title = "-log10(pval)",
-                                                                at = c(0, 2, 5, 10, 20)),
-                                    width = unit(9, "cm"),
-                                    height = unit(15, "cm"))) +
-  theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
 
-
-P4A2 <- wb_top_pval |> 
+P4A <- wb_top_pval |> 
   pivot_longer(cols = -Description, 
                names_to = "cell_type", 
                values_to = "log10pval") |> 
-  mutate(log10pval = na_if(log10pval, 0)) |> 
+  mutate(log10pval = na_if(log10pval, 0),
+         cell_type = str_replace(cell_type, "\\.", " ")) |> 
   ggplot(aes(x = cell_type, y = Description, fill = log10pval)) +
   geom_tile() +
   labs(x = NULL, y = NULL) +
   scale_fill_gradient(low = "#FEE08B", high = "#CB477A", na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  coord_fixed()
 
 
 # TRRUST
@@ -1087,13 +1073,12 @@ P4B <- tf_NEU |>
   ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
   geom_bar(aes(fill = genes), stat = "identity") +
   xlab("-log10(p-adjust)") +
-  ylab("Top TFs") +
   scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
   custom_theme()
 
-P2CD <- cowplot::plot_grid(P2C, P2D, nrow = 1, labels = c("C", "D"), rel_widths = c(1, 0.6), axis = "b", align = "hv")
+P4AB <- cowplot::plot_grid(P4A, P4B, nrow = 1, labels = "AUTO", align = "h")
 
-P2_top <- cowplot::plot_grid(P2AB, P2CD, nrow = 1, rel_widths = c(1, 0.8), axis = "b", align = "hv")
+# P2_top <- cowplot::plot_grid(P2AB, P2CD, nrow = 1, rel_widths = c(1, 0.8), axis = "b", align = "hv")
 
 ggsave(filename = "figures/Panel2/P2_top.png", 
        plot = P2_top,
@@ -1104,35 +1089,27 @@ ggsave(filename = "figures/Panel2/P2_top.png",
        bg = "white")
 
 
-# IFN-RIG1 
+# IFN
 
 DefaultAssay(seu_WB) <- "module_score"
 
-P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
+P4C <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
   as.data.frame() |> 
   dplyr::mutate(cluster = Seurat::Idents(seu_WB),
                 Condition = seu_WB@meta.data$Condition) |> 
   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                       names_to = "source", 
                       values_to = "score") |> 
-  filter(cluster == "Neutrophil" & !source == "NEU2") |> 
+  filter(cluster == "Neutrophil" & source == "IFN1") |> 
   mutate(source = str_sub(source, end = -2)) |> 
   ggplot(aes(Condition, score)) +
-  ggdist::stat_halfeye(aes(fill = Condition), 
-                       alpha = .8,
-                       adjust = .5, 
-                       width = .8, 
-                       justification = -.2, 
-                       .width = 0, 
-                       point_colour = NA) +
   geom_boxplot(aes(fill = Condition), 
                alpha = .8,
-               width = 0.1, 
+               width = 0.5, 
                outlier.colour = "grey") + 
   labs(x = NULL, y = "Module Score") +
-  facet_grid(~source) +
   custom_theme() +
-  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
   geom_signif(
     comparisons = list(c("Control", "Patient")),
     map_signif_level = FALSE, textsize = 3
@@ -1140,9 +1117,56 @@ P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |>
   NoLegend()
 
 
+# P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
+#   as.data.frame() |> 
+#   dplyr::mutate(cluster = Seurat::Idents(seu_WB),
+#                 Condition = seu_WB@meta.data$Condition) |> 
+#   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+#                       names_to = "source", 
+#                       values_to = "score") |> 
+#   filter(cluster == "Neutrophil" & source == "IFN1") |> 
+#   mutate(source = str_sub(source, end = -2)) |> 
+#   ggplot(aes(Condition, score)) +
+#   ggdist::stat_halfeye(aes(fill = Condition), 
+#                        alpha = .8,
+#                        adjust = .5, 
+#                        width = .8, 
+#                        justification = -.2, 
+#                        .width = 0, 
+#                        point_colour = NA) +
+#   geom_boxplot(aes(fill = Condition), 
+#                alpha = .8,
+#                width = 0.1, 
+#                outlier.colour = "grey") + 
+#   labs(x = NULL, y = "Module Score") +
+#   facet_grid(~source) +
+#   custom_theme() +
+#   scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+#   geom_signif(
+#     comparisons = list(c("Control", "Patient")),
+#     map_signif_level = FALSE, textsize = 3
+#     ) &
+#   NoLegend()
+
+
 #TF-STAT1
 
+# TF analysis WB
+
+acts_TF_WB <- read_rds("../data/temp/acts_TF_WB.rds")
+
+seu_WB[['tfsulm']] <- acts_TF_WB |> 
+  tidyr::pivot_wider(id_cols = 'source', 
+                     names_from = 'condition',
+                     values_from = 'score') |> 
+  tibble::column_to_rownames('source') |> 
+  Seurat::CreateAssayObject()
+
 DefaultAssay(seu_WB) <- "tfsulm"
+
+seu_WB <- Seurat::ScaleData(seu_WB)
+seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
+
 
 P2G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |> 
   as.data.frame() |> 
@@ -1167,7 +1191,7 @@ P2G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |>
   facet_grid(~source) +
   labs(x = NULL, y = "TF Score") +
   custom_theme() +
-  scale_fill_manual(values = c("#3CB49F", "#5575B0")) +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
   geom_signif(
     comparisons = list(c("Control", "Patient")),
     map_signif_level = FALSE, textsize = 3
