@@ -1060,7 +1060,8 @@ P4A <- wb_top_pval |>
   labs(x = NULL, y = NULL) +
   scale_fill_gradient(low = "#FEE08B", high = "#CB477A", na.value = "grey") +
   scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        text = element_text(family = "Helvetica", size = 8)) +
   coord_fixed()
 
 
@@ -1072,22 +1073,13 @@ P4B <- tf_NEU |>
   mutate(order = desc(qvalue), .by = TF) |>
   ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
   geom_bar(aes(fill = genes), stat = "identity") +
-  xlab("-log10(p-adjust)") +
+  labs(x = "-log10(pvalue)", y = NULL) +
   scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
   custom_theme()
 
 P4AB <- cowplot::plot_grid(P4A, P4B, nrow = 1, labels = "AUTO", align = "h")
 
 # P2_top <- cowplot::plot_grid(P2AB, P2CD, nrow = 1, rel_widths = c(1, 0.8), axis = "b", align = "hv")
-
-ggsave(filename = "figures/Panel2/P2_top.png", 
-       plot = P2_top,
-       units = "in", 
-       width = 13,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
-
 
 # IFN
 
@@ -1116,6 +1108,16 @@ P4C <- t(as.matrix(seu_WB@assays$module_score@data)) |>
     ) &
   NoLegend()
 
+
+P4ABC <- cowplot::plot_grid(P4A, P4B, P4C, nrow = 1, labels = "AUTO", rel_widths = c(1,0.5,0.5), align = "h", axis = "tb")
+
+ggsave(filename = "figures/Panel4/P4_top.png", 
+       plot = P4ABC,
+       units = "in", 
+       width = 13,
+       height = 8.5/2,
+       dpi = 600,
+       bg = "white")
 
 # P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
 #   as.data.frame() |> 
@@ -1229,8 +1231,6 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 
 
-
-
 # IL10 Module score
 
 P4E <- seu_meta |> 
@@ -1295,6 +1295,49 @@ ggsave(filename = "figures/Panel4/P4_final.png",
 ### Panel 5 - CAD vs NCAD : CS-SCORE,
 
 ```{r}
+# CAD NCAD - IL10
+
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
+
+P5A <- seu_meta |>
+  filter(cell_type == "CD14 Mono" & Condition2 %in% c("CAD", "NCAD")) |> 
+  dplyr::select(orig.ident, Condition2, il10) |> 
+  group_by(orig.ident, Condition2) |> 
+  summarise(prop = length(which(il10 > 0))/length(il10)) |> 
+  ggplot(aes(Condition2, prop, fill = Condition2)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "IL10 Proportion") +
+  custom_theme() +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+  geom_signif(
+    comparisons = list(c("CAD", "NCAD")),
+    map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+
+# Clinical NLR
+
+clin_nlr <- read_csv("../data/clinical_data.csv")
+
+
+P5B <- clin_nlr |> 
+  ggplot(aes(Condition, NLR, fill = Condition)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+  labs(x = NULL, y = "Neutrophil to Lymphocyte Ratio") +
+  custom_theme() +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+  geom_signif(
+        comparisons = list(c("CAD", "Non-CAD")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+P5_top <- cowplot::plot_grid(P5A, P5B, nrow = 1, labels = c("A", "B"), axis = "bt", align = "h")
+
+
 # CS-score
 
 files <- c("RData/CSCORE/2024-11-29_coex_CAD_C.xlsx", "RData/CSCORE/2024-11-29_coex_CAD_NCAD.xlsx")
@@ -1316,7 +1359,7 @@ M15 <- c("defense response to virus", "response to virus", "defense response to 
 
 # Module 9
 
-P5A <- CS_CD14$CAD_NCAD$M9 |> 
+P5C <- CS_CD14$CAD_NCAD$M9 |> 
   dplyr::select(c(1:10,13)) |> 
   filter(Description %in% M9) |> 
   mutate(GeneRatio = eval(parse(text = GeneRatio)),
@@ -1325,7 +1368,7 @@ P5A <- CS_CD14$CAD_NCAD$M9 |>
   ggplot(aes(x = GeneRatio, y = reorder(ID, order),color = p.adjust, size = Count)) +
   geom_point() + 
   labs(x = "Gene Ratio", y = NULL, title = "Module 9") + 
-  scale_color_gradientn(colours = c('#3CB49F', '#FFFFFF'), 
+  scale_color_gradientn(colours = c('#CB477A', '#FEE08B'), 
                         limit = c(min(CS_CD14$CAD_NCAD$M9$p.adjust), 
                                   max(CS_CD14$CAD_NCAD$M9$p.adjust)), 
                         na.value = "grey") +
@@ -1334,7 +1377,7 @@ P5A <- CS_CD14$CAD_NCAD$M9 |>
 
 # Module 15
 
-P5B <- CS_CD14$CAD_NCAD$M15 |> 
+P5D <- CS_CD14$CAD_NCAD$M15 |> 
     dplyr::select(c(1:10,13)) |> 
     filter(Description %in% M15) |> 
     mutate(GeneRatio = eval(parse(text = GeneRatio)),
@@ -1343,7 +1386,7 @@ P5B <- CS_CD14$CAD_NCAD$M15 |>
     ggplot(aes(x = GeneRatio, y = reorder(ID, order), color = p.adjust, size = Count)) +
     geom_point() + 
     labs(x = "Gene Ratio", y = NULL, title = "Module 15") + 
-    scale_color_gradientn(colours = c('#3CB49F', '#FFFFFF'), 
+    scale_color_gradientn(colours = c('#CB477A', '#FEE08B'), 
                           limit = c(min(CS_CD14$CAD_NCAD$M15$p.adjust),
                                     max(CS_CD14$CAD_NCAD$M15$p.adjust)), 
                           na.value = "grey") +
@@ -1351,52 +1394,8 @@ P5B <- CS_CD14$CAD_NCAD$M15 |>
     custom_theme()
 
 
-P5_top <- cowplot::plot_grid(P5A, P5B, nrow = 1, labels = "AUTO", axis = "bt", align = "h")
+P5_bottom <- cowplot::plot_grid(P5C, P5D, nrow = 1, labels = c("C", "D"), axis = "lr", align = "hv")
 
-
-
-# CAD NCAD - IL10
-
-cad_ncad <- subset(x = seu_PBMC, subset = Condition2 %in% c("CAD", "NCAD"), idents = "CD14 Mono")
-
-P5C <- cad_ncad@meta.data |>
-  mutate(il10 = FetchData(cad_ncad, vars = "IL10")$IL10) |> 
-  filter(cell_type == "CD14 Mono") |> 
-  dplyr::select(orig.ident, Condition2, il10) |> 
-  group_by(orig.ident, Condition2) |> 
-  summarise(prop = length(which(il10 > 0))/length(il10)) |> 
-  ggplot(aes(Condition2, prop, fill = Condition2)) +
-  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
-  labs(x = NULL, y = "IL10 Proportion") +
-  custom_theme() +
-  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
-  geom_signif(
-        comparisons = list(c("CAD", "NCAD")),
-        map_signif_level = FALSE, textsize = 3
-    ) &
-  NoLegend()
-
-
-
-# Clinical NLR
-
-clin_nlr <- read_csv("../data/clinical_data.csv")
-
-
-P5D <- clin_nlr |> 
-  ggplot(aes(Condition, NLR, fill = Condition)) +
-  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
-  labs(x = NULL, y = "Neutrophil to Lymphocyte Ratio") +
-  custom_theme() +
-  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
-  geom_signif(
-        comparisons = list(c("CAD", "Non-CAD")),
-        map_signif_level = FALSE, textsize = 3
-    ) &
-  NoLegend()
-
-
-P5_bottom <- cowplot::plot_grid(P5C, P5D, nrow = 1, labels = c("C", "D"), axis = "bt", align = "h")
 
 P5_final <- cowplot::plot_grid(P5_top, P5_bottom, ncol = 1)
 
