@@ -5,3 +5,31 @@ format: html
 editor: source
 ---
 
+## Install packages
+
+```{r}
+#| label: install
+#| echo: true
+#| eval: false
+options(renv.config.pak.enabled = TRUE)
+
+renv::install("pharmaverse/ggsurvfit")
+renv::install("survival")
+
+```
+
+## Load libraries
+
+```{r}
+#| label: packages
+#| echo: true
+#| eval: true
+#| message: false
+#| warning: false
+
+require(DESeq2)
+require(tidyverse)
+require(survival)
+require(ggsurvfit)
+```
+
