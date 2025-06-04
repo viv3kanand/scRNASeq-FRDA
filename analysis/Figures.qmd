@@ -1065,41 +1065,35 @@ P4A <- wb_top_pval |>
   coord_fixed()
 
 
-# TRRUST
-
-tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
-
-P4B <- tf_NEU |> 
-  mutate(order = desc(qvalue), .by = TF) |>
-  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
-  geom_bar(aes(fill = genes), stat = "identity") +
-  labs(x = "-log10(pvalue)", y = NULL) +
-  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
-  custom_theme()
-
-P4AB <- cowplot::plot_grid(P4A, P4B, nrow = 1, labels = "AUTO", align = "h")
-
-# P2_top <- cowplot::plot_grid(P2AB, P2CD, nrow = 1, rel_widths = c(1, 0.8), axis = "b", align = "hv")
-
 # IFN
 
-DefaultAssay(seu_WB) <- "module_score"
+DefaultAssay(seu_WB) <- "RNA"
 
-P4C <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
-  as.data.frame() |> 
-  dplyr::mutate(cluster = Seurat::Idents(seu_WB),
-                Condition = seu_WB@meta.data$Condition) |> 
+seu_WB_neu <- subset(seu_WB, subset = Condition %in% c("Control", "Patient"), idents = "Neutrophil")
+
+expr_matrix_neu <- GetAssayData(seu_WB_neu, slot = "data")
+
+DefaultAssay(seu_WB_neu) <- "module_score"
+
+cell_metadata <- t(as.matrix(seu_WB_neu@assays$module_score@data)) |> 
+    as.data.frame() |> 
+    dplyr::mutate(cluster = Seurat::Idents(seu_WB_neu),
+                  Condition = seu_WB_neu@meta.data$Condition,
+                  LY6E = expr_matrix_neu["LY6E",])
+
+P4B <- cell_metadata |> 
   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
                       names_to = "source", 
                       values_to = "score") |> 
-  filter(cluster == "Neutrophil" & source == "IFN1") |> 
+  filter(source == "IFN1") |> 
   mutate(source = str_sub(source, end = -2)) |> 
   ggplot(aes(Condition, score)) +
   geom_boxplot(aes(fill = Condition), 
                alpha = .8,
-               width = 0.5, 
+               width = 0.3, 
                outlier.colour = "grey") + 
   labs(x = NULL, y = "Module Score") +
+  facet_grid(~source) +
   custom_theme() +
   scale_fill_manual(values = c("#CB477A", "#469FBF")) +
   geom_signif(
@@ -1107,6 +1101,28 @@ P4C <- t(as.matrix(seu_WB@assays$module_score@data)) |>
     map_signif_level = FALSE, textsize = 3
     ) &
   NoLegend()
+
+# LY6E
+
+P4C <- cell_metadata |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition),
+                        names_to = "source", 
+                        values_to = "score") |> 
+  filter(source == "LY6E") |> 
+    ggplot(aes(Condition, score)) +
+    geom_boxplot(aes(fill = Condition), 
+                 alpha = .8,
+                 width = 0.3, 
+                 outlier.colour = "grey") + 
+    labs(x = NULL, y = "Normalized expression") +
+    custom_theme() +
+  facet_grid(~source) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    geom_signif(
+        comparisons = list(c("Control", "Patient")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+    NoLegend()
 
 
 P4ABC <- cowplot::plot_grid(P4A, P4B, P4C, nrow = 1, labels = "AUTO", rel_widths = c(1,0.5,0.5), align = "h", axis = "tb")
@@ -1119,36 +1135,19 @@ ggsave(filename = "figures/Panel4/P4_top.png",
        dpi = 600,
        bg = "white")
 
-# P2F <- t(as.matrix(seu_WB@assays$module_score@data)) |> 
-#   as.data.frame() |> 
-#   dplyr::mutate(cluster = Seurat::Idents(seu_WB),
-#                 Condition = seu_WB@meta.data$Condition) |> 
-#   tidyr::pivot_longer(cols = c(-cluster, -Condition), 
-#                       names_to = "source", 
-#                       values_to = "score") |> 
-#   filter(cluster == "Neutrophil" & source == "IFN1") |> 
-#   mutate(source = str_sub(source, end = -2)) |> 
-#   ggplot(aes(Condition, score)) +
-#   ggdist::stat_halfeye(aes(fill = Condition), 
-#                        alpha = .8,
-#                        adjust = .5, 
-#                        width = .8, 
-#                        justification = -.2, 
-#                        .width = 0, 
-#                        point_colour = NA) +
-#   geom_boxplot(aes(fill = Condition), 
-#                alpha = .8,
-#                width = 0.1, 
-#                outlier.colour = "grey") + 
-#   labs(x = NULL, y = "Module Score") +
-#   facet_grid(~source) +
-#   custom_theme() +
-#   scale_fill_manual(values = c("#CB477A", "#469FBF")) +
-#   geom_signif(
-#     comparisons = list(c("Control", "Patient")),
-#     map_signif_level = FALSE, textsize = 3
-#     ) &
-#   NoLegend()
+
+
+# TRRUST
+
+tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
+
+P4D <- tf_NEU |> 
+  mutate(order = desc(qvalue), .by = TF) |>
+  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+  geom_bar(aes(fill = genes), stat = "identity") +
+  labs(x = "-log10(pvalue)", y = NULL) +
+  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
+  custom_theme()
 
 
 #TF-STAT1
@@ -1167,6 +1166,7 @@ seu_WB[['tfsulm']] <- acts_TF_WB |>
 DefaultAssay(seu_WB) <- "tfsulm"
 
 seu_WB <- Seurat::ScaleData(seu_WB)
+
 seu_WB@assays$tfsulm@data <- seu_WB@assays$tfsulm@scale.data
 
 
@@ -1188,7 +1188,7 @@ P2G <- t(as.matrix(seu_WB@assays$tfsulm@data)) |>
                        point_colour = NA) +
   geom_boxplot(aes(fill = Condition), 
                alpha = .8,
-               width = 0.1, 
+               width = 0.3, 
                outlier.colour = "grey") + 
   facet_grid(~source) +
   labs(x = NULL, y = "TF Score") +
@@ -1223,76 +1223,7 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 ```
 
-### Panel 4 - CD14 Monocytes:
-
-```{r}
-
-
-
-
-
-# IL10 Module score
-
-P4E <- seu_meta |> 
-  select(orig.ident, Condition, cell_type, 30) |>
-  dplyr::filter(cell_type == "CD14 Mono") |> 
-  pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
-               names_to = "source", 
-               values_to = "score") |> 
-  ggplot(aes(Condition, score, fill = Condition)) +
-  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
-  labs(x = NULL, y = "IL10 Module Score") +
-  custom_theme() +
-  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
-  geom_signif(
-    comparisons = list(c("Control", "FRDA")),
-    map_signif_level = FALSE, textsize = 3
-    ) &
-  NoLegend()
-
-
-
-# IL10 expressing cell proportion
-
-P4F <- seu_meta |> 
-    filter(cell_type == "CD14 Mono") |> 
-    dplyr::select(orig.ident, Condition, il10) |> 
-    group_by(orig.ident, Condition) |>
-    summarise(prop = length(which(il10 > 0))/length(il10)) |> 
-    ggplot(aes(Condition, prop, fill = Condition)) +
-    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
-  labs(x = NULL, y = "IL10 Proportion") +
-  custom_theme() +
-  scale_fill_manual(values = c("#5575B0", "#3CB49F")) +
-  geom_signif(
-        comparisons = list(c("Control", "FRDA")),
-        map_signif_level = FALSE, textsize = 3
-    ) &
-  NoLegend()
-
-P4_bottom <- cowplot::plot_grid(NULL, P4E, P4F, labels = c("D", "E", "F"), nrow = 1, axis = "bt", align = "h")
-
-ggsave(filename = "figures/Panel4/P4_bottom.png", 
-       plot = P4_bottom,
-       units = "in", 
-       width = 13,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
-
-
-P4_final <- cowplot::plot_grid(P4_top, P4_bottom, ncol = 1, axis = "lr", align = "v")
-
-ggsave(filename = "figures/Panel4/P4_final.png", 
-       plot = P4_final,
-       units = "in", 
-       width = 13,
-       height = 8.5,
-       dpi = 600,
-       bg = "white")
-```
-
-### Panel 5 - CAD vs NCAD : CS-SCORE,
+### Panel 5 - CAD vs NCAD : CS-SCORE, NLR
 
 ```{r}
 # CAD NCAD - IL10
