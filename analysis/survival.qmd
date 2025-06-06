@@ -40,18 +40,13 @@ require(ggsurvfit)
 #| echo: false
 #| eval: true
 
-count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
-  dplyr::distinct(Gene, .keep_all = TRUE) |> 
-  tibble::column_to_rownames("Gene")
-
-meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
-  tibble::column_to_rownames("SampleID")
+dds <- read_rds("RData/Bulk/2025-06-04_dds.rds")
 ```
 
 ### Transform and filter data
 
 ```{r}
-counts <- counts(dds, normalized=TRUE)
+counts <- counts(dds, normalized = TRUE)
 
 # filter genes whose expression is zero in more than half the samples
 filter_fun <- function(x){
@@ -64,8 +59,13 @@ remove <- filter_fun(counts)
 counts <- counts[-remove,]
 ```
 
-```{r}
+### Batch correction
 
+```{r}
+log_counts <- log2(counts + 1)
+
+mm <- model.matrix(~Condition, colData(dds))
+log_counts <- limma::removeBatchEffect(log_counts, batch=colData(dds)$Batch, design=mm)
 ```
 
 
