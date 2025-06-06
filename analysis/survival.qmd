@@ -68,7 +68,20 @@ mm <- model.matrix(~Condition, colData(dds))
 log_counts <- limma::removeBatchEffect(log_counts, batch=colData(dds)$Batch, design=mm)
 ```
 
+### zscore calculation
 
+```{r}
+# Extract case expression matrix
+case_counts <- log_counts[, 1:52]
+
+# Calculate mean and SD across control samples for each gene
+mean_n <- rowMeans(log_counts[, 53:64])
+sd_n <- apply(log_counts[, 53:64], 1, sd)
+
+# zscore scaling (broadcasting using sweep)
+z_counts <- sweep(case_counts, 1, mean_n, FUN = "-")
+z_counts <- sweep(z_counts, 1, sd_n, FUN = "/")
+```
 
 
 
