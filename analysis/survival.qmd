@@ -48,11 +48,15 @@ dds <- read_rds("RData/Bulk/2025-06-04_dds.rds")
 ```{r}
 counts <- counts(dds, normalized=TRUE)
 
-x <- t(apply(counts,1,as.numeric))
-r <- as.numeric(apply(x,1,function(i) sum(i == 0)))
-remove <- which(r > dim(counts)[2]*0.5) # filter genes whose expression is zero in more than half the samples
+# filter genes whose expression is zero in more than half the samples
+filter_fun <- function(x){
+  x <- t(apply(as.matrix(x),1,as.numeric))
+  r <- as.numeric(apply(x,1,function(i) sum(i == 0)))
+  remove <- which(r > dim(x)[2]*0.5)
+  return(remove)
+}
+remove <- filter_fun(counts)
 counts <- counts[-remove,]
-
 ```
 
 
