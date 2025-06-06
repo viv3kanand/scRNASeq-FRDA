@@ -33,3 +33,12 @@ require(survival)
 require(ggsurvfit)
 ```
 
+### Load data
+
+```{r}
+#| label: load data
+#| echo: false
+#| eval: true
+
+dds <- read_rds("RData/Bulk/2025-06-04_dds.rds")
+```
