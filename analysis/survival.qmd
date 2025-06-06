@@ -5,7 +5,7 @@ format: html
 editor: source
 ---
 
-## Install packages
+### Install packages
 
 ```{r}
 #| label: install
@@ -18,7 +18,7 @@ renv::install("survival")
 
 ```
 
-## Load libraries
+### Load libraries
 
 ```{r}
 #| label: packages
@@ -40,7 +40,12 @@ require(ggsurvfit)
 #| echo: false
 #| eval: true
 
-dds <- read_rds("RData/Bulk/2025-06-04_dds.rds")
+count_bulk <- read_csv("../data/Bulk/FRDA_bulk_counts.csv") |> 
+  dplyr::distinct(Gene, .keep_all = TRUE) |> 
+  tibble::column_to_rownames("Gene")
+
+meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
+  tibble::column_to_rownames("SampleID")
 ```
 
 ### Transform and filter data
@@ -59,6 +64,9 @@ remove <- filter_fun(counts)
 counts <- counts[-remove,]
 ```
 
+```{r}
+
+```
 
 
 
