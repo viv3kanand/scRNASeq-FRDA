@@ -84,6 +84,9 @@ z_counts <- sweep(z_counts, 1, sd_n, FUN = "/")
 ```
 
 
+```{r}
+event_counts <- t(apply(z_counts, 1, function(x) ifelse(abs(x) > 1.96,1,0)))
+```
 
 
 
