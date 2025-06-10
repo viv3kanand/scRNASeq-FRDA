@@ -115,6 +115,18 @@ plot(s, col=c(1:3), frame=F, lwd=2, main=paste(rownames(z_counts)[ind_gene],sep=
 ```
 
 
+```{r}
+prep_data <- function(gene) {
+  meta[ind_meta,] |> 
+    mutate(
+      group = event_counts[gene,],
+      gene = gene
+    ) |> 
+    select(DD, HCM, group, gene)
+}
+
+
+```
 
 
 
