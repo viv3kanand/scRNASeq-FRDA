@@ -129,6 +129,12 @@ gene_li <- ipa_m3[ipa_m3$Pathways == "Cardiac Hypertrophy Signaling (Enhanced)",
 
 plot_data <- map_dfr(gene_li, prep_data)
 
+fits <- plot_data |> 
+  group_split(gene) |> 
+  map(~ survfit(Surv(DD, HCM) ~ group, data = .x))
+
+names(fits) <- unique(plot_data$gene)
+
 
 
 
