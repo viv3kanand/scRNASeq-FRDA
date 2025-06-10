@@ -135,6 +135,19 @@ fits <- plot_data |>
 
 names(fits) <- unique(plot_data$gene)
 
+plots <- imap(fits, function(fit, gene_name) {
+  df <- plot_data |> filter(gene == gene_name)
+  
+  ggsurvplot(
+    fit,
+    data = df,
+    risk.table = TRUE,
+    pval = TRUE,
+    ggtheme = theme_minimal(),
+    title = gene_name,
+    legend.title = "CAD Status"
+  )$plot
+})
 
 
 
