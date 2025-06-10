@@ -145,7 +145,7 @@ plots <- imap(fits, function(fit, gene_name) {
     pval = TRUE,
     ggtheme = theme_minimal(),
     title = gene_name,
-    legend.title = "CAD Status"
+    legend.title = "Expression"
   )$plot
 })
 
