@@ -125,6 +125,12 @@ prep_data <- function(gene) {
     select(DD, HCM, group, gene)
 }
 
+gene_li <- ipa_m3[ipa_m3$Pathways == "Cardiac Hypertrophy Signaling (Enhanced)",]$Molecules |> strsplit(",") |> unlist()
+
+plot_data <- map_dfr(gene_li, prep_data)
+
+
+
 
 ```
 
