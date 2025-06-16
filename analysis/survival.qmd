@@ -71,21 +71,25 @@ log_counts <- limma::removeBatchEffect(log_counts, batch=colData(dds)$Batch, des
 ### zscore calculation
 
 ```{r}
-# Extract case expression matrix
 case_counts <- log_counts[, 1:52]
 
-# Calculate mean and SD across control samples for each gene
 mean_n <- rowMeans(log_counts[, 53:64])
 sd_n <- apply(log_counts[, 53:64], 1, sd)
 
-# zscore scaling (broadcasting using sweep)
+# zscore scaling (broadcasting)
 z_counts <- sweep(case_counts, 1, mean_n, FUN = "-")
 z_counts <- sweep(z_counts, 1, sd_n, FUN = "/")
+
+# z_counts <- z_counts[apply(z_counts, 2, function(x) any(is.infinite(x))),]
+z_counts <- z_counts[apply(z_counts, 1, function(x) all(is.finite(x))), ]
 ```
 
 
 ```{r}
 event_counts <- t(apply(z_counts, 1, function(x) ifelse(abs(x) > 1, 1, 0)))
+
+event_counts <- t(apply(z_counts, 1, function(x) ifelse(x > 1,1,ifelse(x < -1,2,0))))
+
 ```
 
 
@@ -104,9 +108,9 @@ s <- survfit(Surv(as.numeric(as.character(meta$DD))[ind_meta], meta$HCM[ind_meta
 
 s1 <- tryCatch(
  survdiff(Surv(as.numeric(as.character(meta$DD))[ind_meta], meta$HCM[ind_meta]) ~ 
-            event_counts[ind_gene, ind_case]),
-  error = function(e)
-  return(NA)
+            event_counts[ind_gene, ind_case]), 
+ error = function(e)
+   return(NA)
 )
 
 ifelse(is.na(s1), next, (round(1 - pchisq(s1$chisq, length(s1$n) - 1),3)))[[1]]
@@ -119,10 +123,11 @@ plot(s, col=c(1:3), frame=F, lwd=2, main=paste(rownames(z_counts)[ind_gene],sep=
 prep_data <- function(gene) {
   meta[ind_meta,] |> 
     mutate(
-      group = event_counts[gene,],
+      event = event_counts[gene,],
+      group = ifelse(z_counts[gene,] >= (median(z_counts[gene,])), 1,0),
       gene = gene
     ) |> 
-    select(DD, HCM, group, gene)
+    select(DD, HCM, event, group, gene)
 }
 
 gene_li <- ipa_m3[ipa_m3$Pathways == "Cardiac Hypertrophy Signaling (Enhanced)",]$Molecules |> strsplit(",") |> unlist()
@@ -150,6 +155,30 @@ plots <- imap(fits, function(fit, gene_name) {
 })
 
 
+fit_models <- function(gene) {
+  meta_local <- meta[ind_meta,] |> mutate(expression = z_counts[gene,],
+                               group = ifelse(z_counts[gene,] >= (median(z_counts[gene,])), 1,0))
+  cox_model <- coxph(Surv(DD, HCM) ~ expression, data = meta_local)
+  cox_summary <- summary(cox_model)
+
+  surv_diff <- survdiff(Surv(DD, HCM) ~ group, data = meta_local)
+  chisq <- surv_diff$chisq
+  logrank_pval <- 1 - pchisq(chisq, df = length(surv_diff$n) - 1)
+  
+  tibble(
+    gene = gene,
+    coef = cox_summary$coefficients[1, "coef"],
+    HR = cox_summary$coefficients[1, "exp(coef)"],
+    CI_lower = cox_summary$conf.int[1, "lower .95"],
+    CI_upper = cox_summary$conf.int[1, "upper .95"],
+    cox_pval = cox_summary$coefficients[1, "Pr(>|z|)"],
+    logrank_pval = logrank_pval
+  )
+}
+
+results_combined <- map_dfr(gene_li, fit_models) |> arrange(cox_pval)
+
+write_csv(results_combined, file = "results/bulk/survival_all.csv")
 
 ```
 
