@@ -27,7 +27,7 @@ meta_bulk <- read_csv("../data/Bulk/Metadata_bulk.csv") |>
 identical(colnames(count_bulk), rownames(meta_bulk))
 
 ```
-
+### FRDA vs Control
 
 ```{r}
 dds <- DESeq2::DESeqDataSetFromMatrix(countData = count_bulk,
@@ -54,7 +54,30 @@ write_rds(dds, file = paste0("RData/Bulk/", Sys.Date(), "_dds.rds"))
 write_rds(vsd, file = paste0("RData/Bulk/", Sys.Date(), "_vsd.rds"))
 
 ```
+### CAD vs NCAD
 
+```{r}
+meta_bulk <- meta_bulk |> 
+  filter(!is.na(HCM))
+
+count_bulk <- count_bulk[,colnames(count_bulk) %in% rownames(meta_bulk)]
+
+dds <- DESeq2::DESeqDataSetFromMatrix(countData = count_bulk,
+                                      colData = meta_bulk, 
+                                      design = ~ HCM + Batch + Gender + Sampling_Age)
+
+keep <- rowSums(counts(dds) >= 5) >= 3
+table(keep)
+dds <- dds[keep,]
+
+suppressWarnings(dds <- DESeq2::DESeq(dds, 
+                              parallel = TRUE, 
+                              BPPARAM=BiocParallel::MulticoreParam(20)))
+
+res <- results(dds, name = "HCM") |> 
+  as.data.frame() |> 
+  tibble::rownames_to_column("ID")
+```
 
 
 ## scRNA-Seq Data
