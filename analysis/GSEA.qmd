@@ -19,7 +19,7 @@ require(tidyverse)
 
 ```{r}
 dge_bulk <- read_csv("../data/Bulk/DEseq2-gene-batch-corrected-14Nov22.csv")
-
+dge_cad <- read_csv("RData/Bulk/2025-06-17_cad_ncad.csv")
 ```
 
 ```{r}
@@ -103,4 +103,61 @@ names(write_gsea) <- c("GO_BP", "GO_CC", "GO_MF", "REACTOME", "KEGG")
 openxlsx::write.xlsx(write_gsea, paste0("RData/", Sys.Date(), "_gsea_bulk.xlsx"))
 
 ```
+
+
+
+
+
+### CAD vs NCAD
+
+```{r}
+filtered_df <- dge_cad |> 
+  dplyr::arrange(dplyr::desc(abs(log2FoldChange))) |> 
+  dplyr::distinct(ID, .keep_all = TRUE)
+```
+
+
+```{r}
+gsea_cad <- lapply(gene_sets, function(x) {
+  epsilon <- filtered_df[filtered_df$padj > 0,] |> 
+  na.omit() |> 
+  pull(padj) |> 
+  min() # Define a positive constant as the min value
+  lfc_vector <- -log10(pmax(filtered_df$padj, epsilon)) * sign(filtered_df$log2FoldChange)
+  names(lfc_vector) <- filtered_df$ID
+  lfc_vector <- sort(lfc_vector, decreasing = TRUE)
+  
+  set.seed(666)
+  clusterProfiler::GSEA(geneList = lfc_vector,
+                        minGSSize = 10,
+                        maxGSSize = 500,
+                        pvalueCutoff = 0.05,
+                        nPermSimple = 5e4,
+                        seed = TRUE,
+                        pAdjustMethod = "BH",
+                        TERM2GENE = dplyr::select(x,
+                                                  gs_name,
+                                                  gene_symbol)) -> gsea_results
+  return(gsea_results)
+  })
+
+write_rds(gsea_bulk, "RData/Bulk/gsea_cad.rds")
+```
+
+```{r}
+lapply(gsea_cad, function(df){
+  return(df@result)
+}) -> write_gsea
+
+names(write_gsea) <- c("GO_BP", "GO_CC", "GO_MF", "REACTOME", "KEGG")
+
+
+openxlsx::write.xlsx(write_gsea, paste0("RData/Bulk/", Sys.Date(), "_gsea_cad.xlsx"))
+
+```
+
+
+
+
+
 
