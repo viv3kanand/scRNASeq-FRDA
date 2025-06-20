@@ -1025,6 +1025,17 @@ ggsave(filename = "figures/Panel3/P3_final.png",
        bg = "white")
 
 
+
+
+
+
+
+
+
+
+
+
+
 ```
 
 ### Panel 4: Pathways, TF, IFN-RIG1, TF-STAT1
@@ -1223,13 +1234,157 @@ ggsave(filename = "figures/Panel2/P2_final.png",
        bg = "white")
 
 
+
+
+
+
+### Panel 4 restructure
+
+# UMAP - WB
+
+P4A <- DimPlot(seu_WB, 
+               reduction = "umap.harmony", 
+               group.by = c("cell_type"), 
+               pt.size = 0.5, 
+               label = TRUE, 
+               label.size = 2,
+               cols = umap_col) & 
+  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
+  NoLegend() &
+  custom_theme() +
+  empty_axis() +
+  NoLegend()
+
+
+# top pathway terms in clusters
+
+wb_top_pval <- read.csv("RData/WB/WB_top_pval.csv")
+
+# col_fun = colorRamp2(c(0, 2, 20),
+#                      c("grey", "#FEE08B", "#CB477A"))
+# 
+# P4A <- ggplotify::as.ggplot(Heatmap(as.matrix(wb_top_pval), 
+#                                     cluster_rows = TRUE, 
+#                                     cluster_columns = TRUE,
+#                                     col = col_fun,
+#                                     row_names_side = "left",
+#                                     row_dend_side = "right",
+#                                     heatmap_legend_param = list(col_fun = col_fun, 
+#                                                                 title = "-log10(pval)",
+#                                                                 at = c(0, 2, 5, 10, 20)),
+#                                     width = unit(9, "cm"),
+#                                     height = unit(15, "cm"))) +
+#   theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+
+P4B <- wb_top_pval |> 
+    pivot_longer(cols = -Description, 
+                 names_to = "cell_type", 
+                 values_to = "log10pval") |> 
+    mutate(log10pval = na_if(log10pval, 0),
+           cell_type = str_replace(cell_type, "\\.", " ")) |> 
+    ggplot(aes(x = cell_type, y = Description, fill = log10pval)) +
+    geom_tile() +
+    labs(x = NULL, y = NULL) +
+    scale_fill_viridis_c(direction = -1, na.value = "grey") +
+  # scale_fill_gradient(low = "#FEE08B", high = "#CB477A", na.value = "grey") +
+    scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 50)) +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          text = element_text(family = "Helvetica", size = 8)) +
+    coord_fixed()
+
+
+
+P4_top <- cowplot::plot_grid(P4A, P4B, nrow = 1, rel_widths = c(0.6, 1), align = "hv", axis = "tb", labels = c("A", "B"))
+
+ggsave(filename = "figures/Panel4/P4_top.png", 
+       plot = P4_top,
+       units = "in", 
+       width = 8.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
+
+# TRRUST
+
+tf_NEU <- read_csv("../data/TRRUST_NEU.csv")
+
+P4C <- tf_NEU |> 
+  mutate(order = desc(qvalue), .by = TF) |>
+  ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
+  geom_bar(aes(fill = genes), stat = "identity") +
+  labs(x = "-log10(pvalue)", y = NULL) +
+  # scale_fill_viridis_c(direction = -1, na.value = "grey") +
+  scale_fill_gradientn(colours = c('#FEE08B', '#CB477A'), na.value = "grey") +
+  custom_theme()
+
+
+### IFN, LY6E, STAT1
+
+
+DefaultAssay(seu_WB_neu) <- "RNA"
+expr_matrix_neu <- GetAssayData(seu_WB_neu, slot = "data")
+
+DefaultAssay(seu_WB_neu) <- "module_score"
+
+cell_metadata <- t(as.matrix(seu_WB_neu@assays$module_score@data)) |> 
+    as.data.frame() |> 
+    dplyr::mutate(
+                  cluster = Seurat::Idents(seu_WB_neu),
+                  Condition = seu_WB_neu@meta.data$Condition,
+                  LY6E = expr_matrix_neu["LY6E",],
+                  STAT1 = expr_matrix_neu["STAT1",])
+
+P4D <- cell_metadata |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition), 
+                        names_to = "source", 
+                        values_to = "score") |> 
+    filter(source == "IFN1") |> 
+    mutate(source = str_sub(source, end = -2)) |> 
+    ggplot(aes(Condition, score)) +
+    geom_violin(aes(fill = Condition), 
+                 alpha = .8,
+                 width = 0.3) + 
+    geom_boxplot(width = 0.1, outlier.colour = "grey") +
+    labs(x = NULL, y = "Module Score") +
+    facet_grid(~source) +
+    custom_theme() +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    geom_signif(
+        comparisons = list(c("Control", "Patient")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+    NoLegend()
+
+# LY6E and STAT1
+
+P4E <- cell_metadata |> 
+    mutate(LY6E = if_else(LY6E > 0, TRUE, FALSE),
+           STAT1 = if_else(STAT1 > 0, TRUE, FALSE)) |>
+    select(LY6E, STAT1, Condition, cluster) |> 
+    tidyr::pivot_longer(cols = c(-cluster, -Condition),
+                        names_to = "source", 
+                        values_to = "status") |> 
+    ggplot(aes(x = Condition, y = as.numeric(status), fill = Condition)) +
+    stat_summary(fun = mean, geom = "bar", position = position_dodge(), 
+                 color = "black", width = 0.7) +
+   # stat_compare_means(method = "wilcox.test", label = "p.signif") +
+    labs(x = NULL, y = "Cell Proportion") +
+    custom_theme() +
+    facet_grid(~source) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    NoLegend()
+
+
+P4_mid <- cowplot::plot_grid(P4C, P4D, P4E, nrow = 1, labels = c("C", "D", "E"))
+
+
 ### Shweta analysis
 
 seu_WB_neu <- subset(seu_WB, subset = Condition %in% c("Control", "Patient"), idents = "Neutrophil")
 
 DefaultAssay(seu_WB_neu) <- "module_score"
 
-P1 <- Nebulosa::plot_density(seu_WB_neu, 
+P4E <- Nebulosa::plot_density(seu_WB_neu, 
              features = "IFN1", 
              joint = FALSE, 
              combine = TRUE,
@@ -1240,33 +1395,35 @@ P1 <- Nebulosa::plot_density(seu_WB_neu,
 
 DefaultAssay(seu_WB_neu) <- "RNA"
 
-P2 <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
+P4FGH <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
 
-P2A <- P2[[1]] + 
+P4F <- P4FGH[[1]] + 
   labs(title = "LY6E", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
   
-P2B <- P2[[2]] +
+P4G <- P4FGH[[2]] +
   labs(title = "STAT1", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
-P2C <- P2[[3]] +
+P4H <- P4FGH[[3]] +
   labs(title = "LY6E + STAT1", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
-P <- cowplot::plot_grid(P1, P2A, P2B, P2C, nrow = 1)
+P4_bottom <- cowplot::plot_grid(P4E, P4F, P4G, P4H, nrow = 1, align = "v", axis = "tb", labels = c("E", "F", "G", "H"))
 
-ggsave(filename = "figures/Panel4/P4_bottom.png", 
-       plot = P,
+
+P4_final <- cowplot::plot_grid(P4_top, P4_mid, P4_bottom, ncol = 1, rel_heights = c(0.7,0.5, 0.5))
+
+ggsave(filename = "figures/Panel4/P4_final.png", 
+       plot = P4_final,
        units = "in", 
        width = 8.5,
-       height = 13/3,
+       height = 12,
        dpi = 600,
        bg = "white")
-
 ```
 
 ### Panel 5 - CAD vs NCAD : CS-SCORE, NLR
