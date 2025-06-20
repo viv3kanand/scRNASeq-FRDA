@@ -34,7 +34,7 @@ require(ggpointdensity)
 require(ggsignif)
 require(scico)
 require(slingshot)
-
+require(Nebulosa)
 ```
 
 ### Load data
@@ -788,6 +788,8 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 ### Panel 3: scRNA-Seq - PBMC - DCATS, Trajectory, CD14 Mono, GSEA, TF
 
+# Edit - Trajectory, CD14 Volcano, GSEA, AUC Model, IL10 Proportion
+
 ```{r}
 # DCATS - PBMC
 
@@ -826,7 +828,7 @@ P3A <- ggplot(dcats_df, aes(x = cell_type, y = n, fill = Condition)) +
 
 imb_df <- read_rds("RData/2024-12-09_imbalance_score.rds")
 
-P3B <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
+P3A <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
   geom_point(size = 0.5, alpha = 0.8) +
   scale_color_gradientn(colours = c("#9E0142", "#D53E4F", "#CB477A", "#F46D43", "#FDAE61", "#FFFF33", "#ABDDA4", "#3CB49F", "#469FBF", "#5575B0", "#5E4FA2")) +
   labs(title = NULL, x = "UMAP1", y = "UMAP2") +
@@ -838,7 +840,7 @@ P3B <- ggplot(imb_df, aes(x = umapharmony_1, y = umapharmony_2, col = scores)) +
 
 sce_cd14 <- read_rds("RData/trajectory/slingshot_cd14.rds")
 
-P3C <- reducedDims(sce_cd14)$UMAP |> 
+P3B <- reducedDims(sce_cd14)$UMAP |> 
   as.data.frame() |> 
   ggplot(aes(x = umapharmony_1, y = umapharmony_2, color = sce_cd14$slingPseudotime_1)) +
   geom_point(size = 0.5) +
@@ -851,7 +853,7 @@ P3C <- reducedDims(sce_cd14)$UMAP |>
             color = "black", 
             linewidth = 0.5)
 
-P3D <- colData(sce_cd14)[,c(1,2,3,7,8)] |>
+P3C <- colData(sce_cd14)[,c(1,2,3,7,8)] |>
   as.data.frame() |> 
   ggplot(aes(Lineage1, fill = Condition)) + 
   geom_density(alpha = 0.5) +
@@ -860,17 +862,17 @@ P3D <- colData(sce_cd14)[,c(1,2,3,7,8)] |>
   xlim(c(0, 20)) +
   custom_theme()
 
-P3CD <- cowplot::plot_grid(P3C, P3D, ncol = 1, labels = c("C", "D"), rel_widths = c(1, 1), axis = "bt", align = "hv")
+P3BC <- cowplot::plot_grid(P3B, P3C, ncol = 1, labels = c("B", "C"), rel_widths = c(1, 1), axis = "bt", align = "hv")
 
-P3BCD <- cowplot::plot_grid(P3B, P3CD, nrow = 1, labels = c("B"), rel_widths = c(1, 1))
+P3_top <- cowplot::plot_grid(P3A, P3BC, nrow = 1, labels = c("A"), rel_widths = c(1, 1))
 
-P3_top <- cowplot::plot_grid(P3A, P3BCD, nrow = 1, labels = c("A"), rel_widths = c(0.5, 1))
+# P3_top <- cowplot::plot_grid(P3A, P3BCD, nrow = 1, labels = c("A"), rel_widths = c(0.5, 1))
 
 ggsave(filename = "figures/Panel3/P3_top.png", 
        plot = P3_top,
        units = "in", 
-       width = 13,
-       height = 8.5/2,
+       width = 8.5,
+       height = 13/3,
        dpi = 600,
        bg = "white")
 
@@ -890,7 +892,7 @@ DGE_PBMC$`CD14 Mono` |>
     merge(avg.cd14.mono, by.x = "gene", by.y = "gene") -> CD14_plot_data
 
 
-P3E <- CD14_plot_data |> 
+P3D <- CD14_plot_data |> 
   ggplot(aes(Control, FRDA)) + 
   geom_point(aes(color = Expression, alpha = 0.8)) + 
   ggtitle("CD14 Mono") + 
@@ -920,7 +922,7 @@ names(GSEA_CD14) <- c("REACTOME", "BP")
 
 pathway_list <- c("GOBP_POSITIVE_REGULATION_OF_HEMOPOIESIS", "GOBP_POSITIVE_REGULATION_OF_T_CELL_MEDIATED_IMMUNITY", "GOBP_POSITIVE_REGULATION_OF_LYMPHOCYTE_DIFFERENTIATION", "GOBP_NIK_NF_KAPPAB_SIGNALING", "GOBP_CELLULAR_RESPONSE_TO_MOLECULE_OF_BACTERIAL_ORIGIN", "GOBP_POSITIVE_REGULATION_OF_ADAPTIVE_IMMUNE_RESPONSE", "GOBP_INFLAMMATORY_RESPONSE", "GOBP_CYTOKINE_PRODUCTION", "GOBP_MAPK_CASCADE", "GOBP_CELLULAR_EXTRAVASATION", "GOBP_LEUKOCYTE_TETHERING_OR_ROLLING", "GOBP_REGULATION_OF_MONOCYTE_CHEMOTAXIS", "REACTOME_SIGNALING_BY_INTERLEUKINS", "REACTOME_INNATE_IMMUNE_SYSTEM", "REACTOME_INTERLEUKIN_4_AND_INTERLEUKIN_13_SIGNALING", "REACTOME_NEUTROPHIL_DEGRANULATION", "REACTOME_INTERLEUKIN_10_SIGNALING", "REACTOME_CYTOKINE_SIGNALING_IN_IMMUNE_SYSTEM")
 
-P3F <- do.call("rbind", GSEA_CD14) |> 
+P3E <- do.call("rbind", GSEA_CD14) |> 
   as_tibble() |>  
   dplyr::select(c(1,5,6,7,8,9)) |>
   dplyr::mutate(Enrichment = ifelse(NES > 0, "Enriched", "Depleted"),
@@ -940,11 +942,14 @@ P3F <- do.call("rbind", GSEA_CD14) |>
   custom_theme()
 
 
+P3DE <- cowplot::plot_grid(P3D, P3E, nrow = 1, labels = c("D", "E"))
+
+
 # TRRUST - CD14
 
 tf_cd14 <- read_csv("../data/TRRUST_CD14.csv")
 
-P3G <- tf_cd14 |> 
+P3F <- tf_cd14 |> 
   mutate(order = desc(qvalue), .by = TF) |>
   head(20) |> 
   ggplot(aes(x = -log10(qvalue), y = reorder(TF, order))) +
@@ -958,7 +963,7 @@ P3G <- tf_cd14 |>
 
 # IL10 Module score
 
-P3G <- seu_meta |> 
+P3F <- seu_meta |> 
   select(orig.ident, Condition, cell_type, 30) |>
   dplyr::filter(cell_type == "CD14 Mono") |> 
   pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ), 
@@ -999,8 +1004,6 @@ P3H <- seu_meta |>
 
 P3GH <- cowplot::plot_grid(P3G, P3H, nrow = 2, labels = c("G", "H"))
 
-P3EF <- cowplot::plot_grid(P3E, P3F, nrow = 1, labels = c("E", "F"))
-
 P3_bottom <- cowplot::plot_grid(P3EF, P3GH, nrow = 1, rel_widths = c(0.8, 0.3))
 
 ggsave(filename = "figures/Panel3/P3_bottom.png", 
@@ -1020,7 +1023,6 @@ ggsave(filename = "figures/Panel3/P3_final.png",
        height = 8.5,
        dpi = 600,
        bg = "white")
-
 
 
 ```
@@ -1219,6 +1221,27 @@ ggsave(filename = "figures/Panel2/P2_final.png",
        height = 8.5,
        dpi = 600,
        bg = "white")
+
+
+### Shweta analysis
+
+seu_WB_neu <- subset(seu_WB, subset = Condition %in% c("Control", "Patient"), idents = "Neutrophil")
+
+DefaultAssay(seu_WB_neu) <- "module_score"
+
+P1 <- Nebulosa::plot_density(seu_WB_neu, 
+             features = "IFN1", 
+             joint = FALSE, 
+             combine = TRUE,
+             size = 0.5) + 
+  labs(title = "IFN", x = "UMAP1", y = "UMAP2") +
+  custom_theme() +
+  empty_axis()
+
+DefaultAssay(seu_WB_neu) <- "RNA"
+
+P2 <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
+
 
 
 ```
