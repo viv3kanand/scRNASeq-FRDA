@@ -1242,7 +1242,30 @@ DefaultAssay(seu_WB_neu) <- "RNA"
 
 P2 <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
 
+P2A <- P2[[1]] + 
+  labs(title = "LY6E", x = "UMAP1", y = "UMAP2") +
+  custom_theme() +
+  empty_axis()
+  
+P2B <- P2[[2]] +
+  labs(title = "STAT1", x = "UMAP1", y = "UMAP2") +
+  custom_theme() +
+  empty_axis()
 
+P2C <- P2[[3]] +
+  labs(title = "LY6E + STAT1", x = "UMAP1", y = "UMAP2") +
+  custom_theme() +
+  empty_axis()
+
+P <- cowplot::plot_grid(P1, P2A, P2B, P2C, nrow = 1)
+
+ggsave(filename = "figures/Panel4/P4_bottom.png", 
+       plot = P,
+       units = "in", 
+       width = 8.5,
+       height = 13/3,
+       dpi = 600,
+       bg = "white")
 
 ```
 
