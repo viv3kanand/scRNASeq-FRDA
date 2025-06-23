@@ -788,7 +788,7 @@ ggsave(filename = "figures/Panel2/P2_final.png",
 
 ### Panel 3: scRNA-Seq - PBMC - DCATS, Trajectory, CD14 Mono, GSEA, TF
 
-# Edit - Trajectory, CD14 Volcano, GSEA, AUC Model, IL10 Proportion
+### Edit - Trajectory, CD14 Volcano, GSEA, AUC Model, IL10 Proportion
 
 ```{r}
 # DCATS - PBMC
@@ -943,7 +943,7 @@ P3E <- do.call("rbind", GSEA_CD14) |>
   custom_theme()
 
 
-P3DE <- cowplot::plot_grid(P3D, P3E, nrow = 1, labels = c("D", "E"))
+P3_mid <- cowplot::plot_grid(P3D, P3E, nrow = 1, labels = c("D", "E"))
 
 
 # TRRUST - CD14
@@ -1012,7 +1012,7 @@ prop_df <- seu_PBMC@meta.data %>%
   group_by(Condition) %>%
   mutate(prop = n / sum(n))
 
-P4G <- ggplot(seu_PBMC@meta.data, aes(x = Condition, fill = IL10_active)) +
+P3G <- ggplot(seu_PBMC@meta.data, aes(x = Condition, fill = IL10_active)) +
     geom_bar(position = "fill") +
     scale_fill_manual(values = c("gray80", "tomato")) +
     ylab("Proportion of Cells") +
@@ -1036,7 +1036,7 @@ DimPlot(seu_PBMC, group.by = "IL10_active", reduction = "umap.harmony") +
   ggtitle("Interleukin-10 Signaling Activity (AUCell Thresholded)")
 
 ## Create the Nebulosa density plot instead of Dimplot
-P4H <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint = FALSE) +
+P3H <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint = FALSE) +
   scale_color_viridis_c(option = "plasma") +
   ggtitle("Interleukin-10 Signaling Activity") +
   custom_theme() +
@@ -1044,25 +1044,18 @@ P4H <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint =
 
 
 
-P3GH <- cowplot::plot_grid(P3G, P3H, nrow = 2, labels = c("G", "H"))
+P3GH <- cowplot::plot_grid(P3F, P3G, nrow = 2, labels = c("F", "G"), align = "hv")
 
-P3_bottom <- cowplot::plot_grid(P3EF, P3GH, nrow = 1, rel_widths = c(0.8, 0.3))
+P3_bottom <- cowplot::plot_grid(P3GH, P3H, nrow = 1, labels = c("","H"),  rel_widths = c(0.4, 0.6))
 
-ggsave(filename = "figures/Panel3/P3_bottom.png", 
-       plot = P3_bottom,
-       units = "in", 
-       width = 13,
-       height = 8.5/2,
-       dpi = 600,
-       bg = "white")
 
-P3_final <- cowplot::plot_grid(P3_top, P3_bottom, ncol = 1, align = "hv")
+P3_final <- cowplot::plot_grid(P3_top, P3_mid, P3_bottom, ncol = 1, align = "hv")
 
 ggsave(filename = "figures/Panel3/P3_final.png", 
        plot = P3_final,
        units = "in", 
-       width = 13,
-       height = 8.5,
+       width = 8.5,
+       height = 13,
        dpi = 600,
        bg = "white")
 
@@ -1357,7 +1350,6 @@ P4C <- tf_NEU |>
 
 # IFN
 
-
 DefaultAssay(seu_WB_neu) <- "RNA"
 expr_matrix_neu <- GetAssayData(seu_WB_neu, slot = "data")
 
@@ -1421,7 +1413,7 @@ seu_WB_neu <- subset(seu_WB, subset = Condition %in% c("Control", "Patient"), id
 
 DefaultAssay(seu_WB_neu) <- "module_score"
 
-P4E <- Nebulosa::plot_density(seu_WB_neu, 
+P4F <- Nebulosa::plot_density(seu_WB_neu, 
              features = "IFN1", 
              joint = FALSE, 
              combine = TRUE,
@@ -1432,24 +1424,24 @@ P4E <- Nebulosa::plot_density(seu_WB_neu,
 
 DefaultAssay(seu_WB_neu) <- "RNA"
 
-P4FGH <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
+P4GHI <- plot_density(seu_WB_neu, c("LY6E", "STAT1"), joint = TRUE, combine = TRUE, size = 0.5)
 
-P4F <- P4FGH[[1]] + 
+P4G <- P4FGH[[1]] + 
   labs(title = "LY6E", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
   
-P4G <- P4FGH[[2]] +
+P4H <- P4FGH[[2]] +
   labs(title = "STAT1", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
-P4H <- P4FGH[[3]] +
+P4I <- P4FGH[[3]] +
   labs(title = "LY6E + STAT1", x = "UMAP1", y = "UMAP2") +
   custom_theme() +
   empty_axis()
 
-P4_bottom <- cowplot::plot_grid(P4E, P4F, P4G, P4H, nrow = 1, align = "v", axis = "tb", labels = c("E", "F", "G", "H"))
+P4_bottom <- cowplot::plot_grid(P4F, P4G, P4H, P4I, nrow = 1, align = "v", axis = "tb", labels = c("F", "G", "H", "I"))
 
 
 P4_final <- cowplot::plot_grid(P4_top, P4_mid, P4_bottom, ncol = 1, rel_heights = c(0.7,0.5, 0.5))
