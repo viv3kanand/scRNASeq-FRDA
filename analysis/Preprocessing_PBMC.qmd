@@ -1,6 +1,14 @@
 ---
 title: "1. Preprocessing - scRNA-Seq - FRDA (PBMC)"
-format: html
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    css: styles.css
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: true
 editor: source
 author: viv3kanand
 date: "`r format(Sys.time(), '%d %B, %Y')`"
