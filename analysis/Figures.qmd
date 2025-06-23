@@ -1006,17 +1006,13 @@ P3F <- cowplot::ggdraw() + cowplot::draw_image("figures/Panel3/AUC_image.png")
 #     ) &
 #   NoLegend()
 
-prop_df <- seu_PBMC@meta.data %>%
-  group_by(Condition, IL10_active) %>%
-  summarise(n = n(), .groups = 'drop') %>%
-  group_by(Condition) %>%
-  mutate(prop = n / sum(n))
-
-P3G <- ggplot(seu_PBMC@meta.data, aes(x = Condition, fill = IL10_active)) +
-    geom_bar(position = "fill") +
-    scale_fill_manual(values = c("gray80", "tomato")) +
-    ylab("Proportion of Cells") +
-    ggtitle("IL-10 Active Cells per Condition")
+P3G <- seu_meta |> 
+  filter(cell_type == "CD14 Mono") |>
+  ggplot(aes(x = Condition, fill = IL10_active)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("gray80", "tomato")) +
+  ylab("Proportion of Cells") +
+  ggtitle("IL-10 Active Cells per Condition")
 
 cowplot::plot_grid(P4F, P4G, ncol)
 
