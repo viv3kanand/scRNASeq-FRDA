@@ -983,8 +983,34 @@ P3_mid <- cowplot::plot_grid(P3D, P3E, nrow = 1, labels = c("D", "E"))
 #     ) &
 #   NoLegend()
 
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
 
-P3F <- cowplot::ggdraw() + cowplot::draw_image("figures/Panel3/AUC_image.png")
+P3F <- seu_meta |> 
+    select(orig.ident, Condition, cell_type, IL10, IL10RA, IL10RB) |> 
+    tidyr::pivot_longer(cols = c(-orig.ident, -Condition, -cell_type ),
+                        names_to = "gene", 
+                        values_to = "expression") |> 
+    filter(cell_type == "CD14 Mono") |> 
+    ggplot(aes(x = Condition, y = expression, fill = Condition)) +
+    geom_violin(trim = TRUE, alpha = 0.8) +
+    geom_boxplot(width = 0.1, outlier.colour = "grey", 
+                 outlier.size = 0.1,
+                 alpha = 0.8) +
+    stat_compare_means(
+        method = "wilcox.test", 
+        label = "p.signif", 
+        comparisons = list(c("Control", "FRDA"))
+    ) +
+    facet_wrap(~gene, scales = "free_y") +
+    labs(x = "Condition", y = "Scaled Expression") + 
+    guides(fill = "none") +
+    scale_fill_manual(values = c("#469FBF", "#CB477A")) +
+    custom_theme()
+
+
+
+
+P3G <- cowplot::ggdraw() + cowplot::draw_image("figures/Panel3/AUC_image.png")
 
 
 # IL10 expressing cell proportion (update with AUCell)
@@ -1006,15 +1032,15 @@ P3F <- cowplot::ggdraw() + cowplot::draw_image("figures/Panel3/AUC_image.png")
 #     ) &
 #   NoLegend()
 
-P3G <- seu_meta |> 
-  filter(cell_type == "CD14 Mono") |>
-  ggplot(aes(x = Condition, fill = IL10_active)) +
-  geom_bar(position = "fill") +
-  scale_fill_manual(values = c("gray80", "tomato")) +
-  ylab("Proportion of Cells") +
-  ggtitle("IL-10 Active Cells per Condition")
+P3H <- seu_meta |> 
+    filter(cell_type == "CD14 Mono") |>
+    ggplot(aes(x = Condition, fill = IL10_active)) +
+    geom_bar(position = "fill", width = 0.5, alpha = 0.8, colour="black") +
+    scale_fill_manual(values = c("gray80", "#CB477A")) +
+    ylab("Proportion of Cells") +
+    ggtitle("IL-10 Active Cells per Condition") +
+    custom_theme()
 
-cowplot::plot_grid(P4F, P4G, ncol)
 
 auc_thresholds <- read_rds("figures/Panel3/auc_thresholds.rds")
 cells_AUC <- read_rds("figures/Panel3/cells_AUC.rds")
@@ -1032,7 +1058,7 @@ DimPlot(seu_PBMC, group.by = "IL10_active", reduction = "umap.harmony") +
   ggtitle("Interleukin-10 Signaling Activity (AUCell Thresholded)")
 
 ## Create the Nebulosa density plot instead of Dimplot
-P3H <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint = FALSE) +
+P3I <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint = FALSE) +
   scale_color_viridis_c(option = "plasma") +
   ggtitle("Interleukin-10 Signaling Activity") +
   custom_theme() +
@@ -1040,12 +1066,13 @@ P3H <- plot_density(seu_PBMC, "IL10_active", reduction = "umap.harmony", joint =
 
 
 
-P3GH <- cowplot::plot_grid(P3F, P3G, nrow = 2, labels = c("F", "G"), align = "hv")
+P3_bottom <- cowplot::plot_grid(P3F, P3G, P3H, P3I, nrow = 2, labels = c("F", "G", "H", "I"), align = "hv")
 
-P3_bottom <- cowplot::plot_grid(P3GH, P3H, nrow = 1, labels = c("","H"),  rel_widths = c(0.4, 0.6))
+# P3_bottom <- cowplot::plot_grid(P3GH, P3H, nrow = 1, labels = c("","H"),  rel_widths = c(0.4, 0.6))
 
+P3_top_mid <- cowplot::plot_grid(P3_top, P3_mid, ncol = 1, align = "hv")
 
-P3_final <- cowplot::plot_grid(P3_top, P3_mid, P3_bottom, ncol = 1, align = "hv")
+P3_final <- cowplot::plot_grid(P3_top_mid, P3_bottom, ncol = 1, align = "hv", rel_heights = c(1,1))
 
 ggsave(filename = "figures/Panel3/P3_final.png", 
        plot = P3_final,
@@ -1054,10 +1081,6 @@ ggsave(filename = "figures/Panel3/P3_final.png",
        height = 13,
        dpi = 600,
        bg = "white")
-
-
-
-
 
 
 
