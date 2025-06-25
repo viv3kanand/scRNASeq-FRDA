@@ -620,18 +620,7 @@ dge_combined |>
 ```{r}
 # UMAP - PBMC
 
-P2A <- DimPlot(seu_PBMC, 
-               reduction = "umap.harmony", 
-               group.by = c("cell_type"), 
-               pt.size = 0.5,
-               label = TRUE, 
-               label.size = 2,
-               raster = FALSE,
-               cols = umap_col) & 
-  labs(title = NULL, x = "UMAP1", y = "UMAP2") &
-  custom_theme() +
-  empty_axis() &
-  NoLegend()
+P2A <- umap_plot(data = seu_meta, group = cell_type)
 
 # Markers - PBMC
 

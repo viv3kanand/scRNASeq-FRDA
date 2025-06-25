@@ -30,9 +30,40 @@ scale_this <- function(x){
 
 # plot functions
 
-umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20") # umap colors
+font <- "Helvetica"
+text_size <- 6
+line_size <- 0.5
+
+custom_theme <- function(){
+  theme_classic() +
+    theme(text = element_text(family = font,
+                              size = text_size),
+          line = element_line(linewidth = line_size),
+          legend.title = element_text(size = rel(1.25)),
+          axis.title = element_text(size = rel(1.25)),
+          axis.text = element_text(size = rel(1.15)),
+          strip.text.x = element_text(size = 10),
+          plot.title = element_text(size = rel(1.5),
+                                    hjust = 0.5),
+          panel.grid = element_blank(),
+          plot.background = element_rect(fill = "white"),
+          legend.position = "right",
+          legend.text=element_text(size = rel(1.15)))
+}
+
+empty_axis <- function(){
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+}
+
+# umap colors
+
+umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20")
 
 # knee plot
+
 knee_plot <- function(bc_rank) {
   require(DropletUtils)
   knee_plt <- tibble(rank = bc_rank[["rank"]],
@@ -51,9 +82,9 @@ knee_plot <- function(bc_rank) {
   return(p)
 }
 
-umap_plot <- function(data, group) {
+umap_plot <- function(data, group) {d
   require(tidyverse)
-  centroids <- imb_df |> 
+  centroids <- data |> 
     group_by(cell_type) |> 
     summarize(
       umap1 = median(umapharmony_1),
@@ -99,30 +130,3 @@ shift_legend <- function(p) {
   reposition_legend(p, 'center', panel=names)
 }
 
-font <- "Helvetica"
-text_size <- 6
-line_size <- 0.5
-
-custom_theme <- function(){
-  theme_classic() +
-    theme(text = element_text(family = font,
-                              size = text_size),
-          line = element_line(linewidth = line_size),
-          legend.title = element_text(size = rel(1.25)),
-          axis.title = element_text(size = rel(1.25)),
-          axis.text = element_text(size = rel(1.15)),
-          strip.text.x = element_text(size = 10),
-          plot.title = element_text(size = rel(1.5),
-                                    hjust = 0.5),
-          panel.grid = element_blank(),
-          plot.background = element_rect(fill = "white"),
-          legend.position = "right",
-          legend.text=element_text(size = rel(1.15)))
-}
-
-empty_axis <- function(){
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank())
-}
