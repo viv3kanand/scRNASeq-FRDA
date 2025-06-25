@@ -77,6 +77,10 @@ suppressWarnings(dds <- DESeq2::DESeq(dds,
 res <- results(dds, name = "HCM") |> 
   as.data.frame() |> 
   tibble::rownames_to_column("ID")
+
+
+
+
 ```
 
 

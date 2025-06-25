@@ -29,6 +29,10 @@ scale_this <- function(x){
 
 
 # plot functions
+
+umap_col <- paletteer::paletteer_d("ggthemes::Tableau_20") # umap colors
+
+# knee plot
 knee_plot <- function(bc_rank) {
   require(DropletUtils)
   knee_plt <- tibble(rank = bc_rank[["rank"]],
@@ -46,6 +50,7 @@ knee_plot <- function(bc_rank) {
     labs(y = "Rank", x = "Total UMIs")
   return(p)
 }
+
 
 # https://stackoverflow.com/questions/54438495/shift-legend-into-empty-facets-of-a-faceted-plot-in-ggplot2
 shift_legend <- function(p) {

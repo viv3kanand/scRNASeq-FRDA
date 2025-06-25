@@ -615,6 +615,8 @@ dge_combined |>
 
 ### Panel 2: scRNA-Seq summary - PBMC & WB
 
+### Panel 2 rework
+
 ```{r}
 # UMAP - PBMC
 
@@ -1477,34 +1479,12 @@ ggsave(filename = "figures/Panel4/P4_final.png",
 ### Panel 5 - CAD vs NCAD : CS-SCORE, NLR
 
 ```{r}
-# CAD NCAD - IL10
-
-seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
-
-P5A <- seu_meta |>
-  filter(cell_type == "CD14 Mono" & Condition2 %in% c("CAD", "NCAD")) |> 
-  dplyr::select(orig.ident, Condition2, il10) |> 
-  group_by(orig.ident, Condition2) |> 
-  summarise(prop = length(which(il10 > 0))/length(il10)) |> 
-  ggplot(aes(Condition2, prop, fill = Condition2)) +
-  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
-  labs(x = NULL, y = "IL10 Proportion") +
-  custom_theme() +
-  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
-  geom_signif(
-    comparisons = list(c("CAD", "NCAD")),
-    map_signif_level = FALSE, textsize = 3
-    ) &
-  NoLegend()
-
-
-
 # Clinical NLR
 
 clin_nlr <- read_csv("../data/clinical_data.csv")
 
 
-P5B <- clin_nlr |> 
+P5A <- clin_nlr |> 
   ggplot(aes(Condition, NLR, fill = Condition)) +
   geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
   labs(x = NULL, y = "Neutrophil to Lymphocyte Ratio") +
@@ -1517,8 +1497,90 @@ P5B <- clin_nlr |>
   NoLegend()
 
 
-P5_top <- cowplot::plot_grid(P5A, P5B, nrow = 1, labels = c("A", "B"), axis = "bt", align = "h")
+# CAD NCAD - IL10
 
+seu_meta <- read_rds("RData/2025-02-10_seu_PBMC_meta.rds")
+
+P5B <- seu_meta |>
+  filter(cell_type == "CD14 Mono" & Condition2 %in% c("CAD", "NCAD")) |>
+  dplyr::select(orig.ident, Condition2, IL10) |>
+  group_by(orig.ident, Condition2) |>
+  summarise(prop = length(which(IL10 > 0))/length(IL10)) |>
+  ggplot(aes(Condition2, prop, fill = Condition2)) +
+  geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") +
+  labs(x = NULL, y = "IL10 Proportion") +
+  custom_theme() +
+  scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+  geom_signif(
+    comparisons = list(c("CAD", "NCAD")),
+    map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+P5B <- seu_meta |> 
+    filter(cell_type == "CD14 Mono" & Condition2 != "Control" & !is.na(Condition2)) |>
+    ggplot(aes(x = Condition2, fill = IL10_active)) +
+    geom_bar(position = "fill", width = 0.5, alpha = 0.8, colour="black") +
+    scale_fill_manual(values = c("gray80", "#CB477A")) +
+    labs(y = "IL10 Proportion", fill = "IL10 active") +
+    custom_theme()
+
+
+seu_meta |>
+    filter(cell_type == "CD14 Mono" & Condition2 %in% c("CAD", "NCAD")) |>
+    dplyr::select(orig.ident, Condition2, IL10_active) |>
+    group_by(orig.ident, Condition2) |>
+    summarise(prop = length(which(IL10_active == TRUE))/length(IL10_active)) |>
+    ggplot(aes(Condition2, prop, fill = Condition2)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") +
+    labs(x = NULL, y = "IL10 Proportion") +
+    custom_theme() +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) + 
+    stat_compare_means(
+        method = "wilcox.test",
+        comparisons = list(c("CAD", "NCAD"))
+    ) &
+    NoLegend()
+
+
+# P5C <- wrap_plots(plots[results_combined |> filter(cox_pval < 0.05 & logrank_pval < 0.05) |> pull(gene)])
+
+P5C <- plots$IL10RB
+
+vsd <- read_rds("RData/Bulk/2025-01-28_vsd.rds")
+
+P5D <- assay(vsd)[,ind_meta] |> 
+    as.data.frame() |> 
+    tibble::rownames_to_column("gene") |> 
+    pivot_longer(cols = -gene, 
+                 names_to = "sample",
+                 values_to = "expression") |>
+    filter(gene == "IL10RB") |> 
+    merge(meta, by.x = "sample", by.y = "row.names") |>
+    mutate(HCM = if_else(HCM == 1, "CAD", "NCAD")) |> 
+    ggplot(aes(x = HCM, y = expression, fill = HCM)) +
+    geom_boxplot(width = 0.5, alpha = 0.8, outlier.colour = "grey") + 
+    labs(x = NULL, y = "IL10RB expression", title = "IL10RB") +
+    guides(fill = NULL) +
+    scale_fill_manual(values = c("#CB477A", "#469FBF")) +
+    custom_theme() +
+    geom_signif(
+        comparisons = list(c("CAD", "NCAD")),
+        map_signif_level = FALSE, textsize = 3
+    ) &
+  NoLegend()
+
+
+
+
+P5_top <- cowplot::plot_grid(P5A, P5B, P5C, P5D, nrow = 1, labels = c("A", "B", "C", "D"), axis = "bt", align = "h")
+
+
+
+P5_bottom <- cowplot::plot_grid(P5C, P5D, nrow = 1, labels = c("C", "D"), rel_widths = c(0.7, 0.3), axis = "bt", align = "h")
+
+P5_final <- cowplot::plot_grid(P5_top, P5_bottom, ncol = 1, axis = "bt", align = "hv")
 
 # CS-score
 

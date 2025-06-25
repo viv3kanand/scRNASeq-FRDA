@@ -31,6 +31,7 @@ require(DESeq2)
 require(tidyverse)
 require(survival)
 require(ggsurvfit)
+require(survminer)
 ```
 
 ### Load data
@@ -41,6 +42,7 @@ require(ggsurvfit)
 #| eval: true
 
 dds <- read_rds("RData/Bulk/2025-06-04_dds.rds")
+ipa_m3 <- read_csv("../data/Bulk/IPA_M3_0.5FC.csv")
 ```
 
 ### Transform and filter data
@@ -99,11 +101,13 @@ meta <- colData(dds) |> as.data.frame()
 
 
 ```{r}
+ind_meta <- which(rownames(meta) %in% colnames(z_counts))
+
 prep_data <- function(gene) {
   meta[ind_meta,] |> 
     mutate(
       event = event_counts[gene,],
-      group = ifelse(z_counts[gene,] >= (median(z_counts[gene,])), 1,0),
+      group = ifelse(z_counts[gene,] >= (median(z_counts[gene,])), "High", "Low"),
       gene = gene
     ) |> 
     select(DD, HCM, event, group, gene)
@@ -122,15 +126,18 @@ names(fits) <- unique(plot_data$gene)
 plots <- imap(fits, function(fit, gene_name) {
   df <- plot_data |> filter(gene == gene_name)
   
-  ggsurvplot(
+  P <- ggsurvplot(
     fit,
     data = df,
     risk.table = TRUE,
     pval = TRUE,
-    ggtheme = theme_minimal(),
+    pval.size = 3,
+    palette = c("#CB477A", "#469FBF"),
+    ggtheme = custom_theme(),
     title = gene_name,
-    legend.title = "Expression"
-  )$plot
+    legend.title = "Expression")
+  
+  P$plot
 })
 
 
@@ -162,6 +169,26 @@ write_csv(results_combined, file = "results/bulk/survival_all.csv")
 ```
 
 
+```{r}
+wrap_plots(plots[results_combined |> filter(cox_pval < 0.05 & logrank_pval < 0.05) |> pull(gene)])
+
+
+vsd <- read_rds("RData/Bulk/2025-01-28_vsd.rds")
+
+assay(vsd)[,ind_meta] |> 
+    as.data.frame() |> 
+    tibble::rownames_to_column("gene") |> 
+    pivot_longer(cols = -gene, 
+                 names_to = "sample",
+                 values_to = "expression") |>
+    filter(gene == "IL10RB") |> 
+    merge(meta, by.x = "sample", by.y = "row.names") |>
+    mutate(HCM = if_else(HCM == 1, "CAD", "NCAD")) |> 
+    ggplot(aes(x = HCM, y = expression, fill = HCM)) +
+    geom_boxplot(width = 0.5) +
+    custom_theme()
+
+```
 
 
 
