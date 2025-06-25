@@ -53,11 +53,23 @@ knee_plot <- function(bc_rank) {
 
 umap_plot <- function(data, group) {
   require(tidyverse)
+  centroids <- imb_df |> 
+    group_by(cell_type) |> 
+    summarize(
+      umap1 = median(umapharmony_1),
+      umap2 = median(umapharmony_2)
+    )
+  
   group <- rlang::sym(quo_name(enquo(group))) # https://stackoverflow.com/questions/50960339/create-ggplot2-function-and-specify-arguments-as-variables-in-data-as-per-ggplot
-  p <- ggplot(data, aes(x = umapharmony_1, y = umapharmony_2, col = {{group}})) +
+  p <- ggplot(data, aes(x = umapharmony_1, y = umapharmony_2, col = !! group)) +
     geom_point(size = 0.5) +
     scale_color_manual(values = umap_col) +
     labs(title = NULL, x = "UMAP1", y = "UMAP2") +
+    geom_text(
+      data = centroids,
+      aes(x = umap1, y = umap2, label = !! group),
+      color = "black", size = 3, check_overlap = TRUE
+    ) +
     custom_theme() +
     empty_axis() & 
     NoLegend()
