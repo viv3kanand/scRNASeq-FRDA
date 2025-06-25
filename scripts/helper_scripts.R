@@ -51,6 +51,20 @@ knee_plot <- function(bc_rank) {
   return(p)
 }
 
+umap_plot <- function(data, group) {
+  require(tidyverse)
+  group <- rlang::sym(quo_name(enquo(group))) # https://stackoverflow.com/questions/50960339/create-ggplot2-function-and-specify-arguments-as-variables-in-data-as-per-ggplot
+  p <- ggplot(data, aes(x = umapharmony_1, y = umapharmony_2, col = {{group}})) +
+    geom_point(size = 0.5) +
+    scale_color_manual(values = umap_col) +
+    labs(title = NULL, x = "UMAP1", y = "UMAP2") +
+    custom_theme() +
+    empty_axis() & 
+    NoLegend()
+  
+  return(p)
+}
+
 
 # https://stackoverflow.com/questions/54438495/shift-legend-into-empty-facets-of-a-faceted-plot-in-ggplot2
 shift_legend <- function(p) {
