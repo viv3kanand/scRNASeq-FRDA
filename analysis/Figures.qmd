@@ -622,6 +622,12 @@ dge_combined |>
 
 P2A <- umap_plot(data = seu_meta, group = cell_type)
 
+# UMAP - CAD-NCAD
+
+P2B <- umap_plot(data = seu_meta[!is.na(seu_meta$Condition2),], group = cell_type_major) +
+  facet_wrap(~ Condition2)
+
+
 # Markers - PBMC
 
 markers_PBMC <- c("CD34", "TNFRSF17", "LEF1", "MKI67", "TOP2A", "CLEC4C", "NRP1", "KLRB1", "PTGDS", "FCER1A", "CLEC10A", "TNFRSF13B", "TRDC", "FCGR3A", "MS4A7", "PPBP", "CD8A", "CD79A", "MS4A1", "CCR7", "CCR4", "NKG7", "GNLY", "NCAM1", "CD14", "LYZ")
